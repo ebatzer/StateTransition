@@ -1,8 +1,10 @@
 ---
-title: "Introductory analysis of cover and diversity trends"
+title: "WAPS Data Cleaning and Validation"
 output:
   html_document:
     df_print: paged
+  prettydoc::html_pretty:
+  highlight: github
 ---
 
 This notebook serves as an introductory step in the analysis of WAPS data from 2008-2018, examining the interaction between planted taxa (priority effects) and environmental treatments (watering, fertilization, and clipping) on the maintenance of species diversity and compositional dissimilarity in California grasslands. 
@@ -87,7 +89,7 @@ names(long.comp) <- c("plot", "block", "subblock",
 long.comp$cover[is.na(long.comp$cover)] <- 0
 ```
 
-```{r,  echo = FALSE, message = FALSE, warning = FALSE}
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
 # Reassigns species names to standardized names in the waps.specs dataset
 for(i in waps.specs$label){
   long.comp$species <- gsub(paste(i, "$", sep = ""), waps.specs$specname[waps.specs$label == i], long.comp$species)
@@ -109,7 +111,7 @@ long.comp <- long.comp %>% group_by(plot, block, subblock, water, fertilization,
 write.csv(x = long.comp, file = "../data/comdata_longformat.csv", sep =",")
 ```
 
-```{r}
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
 # Spreads dataset to wide format
 comp.wide <- spread(long.comp, key = "species", value = "cover")
 comp.attr <- select(comp.wide, one_of(c("year", waps.specs$specname[waps.specs$type == "class"])))
@@ -146,11 +148,11 @@ __Distinctions between labels in the dataset:__
 
 __Specific species IDs__
 
-* what species is mustard? 
-* what species is oats? 
-* what species is tarweed? 
-* what species is trifolium? 
-* what species is big.leaf.dandelion? 
+* What species is mustard? 
+* What species is oats? 
+* What species is tarweed? 
+* What species is trifolium? 
+* What species is big.leaf.dandelion? 
 
 ```{r}
 unique(long.comp$species)
@@ -174,13 +176,21 @@ Some other values are also really high - why might this be the case? Worth check
 wide.comp[order(rowSums(comp.wide), decreasing = TRUE)[1:10],c(1:6, 26:ncol(wide.comp))]
 ```
 
+__Unique cover values__
 ```{r}
 sort(unique(c(comp.wide)))
+```
+
+__Total number of cover values > 100__ 
+```{r}
 sum(c(comp.wide) > 100)
 ```
+
+__Changing these entries to 23.50 seems to solve the problem:__
 ```{r}
 comp.wide[comp.wide == 235] = 23.50
 hist(rowSums(comp.wide))
 wide.comp <- cbind(data.frame(comp.attr), data.frame(comp.wide))
+write.csv(x = wide.comp, file = "../data/comdata_wideformat.csv")
 ```
 
