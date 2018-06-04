@@ -1,0 +1,232 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+    theme: journal
+---
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+# Cleaning up WAPS data
+library(dplyr);library(tidyr);library(vegan);library(testthat)
+
+setwd("C:/Users/ebatz/Box Sync/Eviner lab shared/Evan/Research Projects/WAPS Data")
+
+waps.comp <- read.csv("C:/Users/ebatz/Box Sync/Eviner lab shared/Evan/Research Projects/WAPS Data/WAPSthrough2017.csv",
+          header = TRUE,
+          stringsAsFactors = FALSE)
+
+trtlabels <- read.csv("C:/Users/ebatz/Box Sync/Eviner lab shared/Evan/Research Projects/WAPS Data/trtlabels.csv",
+          header = TRUE,
+          stringsAsFactors = FALSE)
+
+waps.specs <- read.csv("C:/Users/ebatz/Box Sync/Eviner lab shared/Evan/Research Projects/WAPS Data/WAPSspecies.csv", 
+                       stringsAsFactors = F)
+```
+
+### Data cleaning
+
+There are a bunch of small inconsistencies that come with manual data entry that need to be corrected prior to analysis.
+
+__Checklist:__  
+
+* Convert dataset to wide (matrix format) __done__
+
+* Standardize species names __done__
+
+* Clean up year column __done__
+
+* Assign NA cover values to 0 __done__
+
+* Standardize treatment labels __done__
+
+* Add "class" statistics to attribute table __done__
+
+```{r,  echo = FALSE, message = FALSE, warning = FALSE}
+# Gathers dataset to long format before cleaning up, creates species column
+long.comp <- gather(waps.comp, key = "species", value = "cover", -c(1:7))
+
+# Removes year labels from species column
+spec <- gsub("X\\d\\d\\.*", "", long.comp$species)
+
+# Grabs the first two digits from the species column to make a "year" column
+yr <- gsub('\\.', "", long.comp$species)
+yr <- gsub("X", "20", yr)
+yr <- gsub("[[:alpha:]]+0?", "", yr)
+
+# Reassigns species variable
+long.comp$species <- spec
+
+# Attaches year variable
+long.comp <- cbind(long.comp, year = as.numeric(yr))
+
+# Lowercase names for dataset
+names(long.comp) <- c("plot", "block", "subblock",
+                      "water", "spcomp", "fertilization",
+                      "clipping", "species", "cover", "year")
+
+# Assigns all NA cover values to zero
+long.comp$cover[is.na(long.comp$cover)] <- 0
+```
+
+```{r,  echo = FALSE, message = FALSE, warning = FALSE}
+# Reassigns species names to standardized names in the waps.specs dataset
+for(i in waps.specs$Species){
+  long.comp$species <- gsub(paste(i, "$", sep = ""), waps.specs$Newval[waps.specs$Species == i], long.comp$species)
+}
+
+# Removes spaces from species names
+long.comp$spcomp <- gsub("[[:space:]]\\+[[:space:]]*", " \\+", long.comp$spcomp)
+
+# Removes whitespace from treatment names
+long.comp$spcomp <- gsub("[[:space:]]", "", long.comp$spcomp)
+long.comp$water <- gsub("[[:space:]]", "", long.comp$water)
+
+# Assigns all NAs to zero, merges duplicated species names
+long.comp$cover <- as.numeric(long.comp$cover)
+long.comp$cover[is.na(long.comp$cover)] <- 0
+long.comp <- long.comp %>% group_by(plot, block, subblock, water, fertilization, species, year) %>% summarise(cover = sum(cover))
+
+# Spreads dataset to wide format
+comp.wide <- spread(long.comp, key = "species", value = "cover")
+comp.attr <- select(comp.wide, one_of(c("year", waps.specs$Newval[waps.specs$Type == "class"])))
+comp.wide <- ungroup(comp.wide) %>%  select(one_of(waps.specs$Newval[waps.specs$Type != "class"]))
+comp.wide <- apply(comp.wide, 2, as.numeric)
+comp.wide[is.na(comp.wide)] <- 0
+
+# Merges with treatment labels
+comp.attr <- left_join(comp.attr, trtlabels)
+comp.attr$sp.trt <- gsub("[[:space:]]", "", comp.attr$sp.trt)
+```
+
+After cleaning, we now have two separate dataframes, one that corresponds to different plot treatments/labels and another that corresponds to species abundances:
+
+```{r}
+head(comp.attr)[,1:10]
+head(comp.wide)[,1:10]
+```
+
+The species matrix contains a total of 50 unique species. The full list is provided below:
+```{r}
+colnames(comp.wide)
+```
+
+
+# Ordination analysis
+
+```{r,  echo = FALSE, message = FALSE, warning = FALSE}
+onegroup_trts = c("annuals", "WAPS", "Natives")
+multigroup_trts = c("natives+WAPS+annuals", "annuals+natives", "WAPS+annuals", "WAPS+natives", "Centaureasolstitialis+WAPS+annuals")
+onespec_trts = unique(comp.attr$sp.trt)[!unique(comp.attr$sp.trt) %in% c(onegroup_trts, multigroup_trts)]
+
+selected.trts <- c(onegroup_trts)
+selected.clips <- c("none")
+selected.fert <- c("none")
+selected.water <- c("control-2nd") 
+
+ord.mat <- comp.wide[comp.attr$water == selected.water &
+                     comp.attr$sp.trt %in% selected.trts &
+                     comp.attr$clip %in% selected.clips&
+                     comp.attr$fert %in% selected.fert,]
+
+ord.att <- comp.attr[comp.attr$water == selected.water &
+                     comp.attr$sp.trt %in% selected.trts &
+                     comp.attr$clip %in% selected.clips &
+                     comp.attr$fert %in% selected.fert,]
+
+expect_true(nrow(ord.att) == nrow(ord.mat))
+
+# A number of rows have no recorded live plants (not s)
+ord.att <- ord.att[rowSums(ord.mat) != 0, ]
+ord.mat <- ord.mat[rowSums(ord.mat) != 0, ]
+ord.mat <- sqrt(ord.mat)
+
+distmat <- vegdist(ord.mat)
+WAPS.mds <- metaMDS(distmat, try = 5, trymax = 50, trace = F)
+MDS_xy <- cbind(data.frame(ord.att), data.frame(X = WAPS.mds$points[,1], Y = WAPS.mds$points[,2]))
+
+#WAPS.pca <- prcomp(ord.mat)
+#PCA_xy <- cbind(data.frame(ord.att), data.frame(X = WAPS.pca$x[,1], Y = WAPS.pca$x[,2]))
+```
+
+Subsetting these points over time can show us how communities change in their compositional similarity, both between each other and within each group. The immediate pattern that I see is that communities appear to collapse togather eventually. 
+```{r}
+library(ggplot2)
+ggplot(MDS_xy, aes(X, Y, color = sp.trt, shape = clip)) + geom_point() + theme_bw() + facet_wrap(~year)
+```
+```{r}
+ggplot(MDS_xy[order(MDS_xy$year),], aes(X, Y, color = as.factor(plot))) + 
+  geom_point() + 
+  geom_path( arrow = arrow(unit(0.30,"cm"), angle = 15, ends = "last", type = "closed"), alpha = .5) + 
+  theme_bw() + 
+  facet_grid(sp.trt ~ block) +
+  guides(color = FALSE)
+
+```
+```{r}
+group_abund <- MDS_xy %>% gather(key = "group", value = "cover", annuals, bare, waps, natives, weeds) %>%
+  replace_na(list(cover = 0)) 
+
+ggplot(data = group_abund, 
+       aes(x = year,
+           y = cover,
+           color = group)) +
+  geom_point() + 
+  facet_wrap(~sp.trt) +
+  stat_smooth(method = "lm")
+```
+
+
+```{r}
+calcRateChange_bray <- function(comdf, comvar, abundvar, timevar){
+  # Take dataframe,
+  # Cast by species variable and abundance
+  # Take just numeric values
+  # Assign to commat
+  ssdf <- comdf[,colnames(comdf) %in% c(comvar, abundvar, timevar)]
+  commat <- spread(data.frame(ssdf), 
+                   comvar,
+                   abundvar,
+                   drop = TRUE,
+                   fill = 0)
+  
+  # Calculate vegetation distance
+  vd <- vegdist(commat[,-1], method = "euclidean")
+  td <- dist(commat[,colnames(commat) == timevar])
+  output <- cbind(interval = c(td), distance = c(vd))
+  return(data.frame(output))
+}
+
+comp_ratechange <- left_join(long.comp, trtlabels)
+
+comp_ratechange <- comp_ratechange  %>% filter(species %in% waps.specs$Newval[waps.specs$Type != "class"] &
+                                        water == "control-2nd" &
+                                        sp.trt %in% selected.trts &
+                                        clip %in% selected.clips &
+                                        fert %in% selected.fert)
+
+
+temp_ratechange_bray <- data.frame(comp_ratechange) %>% group_by(block, plot, sp.trt, water) %>%
+  filter(sp.trt %in% onegroup_trts) %>%
+  filter(cover > 0) %>%
+  mutate(cover = cover) %>%
+  do(calcRateChange_bray(., timevar = "year",
+                         comvar = "species",
+                         abundvar = "cover"))
+
+ggplot(aes(x = interval,
+           y = distance,
+           color = sp.trt),
+       data = temp_ratechange_bray) +
+  geom_point(alpha = .1) +
+  facet_wrap(~sp.trt, scales = "fixed") + 
+  stat_smooth(method = "lm", se = FALSE)
+
+```
+```{r}
+summary(lm(distance ~ interval * sp.trt, data = temp_ratechange_bray))
+
+plot(lm(distance ~ interval * sp.trt, data = temp_ratechange_bray))
+```
+
+

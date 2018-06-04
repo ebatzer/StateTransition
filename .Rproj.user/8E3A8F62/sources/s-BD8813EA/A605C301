@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1528133086656.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "A605C301",
+    "lastKnownWriteTime" : 1519751888,
+    "last_content_update" : 1519751888,
+    "path" : "C:/Users/ebatz/Box Sync/waps/evan-sarah analyses/scripts/clustering_explanation.Rmd",
+    "project_path" : "scripts/clustering_explanation.Rmd",
+    "properties" : {
+        "cursorPosition" : "8,0",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

@@ -1,0 +1,24 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1528132833388.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "689996C9",
+    "lastKnownWriteTime" : 1528136749,
+    "last_content_update" : 1528136749570,
+    "path" : "C:/Users/ebatz/Box Sync/waps/evan-sarah analyses/scripts/Data Cleaning and Validation.Rmd",
+    "project_path" : "scripts/Data Cleaning and Validation.Rmd",
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "cursorPosition" : "170,107",
+        "scrollLine" : "167",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
