@@ -1,0 +1,841 @@
+plot,block,sub.block,precip.block,h2o,other.treatment,sp.trt,fert,clip
+1,1,1,A,late wet,35,annuals,none,spring clipping
+2,1,1,A,late wet,7,natives +WAPS + annuals,none,fall clipping
+3,1,1,A,late wet,18a,WAPS,none,spring clipping
+4,1,1,A,late wet,26,Bromus carinatus,none,none
+5,1,1,A,late wet,22,Trifolium subteranneum,none,none
+6,1,1,A,late wet,33a,Lupinus bicolor,none,none
+7,1,1,A,late wet,28,Leymus triticoides,none,none
+8,1,1,A,late wet,1,WAPS + annuals,none,fall clipping
+9,1,1,A,late wet,4,WAPS + annuals,high fert,fall clipping
+10,1,1,A,late wet,25,Centaurea solstitialis + WAPS + annuals,none,none
+11,1,1,A,late wet,34,annuals,none,fall clipping
+12,1,1,A,late wet,8,natives +WAPS + annuals,none,spring clipping
+13,1,1,A,late wet,13,annuals + natives,none,none
+14,1,1,A,late wet,30,Poa secunda,none,none
+15,1,1,A,late wet,11,natives +WAPS + annuals,high fert,spring clipping
+16,1,1,A,late wet,21,Lolium multiflorum,none,none
+17,1,1,A,late wet,19,Avena fatua,none,none
+18,1,1,A,late wet,32,Lotus purshianus,none,none
+19,1,1,A,late wet,10,natives +WAPS + annuals,high fert,fall clipping
+20,1,1,A,late wet,31,Vulpia microstachys,none,none
+21,1,1,A,late wet,29,Nassella pulchra,none,none
+22,1,1,A,late wet,15,annuals,none,none
+23,1,1,A,late wet,24,Taeniatherum caput-medusae,none,none
+24,1,1,A,late wet,27,Elymus glaucus,none,none
+25,1,1,A,late wet,9,natives +WAPS + annuals,none,none
+26,1,1,A,late wet,20,Bromus hordeaceus,none,none
+27,1,1,A,late wet,5,WAPS + annuals,high fert,spring clipping
+28,1,1,A,late wet,12,natives +WAPS + annuals,high fert,none
+29,1,1,A,late wet,6,WAPS + annuals,high fert,none
+30,1,1,A,late wet,2,WAPS + annuals,none,spring clipping
+31,1,1,A,late wet,17,Natives,none,none
+32,1,1,A,late wet,16,WAPS,none,none
+33,1,1,A,late wet,14,WAPS + natives,none,none
+34,1,1,A,late wet,3,WAPS + annuals,none,none
+35,1,1,A,late wet,23,Aegilops triuncialis,none,none
+36,1,2,,control- 2nd,35,annuals,none,spring clipping
+37,1,2,,control- 2nd,20,Bromus hordeaceus,none,none
+38,1,2,,control- 2nd,30,Poa secunda,none,none
+39,1,2,,control- 2nd,6,WAPS + annuals,high fert,none
+40,1,2,,control- 2nd,2,WAPS + annuals,none,spring clipping
+41,1,2,,control- 2nd,9,natives +WAPS + annuals,none,none
+42,1,2,,control- 2nd,1,WAPS + annuals,none,fall clipping
+43,1,2,,control- 2nd,4,WAPS + annuals,high fert,fall clipping
+44,1,2,,control- 2nd,14,WAPS + natives,none,none
+45,1,2,,control- 2nd,16,WAPS,none,none
+46,1,2,,control- 2nd,19,Avena fatua,none,none
+47,1,2,,control- 2nd,18b,Bare,none,none
+48,1,2,,control- 2nd,7,natives +WAPS + annuals,none,fall clipping
+49,1,2,,control- 2nd,5,WAPS + annuals,high fert,spring clipping
+50,1,2,,control- 2nd,12,natives +WAPS + annuals,high fert,none
+51,1,2,,control- 2nd,25,Centaurea solstitialis + WAPS + annuals,none,none
+52,1,2,,control- 2nd,34,annuals,none,fall clipping
+53,1,2,,control- 2nd,31,Vulpia microstachys,none,none
+54,1,2,,control- 2nd,23,Aegilops triuncialis,none,none
+55,1,2,,control- 2nd,11,natives +WAPS + annuals,high fert,spring clipping
+56,1,2,,control- 2nd,24,Taeniatherum caput-medusae,none,none
+57,1,2,,control- 2nd,3,WAPS + annuals,none,none
+58,1,2,,control- 2nd,33a,Lupinus bicolor,none,none
+59,1,2,,control- 2nd,10,natives +WAPS + annuals,high fert,fall clipping
+60,1,2,,control- 2nd,27,Elymus glaucus,none,none
+61,1,2,,control- 2nd,13,annuals + natives,none,none
+62,1,2,,control- 2nd,26,Bromus carinatus,none,none
+63,1,2,,control- 2nd,22,Trifolium subteranneum,none,none
+64,1,2,,control- 2nd,21,Lolium multiflorum,none,none
+65,1,2,,control- 2nd,28,Leymus triticoides,none,none
+66,1,2,,control- 2nd,15,annuals,none,none
+67,1,2,,control- 2nd,29,Nassella pulchra,none,none
+68,1,2,,control- 2nd,32,Lotus purshianus,none,none
+69,1,2,,control- 2nd,17,Natives,none,none
+70,1,2,,control- 2nd,8,natives +WAPS + annuals,none,spring clipping
+71,1,3,,control,11,natives +WAPS + annuals,high fert,spring clipping
+72,1,3,,control,6,WAPS + annuals,high fert,none
+73,1,3,,control,21,Lolium multiflorum,none,none
+74,1,3,,control,17,Natives,none,none
+75,1,3,,control,22,Trifolium subteranneum,none,none
+76,1,3,,control,4,WAPS + annuals,high fert,fall clipping
+77,1,3,,control,1,WAPS + annuals,none,fall clipping
+78,1,3,,control,31,Vulpia microstachys,none,none
+79,1,3,,control,28,Leymus triticoides,none,none
+80,1,3,,control,9,natives +WAPS + annuals,none,none
+81,1,3,,control,24,Taeniatherum caput-medusae,none,none
+82,1,3,,control,5,WAPS + annuals,high fert,spring clipping
+83,1,3,,control,19,Avena fatua,none,none
+84,1,3,,control,20,Bromus hordeaceus,none,none
+85,1,3,,control,29,Nassella pulchra,none,none
+86,1,3,,control,15,annuals,none,none
+87,1,3,,control,34,annuals,none,fall clipping
+88,1,3,,control,7,natives +WAPS + annuals,none,fall clipping
+89,1,3,,control,8,natives +WAPS + annuals,none,spring clipping
+90,1,3,,control,18a,WAPS,none,spring clipping
+91,1,3,,control,14,WAPS + natives,none,none
+92,1,3,,control,32,Lotus purshianus,none,none
+93,1,3,,control,26,Bromus carinatus,none,none
+94,1,3,,control,12,natives +WAPS + annuals,high fert,none
+95,1,3,,control,35,annuals,none,spring clipping
+96,1,3,,control,13,annuals + natives,none,none
+97,1,3,,control,25,Centaurea solstitialis + WAPS + annuals,none,none
+98,1,3,,control,27,Elymus glaucus,none,none
+99,1,3,,control,23,Aegilops triuncialis,none,none
+100,1,3,,control,2,WAPS + annuals,none,spring clipping
+101,1,3,,control,10,natives +WAPS + annuals,high fert,fall clipping
+102,1,3,,control,3,WAPS + annuals,none,none
+103,1,3,,control,30,Poa secunda,none,none
+104,1,3,,control,33b,WAPS,none,fall clipping
+105,1,3,,control,16,WAPS,none,none
+106,2,1,A,wet,28,Leymus triticoides,none,none
+107,2,1,A,wet,30,Poa secunda,none,none
+108,2,1,A,wet,15,annuals,none,none
+109,2,1,A,wet,25,Centaurea solstitialis + WAPS + annuals,none,none
+110,2,1,A,wet,29,Nassella pulchra,none,none
+111,2,1,A,wet,10,natives +WAPS + annuals,high fert,fall clipping
+112,2,1,A,wet,2,WAPS + annuals,none,spring clipping
+113,2,1,A,wet,22,Trifolium subteranneum,none,none
+114,2,1,A,wet,14,WAPS + natives,none,none
+115,2,1,A,wet,23,Aegilops triuncialis,none,none
+116,2,1,A,wet,35,annuals,none,spring clipping
+117,2,1,A,wet,27,Elymus glaucus,none,none
+118,2,1,A,wet,32,Lotus purshianus,none,none
+119,2,1,A,wet,8,natives +WAPS + annuals,none,spring clipping
+120,2,1,A,wet,4,WAPS + annuals,high fert,fall clipping
+121,2,1,A,wet,11,natives +WAPS + annuals,high fert,spring clipping
+122,2,1,A,wet,24,Taeniatherum caput-medusae,none,none
+123,2,1,A,wet,12,natives +WAPS + annuals,high fert,none
+124,2,1,A,wet,9,natives +WAPS + annuals,none,none
+125,2,1,A,wet,13,annuals + natives,none,none
+126,2,1,A,wet,26,Bromus carinatus,none,none
+127,2,1,A,wet,19,Avena fatua,none,none
+128,2,1,A,wet,31,Vulpia microstachys,none,none
+129,2,1,A,wet,18a,WAPS,none,spring clipping
+130,2,1,A,wet,1,WAPS + annuals,none,fall clipping
+131,2,1,A,wet,3,WAPS + annuals,none,none
+132,2,1,A,wet,17,Natives,none,none
+133,2,1,A,wet,7,natives +WAPS + annuals,none,fall clipping
+134,2,1,A,wet,16,WAPS,none,none
+135,2,1,A,wet,6,WAPS + annuals,high fert,none
+136,2,1,A,wet,20,Bromus hordeaceus,none,none
+137,2,1,A,wet,21,Lolium multiflorum,none,none
+138,2,1,A,wet,33a,Lupinus bicolor,none,none
+139,2,1,A,wet,5,WAPS + annuals,high fert,spring clipping
+140,2,1,A,wet,34,annuals,none,fall clipping
+141,2,2,,control- 2nd,16,WAPS,none,none
+142,2,2,,control- 2nd,23,Aegilops triuncialis,none,none
+143,2,2,,control- 2nd,4,WAPS + annuals,high fert,fall clipping
+144,2,2,,control- 2nd,11,natives +WAPS + annuals,high fert,spring clipping
+145,2,2,,control- 2nd,15,annuals,none,none
+146,2,2,,control- 2nd,31,Vulpia microstachys,none,none
+147,2,2,,control- 2nd,9,natives +WAPS + annuals,none,none
+148,2,2,,control- 2nd,1,WAPS + annuals,none,fall clipping
+149,2,2,,control- 2nd,22,Trifolium subteranneum,none,none
+150,2,2,,control- 2nd,29,Nassella pulchra,none,none
+151,2,2,,control- 2nd,34,annuals,none,fall clipping
+152,2,2,,control- 2nd,21,Lolium multiflorum,none,none
+153,2,2,,control- 2nd,24,Taeniatherum caput-medusae,none,none
+154,2,2,,control- 2nd,28,Leymus triticoides,none,none
+155,2,2,,control- 2nd,33a,Lupinus bicolor,none,none
+156,2,2,,control- 2nd,30,Poa secunda,none,none
+157,2,2,,control- 2nd,6,WAPS + annuals,high fert,none
+158,2,2,,control- 2nd,19,Avena fatua,none,none
+159,2,2,,control- 2nd,13,annuals + natives,none,none
+160,2,2,,control- 2nd,17,Natives,none,none
+161,2,2,,control- 2nd,25,Centaurea solstitialis + WAPS + annuals,none,none
+162,2,2,,control- 2nd,14,WAPS + natives,none,none
+163,2,2,,control- 2nd,27,Elymus glaucus,none,none
+164,2,2,,control- 2nd,7,natives +WAPS + annuals,none,fall clipping
+165,2,2,,control- 2nd,26,Bromus carinatus,none,none
+166,2,2,,control- 2nd,20,Bromus hordeaceus,none,none
+167,2,2,,control- 2nd,8,natives +WAPS + annuals,none,spring clipping
+168,2,2,,control- 2nd,32,Lotus purshianus,none,none
+169,2,2,,control- 2nd,2,WAPS + annuals,none,spring clipping
+170,2,2,,control- 2nd,10,natives +WAPS + annuals,high fert,fall clipping
+171,2,2,,control- 2nd,35,annuals,none,spring clipping
+172,2,2,,control- 2nd,18b,Bare,none,none
+173,2,2,,control- 2nd,5,WAPS + annuals,high fert,spring clipping
+174,2,2,,control- 2nd,12,natives +WAPS + annuals,high fert,none
+175,2,2,,control- 2nd,3,WAPS + annuals,none,none
+176,2,3,,control,19,Avena fatua,none,none
+177,2,3,,control,8,natives +WAPS + annuals,none,spring clipping
+178,2,3,,control,7,natives +WAPS + annuals,none,fall clipping
+179,2,3,,control,32,Lotus purshianus,none,none
+180,2,3,,control,22,Trifolium subteranneum,none,none
+181,2,3,,control,16,WAPS,none,none
+182,2,3,,control,1,WAPS + annuals,none,fall clipping
+183,2,3,,control,35,annuals,none,spring clipping
+184,2,3,,control,4,WAPS + annuals,high fert,fall clipping
+185,2,3,,control,17,Natives,none,none
+186,2,3,,control,11,natives +WAPS + annuals,high fert,spring clipping
+187,2,3,,control,13,annuals + natives,none,none
+188,2,3,,control,30,Poa secunda,none,none
+189,2,3,,control,5,WAPS + annuals,high fert,spring clipping
+190,2,3,,control,3,WAPS + annuals,none,none
+191,2,3,,control,34,annuals,none,fall clipping
+192,2,3,,control,14,WAPS + natives,none,none
+193,2,3,,control,20,Bromus hordeaceus,none,none
+194,2,3,,control,27,Elymus glaucus,none,none
+195,2,3,,control,6,WAPS + annuals,high fert,none
+196,2,3,,control,2,WAPS + annuals,none,spring clipping
+197,2,3,,control,33b,WAPS,none,fall clipping
+198,2,3,,control,9,natives +WAPS + annuals,none,none
+199,2,3,,control,21,Lolium multiflorum,none,none
+200,2,3,,control,18a,WAPS,none,spring clipping
+201,2,3,,control,31,Vulpia microstachys,none,none
+202,2,3,,control,24,Taeniatherum caput-medusae,none,none
+203,2,3,,control,25,Centaurea solstitialis + WAPS + annuals,none,none
+204,2,3,,control,12,natives +WAPS + annuals,high fert,none
+205,2,3,,control,15,annuals,none,none
+206,2,3,,control,23,Aegilops triuncialis,none,none
+207,2,3,,control,10,natives +WAPS + annuals,high fert,fall clipping
+208,2,3,,control,28,Leymus triticoides,none,none
+209,2,3,,control,29,Nassella pulchra,none,none
+210,2,3,,control,26,Bromus carinatus,none,none
+211,3,1,A,dry,2,WAPS + annuals,none,spring clipping
+212,3,1,A,dry,25,Centaurea solstitialis + WAPS + annuals,none,none
+213,3,1,A,dry,21,Lolium multiflorum,none,none
+214,3,1,A,dry,28,Leymus triticoides,none,none
+215,3,1,A,dry,26,Bromus carinatus,none,none
+216,3,1,A,dry,11,natives +WAPS + annuals,high fert,spring clipping
+217,3,1,A,dry,3,WAPS + annuals,none,none
+218,3,1,A,dry,1,WAPS + annuals,none,fall clipping
+219,3,1,A,dry,29,Nassella pulchra,none,none
+220,3,1,A,dry,31,Vulpia microstachys,none,none
+221,3,1,A,dry,24,Taeniatherum caput-medusae,none,none
+222,3,1,A,dry,34,annuals,none,fall clipping
+223,3,1,A,dry,16,WAPS,none,none
+224,3,1,A,dry,8,natives +WAPS + annuals,none,spring clipping
+225,3,1,A,dry,33a,Lupinus bicolor,none,none
+226,3,1,A,dry,4,WAPS + annuals,high fert,fall clipping
+227,3,1,A,dry,9,natives +WAPS + annuals,none,none
+228,3,1,A,dry,30,Poa secunda,none,none
+229,3,1,A,dry,15,annuals,none,none
+230,3,1,A,dry,19,Avena fatua,none,none
+231,3,1,A,dry,18b,Bare,none,none
+232,3,1,A,dry,7,natives +WAPS + annuals,none,fall clipping
+233,3,1,A,dry,23,Aegilops triuncialis,none,none
+234,3,1,A,dry,22,Trifolium subteranneum,none,none
+235,3,1,A,dry,5,WAPS + annuals,high fert,spring clipping
+236,3,1,A,dry,13,annuals + natives,none,none
+237,3,1,A,dry,32,Lotus purshianus,none,none
+238,3,1,A,dry,35,annuals,none,spring clipping
+239,3,1,A,dry,27,Elymus glaucus,none,none
+240,3,1,A,dry,6,WAPS + annuals,high fert,none
+241,3,1,A,dry,14,WAPS + natives,none,none
+242,3,1,A,dry,10,natives +WAPS + annuals,high fert,fall clipping
+243,3,1,A,dry,20,Bromus hordeaceus,none,none
+244,3,1,A,dry,12,natives +WAPS + annuals,high fert,none
+245,3,1,A,dry,17,Natives,none,none
+246,3,2,B,control,31,Vulpia microstachys,none,none
+247,3,2,B,control,17,Natives,none,none
+248,3,2,B,control,8,natives +WAPS + annuals,none,spring clipping
+249,3,2,B,control,27,Elymus glaucus,none,none
+250,3,2,B,control,7,natives +WAPS + annuals,none,fall clipping
+251,3,2,B,control,21,Lolium multiflorum,none,none
+252,3,2,B,control,12,natives +WAPS + annuals,high fert,none
+253,3,2,B,control,28,Leymus triticoides,none,none
+254,3,2,B,control,20,Bromus hordeaceus,none,none
+255,3,2,B,control,11,natives +WAPS + annuals,high fert,spring clipping
+256,3,2,B,control,32,Lotus purshianus,none,none
+257,3,2,B,control,16,WAPS,none,none
+258,3,2,B,control,24,Taeniatherum caput-medusae,none,none
+259,3,2,B,control,34,annuals,none,fall clipping
+260,3,2,B,control,1,WAPS + annuals,none,fall clipping
+261,3,2,B,control,35,annuals,none,spring clipping
+262,3,2,B,control,6,WAPS + annuals,high fert,none
+263,3,2,B,control,18a,WAPS,none,spring clipping
+264,3,2,B,control,3,WAPS + annuals,none,none
+265,3,2,B,control,26,Bromus carinatus,none,none
+266,3,2,B,control,30,Poa secunda,none,none
+267,3,2,B,control,13,annuals + natives,none,none
+268,3,2,B,control,14,WAPS + natives,none,none
+269,3,2,B,control,19,Avena fatua,none,none
+270,3,2,B,control,22,Trifolium subteranneum,none,none
+271,3,2,B,control,10,natives +WAPS + annuals,high fert,fall clipping
+272,3,2,B,control,9,natives +WAPS + annuals,none,none
+273,3,2,B,control,15,annuals,none,none
+274,3,2,B,control,25,Centaurea solstitialis + WAPS + annuals,none,none
+275,3,2,B,control,29,Nassella pulchra,none,none
+276,3,2,B,control,2,WAPS + annuals,none,spring clipping
+277,3,2,B,control,23,Aegilops triuncialis,none,none
+278,3,2,B,control,33b,WAPS,none,fall clipping
+279,3,2,B,control,5,WAPS + annuals,high fert,spring clipping
+280,3,2,B,control,4,WAPS + annuals,high fert,fall clipping
+281,3,3,B,late wet,16,WAPS,none,none
+282,3,3,B,late wet,32,Lotus purshianus,none,none
+283,3,3,B,late wet,12,natives +WAPS + annuals,high fert,none
+284,3,3,B,late wet,14,WAPS + natives,none,none
+285,3,3,B,late wet,31,Vulpia microstachys,none,none
+286,3,3,B,late wet,17,Natives,none,none
+287,3,3,B,late wet,24,Taeniatherum caput-medusae,none,none
+288,3,3,B,late wet,3,WAPS + annuals,none,none
+289,3,3,B,late wet,20,Bromus hordeaceus,none,none
+290,3,3,B,late wet,10,natives +WAPS + annuals,high fert,fall clipping
+291,3,3,B,late wet,7,natives +WAPS + annuals,none,fall clipping
+292,3,3,B,late wet,30,Poa secunda,none,none
+293,3,3,B,late wet,4,WAPS + annuals,high fert,fall clipping
+294,3,3,B,late wet,23,Aegilops triuncialis,none,none
+295,3,3,B,late wet,34,annuals,none,fall clipping
+296,3,3,B,late wet,35,annuals,none,spring clipping
+297,3,3,B,late wet,11,natives +WAPS + annuals,high fert,spring clipping
+298,3,3,B,late wet,2,WAPS + annuals,none,spring clipping
+299,3,3,B,late wet,6,WAPS + annuals,high fert,none
+300,3,3,B,late wet,9,natives +WAPS + annuals,none,none
+301,3,3,B,late wet,1,WAPS + annuals,none,fall clipping
+302,3,3,B,late wet,21,Lolium multiflorum,none,none
+303,3,3,B,late wet,25,Centaurea solstitialis + WAPS + annuals,none,none
+304,3,3,B,late wet,13,annuals + natives,none,none
+305,3,3,B,late wet,19,Avena fatua,none,none
+306,3,3,B,late wet,33a,Lupinus bicolor,none,none
+307,3,3,B,late wet,26,Bromus carinatus,none,none
+308,3,3,B,late wet,27,Elymus glaucus,none,none
+309,3,3,B,late wet,28,Leymus triticoides,none,none
+310,3,3,B,late wet,5,WAPS + annuals,high fert,spring clipping
+311,3,3,B,late wet,18a,WAPS,none,spring clipping
+312,3,3,B,late wet,22,Trifolium subteranneum,none,none
+313,3,3,B,late wet,8,natives +WAPS + annuals,none,spring clipping
+314,3,3,B,late wet,15,annuals,none,none
+315,3,3,B,late wet,29,Nassella pulchra,none,none
+316,4,1,A,control,23,Aegilops triuncialis,none,none
+317,4,1,A,control,9,natives +WAPS + annuals,none,none
+318,4,1,A,control,22,Trifolium subteranneum,none,none
+319,4,1,A,control,16,WAPS,none,none
+320,4,1,A,control,28,Leymus triticoides,none,none
+321,4,1,A,control,12,natives +WAPS + annuals,high fert,none
+322,4,1,A,control,11,natives +WAPS + annuals,high fert,spring clipping
+323,4,1,A,control,15,annuals,none,none
+324,4,1,A,control,29,Nassella pulchra,none,none
+325,4,1,A,control,8,natives +WAPS + annuals,none,spring clipping
+326,4,1,A,control,35,annuals,none,spring clipping
+327,4,1,A,control,21,Lolium multiflorum,none,none
+328,4,1,A,control,26,Bromus carinatus,none,none
+329,4,1,A,control,10,natives +WAPS + annuals,high fert,fall clipping
+330,4,1,A,control,31,Vulpia microstachys,none,none
+331,4,1,A,control,2,WAPS + annuals,none,spring clipping
+332,4,1,A,control,13,annuals + natives,none,none
+333,4,1,A,control,14,WAPS + natives,none,none
+334,4,1,A,control,34,annuals,none,fall clipping
+335,4,1,A,control,17,Natives,none,none
+336,4,1,A,control,4,WAPS + annuals,high fert,fall clipping
+337,4,1,A,control,18a,WAPS,none,spring clipping
+338,4,1,A,control,1,WAPS + annuals,none,fall clipping
+339,4,1,A,control,24,Taeniatherum caput-medusae,none,none
+340,4,1,A,control,20,Bromus hordeaceus,none,none
+341,4,1,A,control,33b,WAPS,none,fall clipping
+342,4,1,A,control,19,Avena fatua,none,none
+343,4,1,A,control,25,Centaurea solstitialis + WAPS + annuals,none,none
+344,4,1,A,control,27,Elymus glaucus,none,none
+345,4,1,A,control,5,WAPS + annuals,high fert,spring clipping
+346,4,1,A,control,3,WAPS + annuals,none,none
+347,4,1,A,control,7,natives +WAPS + annuals,none,fall clipping
+348,4,1,A,control,32,Lotus purshianus,none,none
+349,4,1,A,control,30,Poa secunda,none,none
+350,4,1,A,control,6,WAPS + annuals,high fert,none
+351,4,2,B,dry,7,natives +WAPS + annuals,none,fall clipping
+352,4,2,B,dry,26,Bromus carinatus,none,none
+353,4,2,B,dry,12,natives +WAPS + annuals,high fert,none
+354,4,2,B,dry,28,Leymus triticoides,none,none
+355,4,2,B,dry,1,WAPS + annuals,none,fall clipping
+356,4,2,B,dry,6,WAPS + annuals,high fert,none
+357,4,2,B,dry,5,WAPS + annuals,high fert,spring clipping
+358,4,2,B,dry,2,WAPS + annuals,none,spring clipping
+359,4,2,B,dry,23,Aegilops triuncialis,none,none
+360,4,2,B,dry,11,natives +WAPS + annuals,high fert,spring clipping
+361,4,2,B,dry,13,annuals + natives,none,none
+362,4,2,B,dry,25,Centaurea solstitialis + WAPS + annuals,none,none
+363,4,2,B,dry,31,Vulpia microstachys,none,none
+364,4,2,B,dry,15,annuals,none,none
+365,4,2,B,dry,8,natives +WAPS + annuals,none,spring clipping
+366,4,2,B,dry,4,WAPS + annuals,high fert,fall clipping
+367,4,2,B,dry,27,Elymus glaucus,none,none
+368,4,2,B,dry,21,Lolium multiflorum,none,none
+369,4,2,B,dry,9,natives +WAPS + annuals,none,none
+370,4,2,B,dry,10,natives +WAPS + annuals,high fert,fall clipping
+371,4,2,B,dry,3,WAPS + annuals,none,none
+372,4,2,B,dry,29,Nassella pulchra,none,none
+373,4,2,B,dry,22,Trifolium subteranneum,none,none
+374,4,2,B,dry,17,Natives,none,none
+375,4,2,B,dry,19,Avena fatua,none,none
+376,4,2,B,dry,18b,Bare,none,none
+377,4,2,B,dry,24,Taeniatherum caput-medusae,none,none
+378,4,2,B,dry,35,annuals,none,spring clipping
+379,4,2,B,dry,16,WAPS,none,none
+380,4,2,B,dry,30,Poa secunda,none,none
+381,4,2,B,dry,20,Bromus hordeaceus,none,none
+382,4,2,B,dry,34,annuals,none,fall clipping
+383,4,2,B,dry,14,WAPS + natives,none,none
+384,4,2,B,dry,32,Lotus purshianus,none,none
+385,4,2,B,dry,33a,Lupinus bicolor,none,none
+386,4,3,B,wet,6,WAPS + annuals,high fert,none
+387,4,3,B,wet,24,Taeniatherum caput-medusae,none,none
+388,4,3,B,wet,22,Trifolium subteranneum,none,none
+389,4,3,B,wet,32,Lotus purshianus,none,none
+390,4,3,B,wet,19,Avena fatua,none,none
+391,4,3,B,wet,2,WAPS + annuals,none,spring clipping
+392,4,3,B,wet,15,annuals,none,none
+393,4,3,B,wet,26,Bromus carinatus,none,none
+394,4,3,B,wet,4,WAPS + annuals,high fert,fall clipping
+395,4,3,B,wet,5,WAPS + annuals,high fert,spring clipping
+396,4,3,B,wet,10,natives +WAPS + annuals,high fert,fall clipping
+397,4,3,B,wet,1,WAPS + annuals,none,fall clipping
+398,4,3,B,wet,8,natives +WAPS + annuals,none,spring clipping
+399,4,3,B,wet,3,WAPS + annuals,none,none
+400,4,3,B,wet,33a,Lupinus bicolor,none,none
+401,4,3,B,wet,29,Nassella pulchra,none,none
+402,4,3,B,wet,34,annuals,none,fall clipping
+403,4,3,B,wet,25,Centaurea solstitialis + WAPS + annuals,none,none
+404,4,3,B,wet,27,Elymus glaucus,none,none
+405,4,3,B,wet,9,natives +WAPS + annuals,none,none
+406,4,3,B,wet,23,Aegilops triuncialis,none,none
+407,4,3,B,wet,35,annuals,none,spring clipping
+408,4,3,B,wet,30,Poa secunda,none,none
+409,4,3,B,wet,17,Natives,none,none
+410,4,3,B,wet,31,Vulpia microstachys,none,none
+411,4,3,B,wet,16,WAPS,none,none
+412,4,3,B,wet,21,Lolium multiflorum,none,none
+413,4,3,B,wet,11,natives +WAPS + annuals,high fert,spring clipping
+414,4,3,B,wet,18a,WAPS,none,spring clipping
+415,4,3,B,wet,12,natives +WAPS + annuals,high fert,none
+416,4,3,B,wet,13,annuals + natives,none,none
+417,4,3,B,wet,14,WAPS + natives,none,none
+418,4,3,B,wet,20,Bromus hordeaceus,none,none
+419,4,3,B,wet,7,natives +WAPS + annuals,none,fall clipping
+420,4,3,B,wet,28,Leymus triticoides,none,none
+421,5,1,C,wet,25,Centaurea solstitialis + WAPS + annuals,none,none
+422,5,1,C,wet,27,Elymus glaucus,none,none
+423,5,1,C,wet,31,Vulpia microstachys,none,none
+424,5,1,C,wet,5,WAPS + annuals,high fert,spring clipping
+425,5,1,C,wet,4,WAPS + annuals,high fert,fall clipping
+426,5,1,C,wet,32,Lotus purshianus,none,none
+427,5,1,C,wet,16,WAPS,none,none
+428,5,1,C,wet,6,WAPS + annuals,high fert,none
+429,5,1,C,wet,29,Nassella pulchra,none,none
+430,5,1,C,wet,20,Bromus hordeaceus,none,none
+431,5,1,C,wet,24,Taeniatherum caput-medusae,none,none
+432,5,1,C,wet,19,Avena fatua,none,none
+433,5,1,C,wet,12,natives +WAPS + annuals,high fert,none
+434,5,1,C,wet,14,WAPS + natives,none,none
+435,5,1,C,wet,10,natives +WAPS + annuals,high fert,fall clipping
+436,5,1,C,wet,3,WAPS + annuals,none,none
+437,5,1,C,wet,8,natives +WAPS + annuals,none,spring clipping
+438,5,1,C,wet,2,WAPS + annuals,none,spring clipping
+439,5,1,C,wet,30,Poa secunda,none,none
+440,5,1,C,wet,33a,Lupinus bicolor,none,none
+441,5,1,C,wet,9,natives +WAPS + annuals,none,none
+442,5,1,C,wet,23,Aegilops triuncialis,none,none
+443,5,1,C,wet,26,Bromus carinatus,none,none
+444,5,1,C,wet,7,natives +WAPS + annuals,none,fall clipping
+445,5,1,C,wet,13,annuals + natives,none,none
+446,5,1,C,wet,1,WAPS + annuals,none,fall clipping
+447,5,1,C,wet,34,annuals,none,fall clipping
+448,5,1,C,wet,21,Lolium multiflorum,none,none
+449,5,1,C,wet,28,Leymus triticoides,none,none
+450,5,1,C,wet,18b,Bare,none,none
+451,5,1,C,wet,11,natives +WAPS + annuals,high fert,spring clipping
+452,5,1,C,wet,15,annuals,none,none
+453,5,1,C,wet,17,Natives,none,none
+454,5,1,C,wet,35,annuals,none,spring clipping
+455,5,1,C,wet,22,Trifolium subteranneum,none,none
+456,5,2,C,late wet,5,WAPS + annuals,high fert,spring clipping
+457,5,2,C,late wet,23,Aegilops triuncialis,none,none
+458,5,2,C,late wet,28,Leymus triticoides,none,none
+459,5,2,C,late wet,19,Avena fatua,none,none
+460,5,2,C,late wet,24,Taeniatherum caput-medusae,none,none
+461,5,2,C,late wet,12,natives +WAPS + annuals,high fert,none
+462,5,2,C,late wet,14,WAPS + natives,none,none
+463,5,2,C,late wet,3,WAPS + annuals,none,none
+464,5,2,C,late wet,2,WAPS + annuals,none,spring clipping
+465,5,2,C,late wet,26,Bromus carinatus,none,none
+466,5,2,C,late wet,32,Lotus purshianus,none,none
+467,5,2,C,late wet,34,annuals,none,fall clipping
+468,5,2,C,late wet,27,Elymus glaucus,none,none
+469,5,2,C,late wet,17,Natives,none,none
+470,5,2,C,late wet,7,natives +WAPS + annuals,none,fall clipping
+471,5,2,C,late wet,22,Trifolium subteranneum,none,none
+472,5,2,C,late wet,29,Nassella pulchra,none,none
+473,5,2,C,late wet,31,Vulpia microstachys,none,none
+474,5,2,C,late wet,6,WAPS + annuals,high fert,none
+475,5,2,C,late wet,8,natives +WAPS + annuals,none,spring clipping
+476,5,2,C,late wet,16,WAPS,none,none
+477,5,2,C,late wet,25,Centaurea solstitialis + WAPS + annuals,none,none
+478,5,2,C,late wet,9,natives +WAPS + annuals,none,none
+479,5,2,C,late wet,20,Bromus hordeaceus,none,none
+480,5,2,C,late wet,13,annuals + natives,none,none
+481,5,2,C,late wet,15,annuals,none,none
+482,5,2,C,late wet,4,WAPS + annuals,high fert,fall clipping
+483,5,2,C,late wet,33a,Lupinus bicolor,none,none
+484,5,2,C,late wet,21,Lolium multiflorum,none,none
+485,5,2,C,late wet,30,Poa secunda,none,none
+486,5,2,C,late wet,11,natives +WAPS + annuals,high fert,spring clipping
+487,5,2,C,late wet,35,annuals,none,spring clipping
+488,5,2,C,late wet,1,WAPS + annuals,none,fall clipping
+489,5,2,C,late wet,10,natives +WAPS + annuals,high fert,fall clipping
+490,5,2,C,late wet,18a,WAPS,none,spring clipping
+491,5,3,,control,24,Taeniatherum caput-medusae,none,none
+492,5,3,,control,9,natives +WAPS + annuals,none,none
+493,5,3,,control,34,annuals,none,fall clipping
+494,5,3,,control,20,Bromus hordeaceus,none,none
+495,5,3,,control,19,Avena fatua,none,none
+496,5,3,,control,5,WAPS + annuals,high fert,spring clipping
+497,5,3,,control,18a,WAPS,none,spring clipping
+498,5,3,,control,35,annuals,none,spring clipping
+499,5,3,,control,17,Natives,none,none
+500,5,3,,control,14,WAPS + natives,none,none
+501,5,3,,control,26,Bromus carinatus,none,none
+502,5,3,,control,29,Nassella pulchra,none,none
+503,5,3,,control,16,WAPS,none,none
+504,5,3,,control,7,natives +WAPS + annuals,none,fall clipping
+505,5,3,,control,1,WAPS + annuals,none,fall clipping
+506,5,3,,control,28,Leymus triticoides,none,none
+507,5,3,,control,3,WAPS + annuals,none,none
+508,5,3,,control,12,natives +WAPS + annuals,high fert,none
+509,5,3,,control,23,Aegilops triuncialis,none,none
+510,5,3,,control,22,Trifolium subteranneum,none,none
+511,5,3,,control,11,natives +WAPS + annuals,high fert,spring clipping
+512,5,3,,control,6,WAPS + annuals,high fert,none
+513,5,3,,control,25,Centaurea solstitialis + WAPS + annuals,none,none
+514,5,3,,control,4,WAPS + annuals,high fert,fall clipping
+515,5,3,,control,32,Lotus purshianus,none,none
+516,5,3,,control,33b,WAPS,none,fall clipping
+517,5,3,,control,8,natives +WAPS + annuals,none,spring clipping
+518,5,3,,control,13,annuals + natives,none,none
+519,5,3,,control,21,Lolium multiflorum,none,none
+520,5,3,,control,31,Vulpia microstachys,none,none
+521,5,3,,control,30,Poa secunda,none,none
+522,5,3,,control,10,natives +WAPS + annuals,high fert,fall clipping
+523,5,3,,control,2,WAPS + annuals,none,spring clipping
+524,5,3,,control,27,Elymus glaucus,none,none
+525,5,3,,control,15,annuals,none,none
+526,6,1,C,dry,6,WAPS + annuals,high fert,none
+527,6,1,C,dry,1,WAPS + annuals,none,fall clipping
+528,6,1,C,dry,20,Bromus hordeaceus,none,none
+529,6,1,C,dry,15,annuals,none,none
+530,6,1,C,dry,5,WAPS + annuals,high fert,spring clipping
+531,6,1,C,dry,26,Bromus carinatus,none,none
+532,6,1,C,dry,11,natives +WAPS + annuals,high fert,spring clipping
+533,6,1,C,dry,33a,Lupinus bicolor,none,none
+534,6,1,C,dry,23,Aegilops triuncialis,none,none
+535,6,1,C,dry,27,Elymus glaucus,none,none
+536,6,1,C,dry,35,annuals,none,spring clipping
+537,6,1,C,dry,7,natives +WAPS + annuals,none,fall clipping
+538,6,1,C,dry,22,Trifolium subteranneum,none,none
+539,6,1,C,dry,12,natives +WAPS + annuals,high fert,none
+540,6,1,C,dry,34,annuals,none,fall clipping
+541,6,1,C,dry,17,Natives,none,none
+542,6,1,C,dry,21,Lolium multiflorum,none,none
+543,6,1,C,dry,10,natives +WAPS + annuals,high fert,fall clipping
+544,6,1,C,dry,30,Poa secunda,none,none
+545,6,1,C,dry,29,Nassella pulchra,none,none
+546,6,1,C,dry,8,natives +WAPS + annuals,none,spring clipping
+547,6,1,C,dry,14,WAPS + natives,none,none
+548,6,1,C,dry,2,WAPS + annuals,none,spring clipping
+549,6,1,C,dry,16,WAPS,none,none
+550,6,1,C,dry,28,Leymus triticoides,none,none
+551,6,1,C,dry,31,Vulpia microstachys,none,none
+552,6,1,C,dry,3,WAPS + annuals,none,none
+553,6,1,C,dry,18b,Bare,none,none
+554,6,1,C,dry,25,Centaurea solstitialis + WAPS + annuals,none,none
+555,6,1,C,dry,4,WAPS + annuals,high fert,fall clipping
+556,6,1,C,dry,24,Taeniatherum caput-medusae,none,none
+557,6,1,C,dry,32,Lotus purshianus,none,none
+558,6,1,C,dry,13,annuals + natives,none,none
+559,6,1,C,dry,19,Avena fatua,none,none
+560,6,1,C,dry,9,natives +WAPS + annuals,none,none
+561,6,2,C,control,34,annuals,none,fall clipping
+562,6,2,C,control,9,natives +WAPS + annuals,none,none
+563,6,2,C,control,22,Trifolium subteranneum,none,none
+564,6,2,C,control,13,annuals + natives,none,none
+565,6,2,C,control,35,annuals,none,spring clipping
+566,6,2,C,control,5,WAPS + annuals,high fert,spring clipping
+567,6,2,C,control,21,Lolium multiflorum,none,none
+568,6,2,C,control,25,Centaurea solstitialis + WAPS + annuals,none,none
+569,6,2,C,control,19,Avena fatua,none,none
+570,6,2,C,control,16,WAPS,none,none
+571,6,2,C,control,7,natives +WAPS + annuals,none,fall clipping
+572,6,2,C,control,8,natives +WAPS + annuals,none,spring clipping
+573,6,2,C,control,29,Nassella pulchra,none,none
+574,6,2,C,control,12,natives +WAPS + annuals,high fert,none
+575,6,2,C,control,20,Bromus hordeaceus,none,none
+576,6,2,C,control,33b,WAPS,none,fall clipping
+577,6,2,C,control,17,Natives,none,none
+578,6,2,C,control,18a,WAPS,none,spring clipping
+579,6,2,C,control,6,WAPS + annuals,high fert,none
+580,6,2,C,control,23,Aegilops triuncialis,none,none
+581,6,2,C,control,31,Vulpia microstachys,none,none
+582,6,2,C,control,27,Elymus glaucus,none,none
+583,6,2,C,control,3,WAPS + annuals,none,none
+584,6,2,C,control,28,Leymus triticoides,none,none
+585,6,2,C,control,2,WAPS + annuals,none,spring clipping
+586,6,2,C,control,11,natives +WAPS + annuals,high fert,spring clipping
+587,6,2,C,control,15,annuals,none,none
+588,6,2,C,control,30,Poa secunda,none,none
+589,6,2,C,control,32,Lotus purshianus,none,none
+590,6,2,C,control,14,WAPS + natives,none,none
+591,6,2,C,control,26,Bromus carinatus,none,none
+592,6,2,C,control,1,WAPS + annuals,none,fall clipping
+593,6,2,C,control,4,WAPS + annuals,high fert,fall clipping
+594,6,2,C,control,10,natives +WAPS + annuals,high fert,fall clipping
+595,6,2,C,control,24,Taeniatherum caput-medusae,none,none
+596,6,3,,control-2nd,10,natives +WAPS + annuals,high fert,fall clipping
+597,6,3,,control-2nd,15,annuals,none,none
+598,6,3,,control-2nd,17,Natives,none,none
+599,6,3,,control-2nd,1,WAPS + annuals,none,fall clipping
+600,6,3,,control-2nd,30,Poa secunda,none,none
+601,6,3,,control-2nd,4,WAPS + annuals,high fert,fall clipping
+602,6,3,,control-2nd,20,Bromus hordeaceus,none,none
+603,6,3,,control-2nd,28,Leymus triticoides,none,none
+604,6,3,,control-2nd,3,WAPS + annuals,none,none
+605,6,3,,control-2nd,9,natives +WAPS + annuals,none,none
+606,6,3,,control-2nd,14,WAPS + natives,none,none
+607,6,3,,control-2nd,24,Taeniatherum caput-medusae,none,none
+608,6,3,,control-2nd,8,natives +WAPS + annuals,none,spring clipping
+609,6,3,,control-2nd,16,WAPS,none,none
+610,6,3,,control-2nd,18a,WAPS,none,spring clipping
+611,6,3,,control-2nd,22,Trifolium subteranneum,none,none
+612,6,3,,control-2nd,34,annuals,none,fall clipping
+613,6,3,,control-2nd,25,Centaurea solstitialis + WAPS + annuals,none,none
+614,6,3,,control-2nd,35,annuals,none,spring clipping
+615,6,3,,control-2nd,31,Vulpia microstachys,none,none
+616,6,3,,control-2nd,19,Avena fatua,none,none
+617,6,3,,control-2nd,32,Lotus purshianus,none,none
+618,6,3,,control-2nd,21,Lolium multiflorum,none,none
+619,6,3,,control-2nd,6,WAPS + annuals,high fert,none
+620,6,3,,control-2nd,11,natives +WAPS + annuals,high fert,spring clipping
+621,6,3,,control-2nd,2,WAPS + annuals,none,spring clipping
+622,6,3,,control-2nd,12,natives +WAPS + annuals,high fert,none
+623,6,3,,control-2nd,33a,Lupinus bicolor,none,none
+624,6,3,,control-2nd,13,annuals + natives,none,none
+625,6,3,,control-2nd,27,Elymus glaucus,none,none
+626,6,3,,control-2nd,29,Nassella pulchra,none,none
+627,6,3,,control-2nd,26,Bromus carinatus,none,none
+628,6,3,,control-2nd,5,WAPS + annuals,high fert,spring clipping
+629,6,3,,control-2nd,23,Aegilops triuncialis,none,none
+630,6,3,,control-2nd,7,natives +WAPS + annuals,none,fall clipping
+631,7,1,,control,15,annuals,none,none
+632,7,1,,control,6,WAPS + annuals,high fert,none
+633,7,1,,control,24,Taeniatherum caput-medusae,none,none
+634,7,1,,control,17,Natives,none,none
+635,7,1,,control,22,Trifolium subteranneum,none,none
+636,7,1,,control,19,Avena fatua,none,none
+637,7,1,,control,20,Bromus hordeaceus,none,none
+638,7,1,,control,7,natives +WAPS + annuals,none,fall clipping
+639,7,1,,control,21,Lolium multiflorum,none,none
+640,7,1,,control,10,natives +WAPS + annuals,high fert,fall clipping
+641,7,1,,control,16,WAPS,none,none
+642,7,1,,control,29,Nassella pulchra,none,none
+643,7,1,,control,31,Vulpia microstachys,none,none
+644,7,1,,control,2,WAPS + annuals,none,spring clipping
+645,7,1,,control,13,annuals + natives,none,none
+646,7,1,,control,28,Leymus triticoides,none,none
+647,7,1,,control,3,WAPS + annuals,none,none
+648,7,1,,control,35,annuals,none,spring clipping
+649,7,1,,control,30,Poa secunda,none,none
+650,7,1,,control,4,WAPS + annuals,high fert,fall clipping
+651,7,1,,control,12,natives +WAPS + annuals,high fert,none
+652,7,1,,control,14,WAPS + natives,none,none
+653,7,1,,control,34,annuals,none,fall clipping
+654,7,1,,control,8,natives +WAPS + annuals,none,spring clipping
+655,7,1,,control,18a,WAPS,none,spring clipping
+656,7,1,,control,27,Elymus glaucus,none,none
+657,7,1,,control,25,Centaurea solstitialis + WAPS + annuals,none,none
+658,7,1,,control,32,Lotus purshianus,none,none
+659,7,1,,control,23,Aegilops triuncialis,none,none
+660,7,1,,control,26,Bromus carinatus,none,none
+661,7,1,,control,9,natives +WAPS + annuals,none,none
+662,7,1,,control,5,WAPS + annuals,high fert,spring clipping
+663,7,1,,control,1,WAPS + annuals,none,fall clipping
+664,7,1,,control,11,natives +WAPS + annuals,high fert,spring clipping
+665,7,1,,control,33b,WAPS,none,fall clipping
+666,7,2,,control-2nd,6,WAPS + annuals,high fert,none
+667,7,2,,control-2nd,24,Taeniatherum caput-medusae,none,none
+668,7,2,,control-2nd,9,natives +WAPS + annuals,none,none
+669,7,2,,control-2nd,29,Nassella pulchra,none,none
+670,7,2,,control-2nd,26,Bromus carinatus,none,none
+671,7,2,,control-2nd,8,natives +WAPS + annuals,none,spring clipping
+672,7,2,,control-2nd,17,Natives,none,none
+673,7,2,,control-2nd,28,Leymus triticoides,none,none
+674,7,2,,control-2nd,23,Aegilops triuncialis,none,none
+675,7,2,,control-2nd,16,WAPS,none,none
+676,7,2,,control-2nd,1,WAPS + annuals,none,fall clipping
+677,7,2,,control-2nd,31,Vulpia microstachys,none,none
+678,7,2,,control-2nd,14,WAPS + natives,none,none
+679,7,2,,control-2nd,18b,Bare,none,none
+680,7,2,,control-2nd,22,Trifolium subteranneum,none,none
+681,7,2,,control-2nd,10,natives +WAPS + annuals,high fert,fall clipping
+682,7,2,,control-2nd,3,WAPS + annuals,none,none
+683,7,2,,control-2nd,15,annuals,none,none
+684,7,2,,control-2nd,27,Elymus glaucus,none,none
+685,7,2,,control-2nd,13,annuals + natives,none,none
+686,7,2,,control-2nd,5,WAPS + annuals,high fert,spring clipping
+687,7,2,,control-2nd,20,Bromus hordeaceus,none,none
+688,7,2,,control-2nd,12,natives +WAPS + annuals,high fert,none
+689,7,2,,control-2nd,21,Lolium multiflorum,none,none
+690,7,2,,control-2nd,11,natives +WAPS + annuals,high fert,spring clipping
+691,7,2,,control-2nd,33a,Lupinus bicolor,none,none
+692,7,2,,control-2nd,32,Lotus purshianus,none,none
+693,7,2,,control-2nd,7,natives +WAPS + annuals,none,fall clipping
+694,7,2,,control-2nd,4,WAPS + annuals,high fert,fall clipping
+695,7,2,,control-2nd,25,Centaurea solstitialis + WAPS + annuals,none,none
+696,7,2,,control-2nd,30,Poa secunda,none,none
+697,7,2,,control-2nd,35,annuals,none,spring clipping
+698,7,2,,control-2nd,19,Avena fatua,none,none
+699,7,2,,control-2nd,2,WAPS + annuals,none,spring clipping
+700,7,2,,control-2nd,34,annuals,none,fall clipping
+701,7,3,,control-2nd,20,Bromus hordeaceus,none,none
+702,7,3,,control-2nd,9,natives +WAPS + annuals,none,none
+703,7,3,,control-2nd,4,WAPS + annuals,high fert,fall clipping
+704,7,3,,control-2nd,8,natives +WAPS + annuals,none,spring clipping
+705,7,3,,control-2nd,21,Lolium multiflorum,none,none
+706,7,3,,control-2nd,25,Centaurea solstitialis + WAPS + annuals,none,none
+707,7,3,,control-2nd,22,Trifolium subteranneum,none,none
+708,7,3,,control-2nd,32,Lotus purshianus,none,none
+709,7,3,,control-2nd,19,Avena fatua,none,none
+710,7,3,,control-2nd,13,annuals + natives,none,none
+711,7,3,,control-2nd,11,natives +WAPS + annuals,high fert,spring clipping
+712,7,3,,control-2nd,26,Bromus carinatus,none,none
+713,7,3,,control-2nd,33a,Lupinus bicolor,none,none
+714,7,3,,control-2nd,16,WAPS,none,none
+715,7,3,,control-2nd,24,Taeniatherum caput-medusae,none,none
+716,7,3,,control-2nd,34,annuals,none,fall clipping
+717,7,3,,control-2nd,7,natives +WAPS + annuals,none,fall clipping
+718,7,3,,control-2nd,5,WAPS + annuals,high fert,spring clipping
+719,7,3,,control-2nd,12,natives +WAPS + annuals,high fert,none
+720,7,3,,control-2nd,17,Natives,none,none
+721,7,3,,control-2nd,35,annuals,none,spring clipping
+722,7,3,,control-2nd,29,Nassella pulchra,none,none
+723,7,3,,control-2nd,30,Poa secunda,none,none
+724,7,3,,control-2nd,31,Vulpia microstachys,none,none
+725,7,3,,control-2nd,3,WAPS + annuals,none,none
+726,7,3,,control-2nd,10,natives +WAPS + annuals,high fert,fall clipping
+727,7,3,,control-2nd,1,WAPS + annuals,none,fall clipping
+728,7,3,,control-2nd,15,annuals,none,none
+729,7,3,,control-2nd,18a,WAPS,none,spring clipping
+730,7,3,,control-2nd,23,Aegilops triuncialis,none,none
+731,7,3,,control-2nd,28,Leymus triticoides,none,none
+732,7,3,,control-2nd,2,WAPS + annuals,none,spring clipping
+733,7,3,,control-2nd,6,WAPS + annuals,high fert,none
+734,7,3,,control-2nd,14,WAPS + natives,none,none
+735,7,3,,control-2nd,27,Elymus glaucus,none,none
+736,8,1,,control,4,WAPS + annuals,high fert,fall clipping
+737,8,1,,control,1,WAPS + annuals,none,fall clipping
+738,8,1,,control,27,Elymus glaucus,none,none
+739,8,1,,control,21,Lolium multiflorum,none,none
+740,8,1,,control,10,natives +WAPS + annuals,high fert,fall clipping
+741,8,1,,control,24,Taeniatherum caput-medusae,none,none
+742,8,1,,control,29,Nassella pulchra,none,none
+743,8,1,,control,15,annuals,none,none
+744,8,1,,control,9,natives +WAPS + annuals,none,none
+745,8,1,,control,7,natives +WAPS + annuals,none,fall clipping
+746,8,1,,control,16,WAPS,none,none
+747,8,1,,control,32,Lotus purshianus,none,none
+748,8,1,,control,30,Poa secunda,none,none
+749,8,1,,control,33b,WAPS,none,fall clipping
+750,8,1,,control,35,annuals,none,spring clipping
+751,8,1,,control,2,WAPS + annuals,none,spring clipping
+752,8,1,,control,6,WAPS + annuals,high fert,none
+753,8,1,,control,11,natives +WAPS + annuals,high fert,spring clipping
+754,8,1,,control,3,WAPS + annuals,none,none
+755,8,1,,control,34,annuals,none,fall clipping
+756,8,1,,control,13,annuals + natives,none,none
+757,8,1,,control,31,Vulpia microstachys,none,none
+758,8,1,,control,12,natives +WAPS + annuals,high fert,none
+759,8,1,,control,22,Trifolium subteranneum,none,none
+760,8,1,,control,5,WAPS + annuals,high fert,spring clipping
+761,8,1,,control,23,Aegilops triuncialis,none,none
+762,8,1,,control,18a,WAPS,none,spring clipping
+763,8,1,,control,20,Bromus hordeaceus,none,none
+764,8,1,,control,26,Bromus carinatus,none,none
+765,8,1,,control,17,Natives,none,none
+766,8,1,,control,19,Avena fatua,none,none
+767,8,1,,control,25,Centaurea solstitialis + WAPS + annuals,none,none
+768,8,1,,control,28,Leymus triticoides,none,none
+769,8,1,,control,14,WAPS + natives,none,none
+770,8,1,,control,8,natives +WAPS + annuals,none,spring clipping
+771,8,2,,control-2nd,10,natives +WAPS + annuals,high fert,fall clipping
+772,8,2,,control-2nd,35,annuals,none,spring clipping
+773,8,2,,control-2nd,18a,WAPS,none,spring clipping
+774,8,2,,control-2nd,14,WAPS + natives,none,none
+775,8,2,,control-2nd,17,Natives,none,none
+776,8,2,,control-2nd,30,Poa secunda,none,none
+777,8,2,,control-2nd,13,annuals + natives,none,none
+778,8,2,,control-2nd,26,Bromus carinatus,none,none
+779,8,2,,control-2nd,25,Centaurea solstitialis + WAPS + annuals,none,none
+780,8,2,,control-2nd,33a,Lupinus bicolor,none,none
+781,8,2,,control-2nd,24,Taeniatherum caput-medusae,none,none
+782,8,2,,control-2nd,31,Vulpia microstachys,none,none
+783,8,2,,control-2nd,28,Leymus triticoides,none,none
+784,8,2,,control-2nd,1,WAPS + annuals,none,fall clipping
+785,8,2,,control-2nd,5,WAPS + annuals,high fert,spring clipping
+786,8,2,,control-2nd,15,annuals,none,none
+787,8,2,,control-2nd,12,natives +WAPS + annuals,high fert,none
+788,8,2,,control-2nd,6,WAPS + annuals,high fert,none
+789,8,2,,control-2nd,27,Elymus glaucus,none,none
+790,8,2,,control-2nd,3,WAPS + annuals,none,none
+791,8,2,,control-2nd,34,annuals,none,fall clipping
+792,8,2,,control-2nd,4,WAPS + annuals,high fert,fall clipping
+793,8,2,,control-2nd,22,Trifolium subteranneum,none,none
+794,8,2,,control-2nd,32,Lotus purshianus,none,none
+795,8,2,,control-2nd,16,WAPS,none,none
+796,8,2,,control-2nd,9,natives +WAPS + annuals,none,none
+797,8,2,,control-2nd,2,WAPS + annuals,none,spring clipping
+798,8,2,,control-2nd,21,Lolium multiflorum,none,none
+799,8,2,,control-2nd,29,Nassella pulchra,none,none
+800,8,2,,control-2nd,20,Bromus hordeaceus,none,none
+801,8,2,,control-2nd,8,natives +WAPS + annuals,none,spring clipping
+802,8,2,,control-2nd,7,natives +WAPS + annuals,none,fall clipping
+803,8,2,,control-2nd,11,natives +WAPS + annuals,high fert,spring clipping
+804,8,2,,control-2nd,19,Avena fatua,none,none
+805,8,2,,control-2nd,23,Aegilops triuncialis,none,none
+806,8,3,,control-2nd,2,WAPS + annuals,none,spring clipping
+807,8,3,,control-2nd,10,natives +WAPS + annuals,high fert,fall clipping
+808,8,3,,control-2nd,15,annuals,none,none
+809,8,3,,control-2nd,3,WAPS + annuals,none,none
+810,8,3,,control-2nd,19,Avena fatua,none,none
+811,8,3,,control-2nd,12,natives +WAPS + annuals,high fert,none
+812,8,3,,control-2nd,8,natives +WAPS + annuals,none,spring clipping
+813,8,3,,control-2nd,26,Bromus carinatus,none,none
+814,8,3,,control-2nd,27,Elymus glaucus,none,none
+815,8,3,,control-2nd,33a,Lupinus bicolor,none,none
+816,8,3,,control-2nd,16,WAPS,none,none
+817,8,3,,control-2nd,9,natives +WAPS + annuals,none,none
+818,8,3,,control-2nd,21,Lolium multiflorum,none,none
+819,8,3,,control-2nd,28,Leymus triticoides,none,none
+820,8,3,,control-2nd,30,Poa secunda,none,none
+821,8,3,,control-2nd,13,annuals + natives,none,none
+822,8,3,,control-2nd,23,Aegilops triuncialis,none,none
+823,8,3,,control-2nd,4,WAPS + annuals,high fert,fall clipping
+824,8,3,,control-2nd,5,WAPS + annuals,high fert,spring clipping
+825,8,3,,control-2nd,18b,Bare,none,none
+826,8,3,,control-2nd,17,Natives,none,none
+827,8,3,,control-2nd,7,natives +WAPS + annuals,none,fall clipping
+828,8,3,,control-2nd,29,Nassella pulchra,none,none
+829,8,3,,control-2nd,25,Centaurea solstitialis + WAPS + annuals,none,none
+830,8,3,,control-2nd,22,Trifolium subteranneum,none,none
+831,8,3,,control-2nd,6,WAPS + annuals,high fert,none
+832,8,3,,control-2nd,14,WAPS + natives,none,none
+833,8,3,,control-2nd,24,Taeniatherum caput-medusae,none,none
+834,8,3,,control-2nd,1,WAPS + annuals,none,fall clipping
+835,8,3,,control-2nd,20,Bromus hordeaceus,none,none
+836,8,3,,control-2nd,35,annuals,none,spring clipping
+837,8,3,,control-2nd,31,Vulpia microstachys,none,none
+838,8,3,,control-2nd,11,natives +WAPS + annuals,high fert,spring clipping
+839,8,3,,control-2nd,34,annuals,none,fall clipping
+840,8,3,,control-2nd,32,Lotus purshianus,none,none

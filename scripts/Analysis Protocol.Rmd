@@ -1,0 +1,59 @@
+---
+title: "Thoughts on Analysis"
+output: html_notebook
+---
+ 
+# Analysis Protocol
+ 
+## What are the different ways to think about priority effects?
+  * Fukami, Mordecai, and Ostling (2016)
+      * Present a framework for thinking about priority effects that is an extension of Chesson's classification of mechanisms of species coexistence (stabilizing / equalizing)
+      * The more equal species are, the less likely they are to coexist long-term
+      * Stabilizing mechanisms (density-dependent herbivory, for example) can promote coexistence, as well.
+      * Priority effects seem to be a destabilizing mechanism - don't lead to long-term convergence on a single community type, but may also make communities more resilient when equalizing and destabilizing forces are strong. (Need more clarification here - this point isn't that clear to me.)
+      
+  * Fukami (2015)
+      * Two requirements for historical contingency (priority effects) to occur:
+          * Regional species pool contains species that can together cause priority effects
+          * Local dynamics are rapid enough for early-arriviing species to preempt or modify niches before other species arrive
+      * "The vagaries of history tend to be viewed as a nuisance that hinders advances in community ecology as a predictive science (Kingsland 1995). It is more tempting to search for deterministic patterns and processes that are amenable to general predictions. Idionsyncracies of historical contingency make each instance of community assembly appear unique and therefore not understandable within a general predictive framework (Lawton 1999)."
+      * Historical contingency = "The effect of the order and timing of past events on community assembly"
+      * Priority Effects - 2 broad classes
+          * Inhibitory: Prior-residence advantage, home-field advantage, incumbency effects, etc. (generall more studied?)
+          * Facilitative: Species A's effect on species B if species A arrives first is more positive than if B arrives before A
+      * Particularly important when species dynamics follow alternative stable states, alternative transient states, or compositional cycles where __species composition at a given time depends on the past sequence of species arrival__.
+      * Priority efgfects are distinct from alternative stable states, alternative transient states, and compositional cycles in terms of the timescale considered. ASS, ATS, CC are long-term consequences of priority effects.
+      * __Two key ways in which priority effects can work__
+          * Niche pre-emption - species that arrive early reduce the amount of resources available to other species and, in doing so, limit the local abundance that can be attained by late-arriving species that need these resources to survive and reproduce. Priority effects are always inhibitory when driven by niche pre-emption.
+          * Niche modification - early-arriving species change the types of niches available within the local site and, consequently, the identities of late-arriving species that can colonize the community. These effects can be inhibitory or facultative. E.g. fire-resistant species making local patches more fire prone by litter production, creating niches for fire-resistant species, including themselves, while erasing niches for fire-sensitive species.
+          * I have some trouble recognizing the ways in which this pertains to annual systems, where plants "reset" every year and aren't competing at different life stages. When it comes to temporal priority in resource competition, this seems more related to constant propagule pressure?
+          * On the other hand, it's easier to understand litter feedbacks in this system - this sort of build-up can influence what species are able to colonize in subsequent years (niche modification)
+          
+## What questions can be asked?
+  
+  * Ignoring priority effects, are communities sorting themselves into different compositions based on treatment? E.g. if we just look at the full species treatment, does treatment matter over time? Do clipped / fertilized communities look different from one another? What species seem to predominate?
+      * The easiest thing is just to look at relative proportions of different functional groups over time.
+      * Can also look at compositional change - are these the same species? What species drive most of the differences?
+  * However, are these trajectories the same if we add priority? How long does it take for communities to become indistinguishable from one another? Does this take more or less time depending on treatment and treatment interactions?
+  * How does ecosystem function vary over time? Is there a consistent signal of planting composition and species treatment on biomass over time?
+  * Are shifts in community composition closely associated with nutrient availability? Is next year's dissimilarity correlated with the amount of available nutrients?
+  
+## What are some relevant response variables?
+
+  * Functional group abundance
+  * Directional change in community response data
+      * Visualized through NMDS, RDA
+      * Tested via RDA and perMANOVA
+          * Conditioning based on time/treatment? 
+  * Community disperson
+      * Mean pairwise Bray-Curtis dissimilarity?
+      * Multi-assemblage dissimilarity (Horn, Morisita-Horn)?
+      * Distance to centroid?
+  * Productivity (biomass)
+  * Nutrient availability
+  
+    
+  
+      
+
+    

@@ -1,0 +1,83 @@
+---
+title: "Unconstrained Ordination"
+output: html_notebook
+---
+
+Unoconstrained ordination (NMDS/PCA) here can be used to generate visualizations to guide further questions/analysis, as well as serve as a valuable figure in its own right.
+
+```{r}
+library(dplyr)
+library(testthat)
+
+# Cover data (wide format)
+cover <- read.csv("../data/comdata_wideformat.csv", 
+                  header = TRUE, 
+                  stringsAsFactors = FALSE)
+group_percents = cover[,12:23]
+cover = cover[,-(12:23)]
+
+# Treatment labels and group structure
+trtlabels <- read.csv("../data/trtlabels.csv",
+          header = TRUE,
+          stringsAsFactors = FALSE)
+
+# Species treatments
+waps.specs <- read.csv("../data/WAPSspecies.csv",
+                       header = TRUE,
+                       stringsAsFactors = FALSE)
+
+comp.attr <- cover[,1:11]
+comp.cover <- cover[,12:ncol(cover)]
+```
+
+
+```{r}
+selected.trts <-c("annuals", "WAPS", "Natives", "natives+WAPS+annuals", "annuals+natives", "WAPS+annuals", "WAPS+natives")
+selected.clips <- c("none")
+selected.fert <- c("none")
+selected.water <- c("wet") 
+
+ord.mat <- comp.cover[comp.attr$h2o == selected.water &
+                     comp.attr$sp.trt %in% selected.trts &
+                     comp.attr$clip %in% selected.clips&
+                     comp.attr$fertilization %in% selected.fert,]
+
+ord.att <- comp.attr[comp.attr$h2o == selected.water &
+                     comp.attr$sp.trt %in% selected.trts &
+                     comp.attr$clip %in% selected.clips &
+                     comp.attr$fertilization %in% selected.fert,]
+
+expect_true(nrow(ord.att) == nrow(ord.mat))
+
+# A number of rows have no recorded live plants (not s)
+ord.att <- ord.att[rowSums(ord.mat) != 0, ]
+ord.mat <- ord.mat[rowSums(ord.mat) != 0, ]
+ord.mat <- sqrt(ord.mat)
+
+library(vegan)
+distmat <- vegdist(ord.mat, method = "bray")
+WAPS.mds <- metaMDS(distmat, try = 5, trymax = 50, trace = F)
+MDS_xy <- bind_cols(data.frame(ord.att), data.frame(X = WAPS.mds$points[,1], Y = WAPS.mds$points[,2]))
+
+#WAPS.pca <- prcomp(ord.mat)
+#PCA_xy <- cbind(data.frame(ord.att), data.frame(X = WAPS.pca$x[,1], Y = WAPS.pca$x[,2]))
+WAPS.mds$stress
+```
+
+```{r}
+library(ggplot2)
+ggplot(MDS_xy, aes(X1, Y, color = sp.trt)) + geom_point() + theme_bw() + facet_wrap(~year)
+```
+
+```{r}
+trt = factor(ord.att$sp.trt)
+trt <- relevel(trt, "natives+WAPS+annuals")
+pc <- prc(ord.mat, treatment = trt, time = factor(ord.att$year))
+plot(pc, axis = 1, ylim = c(-.5,1))
+plot(pc, axis = 2, ylim = c(-.5,1))
+anova(pc)
+```
+```{r}
+summary(pc)
+```
+

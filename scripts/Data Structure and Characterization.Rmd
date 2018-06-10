@@ -1,0 +1,240 @@
+---
+title: "Data Structure and Characterization"
+output:
+  html_document:
+    df_print: paged
+  prettydoc::html_pretty:
+  highlight: github
+---
+
+<style type="text/css">
+
+body{ /* Normal  */
+      font-size: 12px;
+}
+td {  /* Table  */
+  font-size: 12px;
+}
+h1.title {
+  font-size: 38px;
+  color: DarkRed;
+}
+h1 { /* Header 1 */
+  font-size: 28px;
+  color: DarkBlue;
+}
+h2 { /* Header 2 */
+    font-size: 22px;
+  color: DarkBlue;
+}
+h3 { /* Header 3 */
+  font-size: 18px;
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+code.r{ /* Code block */
+    font-size: 10px;
+}
+pre { /* Code block - determines code spacing between lines */
+    font-size: 10px;
+}
+</style>
+
+This notebook is designed to check for general structure of all relevant datasets, distribution of observations, and shared naming conventions. 
+
+# Key questions for Valerie:
+
+* What are the distinctions between different species (WAPS/annuals/natives/weeds)?
+  * In particular, what is "other"? What is a "weed"?
+* What is the definition of "fall clipping"
+* Is there a "low fert"?
+* Does the distribution of observations seem correct?
+
+# Ways to think about this dataset:
+
+* Differences in temporal priority
+  * Single group treatments are used to give temporal priority
+  * Multi-group treatments remove priority for one or more groups
+* Interactions with other treatment effects
+  * How does priority among groups differ with treatment effects
+  * Note - only present for a subset of all group treatments
+
+# Reading in all relevant datasets:
+
+To add - resin data, when finished.
+
+```{r, include = FALSE}
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+# Cover data (wide format)
+cover <- read.csv("../data/comdata_wideformat.csv", 
+                  header = TRUE, 
+                  stringsAsFactors = FALSE)
+group_percents = cover[,12:23]
+cover = cover[,-(12:23)]
+
+# Treatment labels and group structure
+trtlabels <- read.csv("../data/trtlabels.csv",
+          header = TRUE,
+          stringsAsFactors = FALSE)
+
+# Biomass data
+biomass <-  read.csv("../data/biomass_all.csv", 
+                  header = TRUE, 
+                  stringsAsFactors = FALSE)
+
+# Other treatment labels (checking for redundancy)
+checklabels <- read.csv("../data/plot_ids.csv",
+          header = TRUE,
+          stringsAsFactors = FALSE)
+
+checklabels$Sp.comp <- gsub(" ", "", checklabels$Sp.comp)
+
+# Species treatments
+waps.specs <- read.csv("../data/WAPSspecies.csv",
+                       header = TRUE,
+                       stringsAsFactors = FALSE)
+```
+
+
+# Variables:
+
+* H2O
+    * Control - No water added
+    * Dry - Decrease water 25% Sept-Feb, 35% March-April
+    * Wet - Increase water 25% Sept-April, 50% of all other times, add 3 weeks of rain at the end of season
+    * Late wet - No change Sep-April, 50% of all other times, add 3 weeks of rain at the end of season
+      * Added later in the experiment? (Sarah)
+    * Control-2nd - No water added, less maintained for species composition (see notes)
+
+* Fertilization
+    * None
+    * High fert - high fert = 45 kg N/ha/yr (4.5 g/m2/yr) spread out over 3 applications (early- mid- Nov, mid-Jan, early-March)
+
+* Clipping
+    * None
+    * Fall clipping - ??
+    * Spring clipping - 2 clips mid-march through mid-april
+
+#How many observations are there for each unique treatment combination?
+
+```{r, size = "tiny"}
+relevant_trts = c("annuals", "WAPS", "Natives", "natives+WAPS+annuals", "annuals+natives", "WAPS+annuals", "WAPS+natives")
+
+checklabels = checklabels[checklabels$Sp.comp %in% relevant_trts,]
+
+table(checklabels %>% select(one_of("H2O", "Sp.comp", "Fertilization", "Clipping")))
+```
+
+#How many total observations (plot x year) are there for each unique treatment combination in the cover dataset?
+
+```{r}
+relevant_trts = c("annuals", "WAPS", "Natives", "natives+WAPS+annuals", "annuals+natives", "WAPS+annuals", "WAPS+natives")
+
+group_percents = group_percents[cover$sp.trt %in% relevant_trts,]
+cover = cover[cover$sp.trt %in% relevant_trts,]
+
+cover %>% 
+  group_by(sp.trt) %>% 
+  filter(h2o != "control-2nd") %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+```
+
+# Do cover data labels line up with data checking labels?
+
+```{r}
+library(testthat)
+
+for(rowindex in 1:nrow(cover)){
+  
+  plotno = cover$plot[rowindex]
+  
+  # Is water the same?
+  expect_equivalent(cover$h2o[rowindex], checklabels$H2O[checklabels$Plot.. == plotno])
+  
+  # Is fertilizer the same?
+  expect_equivalent(cover$fertilization[rowindex], checklabels$Fertilization[checklabels$Plot.. == plotno])
+
+  # Is clipping the same?
+  expect_equivalent(cover$clip[rowindex], checklabels$Clipping[checklabels$Plot.. == plotno])
+  
+}
+
+head(cover)
+```
+
+# Do group (class) totals equal those supplied on the general data summary? 
+
+```{r}
+calc_class_percent <- function(x){
+  
+  sums = c()
+  count = 1
+  
+  for(g in unique(waps.specs$group)){
+    sums[count] = sum(x[,colnames(x) %in% waps.specs$specname[waps.specs$group == g]])
+    count = count + 1
+  }
+  
+  names(sums) =  unique(waps.specs$group)
+  
+  return(data.frame(t(sums)))
+}
+
+class_percent <- cover %>% group_by(plot, year) %>% do(calc_class_percent(.))
+
+diff_ann <- c();diff_nat<- c();diff_waps<- c(); diff_weeds<- c()
+
+for(rowindex in 1:nrow(class_percent)){
+  
+  diff_ann[rowindex] = class_percent$annual[rowindex] - group_percents$annuals[rowindex]
+  diff_nat[rowindex] = class_percent$natives[rowindex] - group_percents$natives[rowindex]
+  diff_waps[rowindex] = class_percent$waps[rowindex] - group_percents$waps[rowindex]
+  diff_weeds[rowindex] = class_percent$weeds[rowindex] - group_percents$weeds[rowindex]
+
+}
+
+group_diffs = data.frame(diff_ann, diff_nat, diff_waps, diff_weeds)
+
+```
+
+```{r, warning=FALSE}
+library(ggplot2)
+
+gather(class_percent, key = "class", value = "cover", -c(plot, year)) %>%
+  ggplot(aes(x = year,
+      y = cover,
+      color = class)) +
+  geom_point(alpha = .01) +
+  stat_smooth(method = "loess") +
+  ylim(0, 150) +
+  ggtitle("Calculated Default Group Cover per Year")
+```
+```{r, warning=FALSE}
+
+gather(bind_cols(class_percent[,1:2], group_percents[,colnames(group_percents) %in% c("annuals", "natives", "waps", "weeds", "other")]), 
+       key = "class", value = "cover", -c(plot, year)) %>%
+  ggplot(aes(x = year,
+      y = cover,
+      color = class)) +
+  geom_point(alpha = .01) +
+  stat_smooth(method = "loess") +
+  ylim(0, 150) +
+  ggtitle("Default Total Cover per Year")
+```
+
+```{r, warning=FALSE}
+data.frame(bind_cols(class_percent[,1:2], group_diffs)) %>%
+  gather(key = "class", value = "cover", -c(plot, year), convert = TRUE) %>%
+  ggplot(aes(x = year,
+      y = cover,
+      color = class)) +
+  geom_jitter(alpha = .01, width = .01, height = 1) +
+  stat_smooth(method = "loess") +
+  facet_wrap(~class) +
+  ggtitle("Difference in Calculated Group Cover")
+```
+
