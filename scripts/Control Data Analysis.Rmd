@@ -1,0 +1,173 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Control Data Analysis
+
+Who wins, and what happens when we just look at situations where all plots are combined?
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(ggplot2)
+library(testthat)
+
+# Cover data (wide format)
+cover <- read.csv("../data/comdata_wideformat.csv", 
+                  header = TRUE, 
+                  stringsAsFactors = FALSE)
+group_percents = cover[,12:23]
+cover = cover[,-(12:23)]
+
+# Treatment labels and group structure
+trtlabels <- read.csv("../data/trtlabels.csv",
+          header = TRUE,
+          stringsAsFactors = FALSE)
+
+# Biomass data
+biomass <-  read.csv("../data/biomass_all.csv", 
+                  header = TRUE, 
+                  stringsAsFactors = FALSE)
+
+# Other treatment labels (checking for redundancy)
+checklabels <- read.csv("../data/plot_ids.csv",
+          header = TRUE,
+          stringsAsFactors = FALSE)
+
+checklabels$Sp.comp <- gsub(" ", "", checklabels$Sp.comp)
+
+# Species treatments
+waps.specs <- read.csv("../data/WAPSspecies.csv",
+                       header = TRUE,
+                       stringsAsFactors = FALSE)
+
+# Functional group percent composition
+funcgroups <- read.csv("../data/func_group_percents.csv",
+                       header = TRUE,
+                       stringsAsFactors = FALSE)
+
+funcgroups = funcgroups %>% select(-X)
+```
+
+
+
+```{r}
+NWA = funcgroups %>% filter(sp.trt == "natives+WAPS+annuals")
+
+NWA[,4:ncol(NWA)] = vegan::decostand(NWA[,4:ncol(NWA)],
+                                     method = "total")
+```
+
+# Visualizing differences in functional group cover:
+
+Question of whether or not to normalize cover before conducting this analysis
+
+Proportionally, we see that natives are a muc hbigger fraction ofoverall cover in the "dry" treatment - persistence of perennials under dry conditions where everything else suffers. Curiously, they seem to do worst in "wet" conditions. I'd be curious to see what happens when they are given temporal priority - e.g. a more standard restoration setting.
+
+```{r}
+NWA_long = gather(NWA, key = "class", value = "cover", -c(plot, year, sp.trt))
+
+NWA_long = left_join(NWA_long, trtlabels, by = "plot")
+
+NWA_long %>% filter(clip == "none" & fert == "none" & h2o != "control-2nd") %>%
+  filter(h2o == "control") %>%
+  ggplot(aes(x = year,
+             y = cover,
+             color = class)) +
+  geom_point() + 
+  stat_smooth(se = FALSE) + 
+  ylim(0,1) +
+  ggtitle("Control H2O")
+
+NWA_long %>% filter(clip == "none" & fert == "none" & h2o != "control-2nd") %>%
+  filter(h2o == "wet") %>%
+  ggplot(aes(x = year,
+             y = cover,
+             color = class)) +
+  geom_point() + 
+  stat_smooth(se = FALSE) + 
+  ylim(0,1)+
+  ggtitle("Wet H2O")
+
+NWA_long %>% filter(clip == "none" & fert == "none" & h2o != "control-2nd") %>%
+  filter(h2o == "dry") %>%
+  ggplot(aes(x = year,
+             y = cover,
+             color = class)) +
+  geom_point() + 
+  stat_smooth(se = FALSE) + 
+  ylim(0,1)+
+  ggtitle("Dry H2O")
+
+NWA_long %>% filter(clip == "none" & fert == "none" & h2o != "control-2nd") %>%
+  filter(h2o == "late wet") %>%
+  ggplot(aes(x = year,
+             y = cover,
+             color = class)) +
+  geom_point() + 
+  stat_smooth(se = FALSE) + 
+  ylim(0,1)+
+  ggtitle("Late Wet H2O")
+```
+
+# Visualizing this with NMDS
+
+```{r}
+library(vegan)
+
+comp.attr <- cover[,1:11]
+comp.cover <- cover[,12:ncol(cover)]
+
+selected.trts <-c("natives+WAPS+annuals")
+selected.clips <- c("none")
+selected.fert <- c("none")
+selected.water <- c("control", "wet", "latewet", "dry") 
+
+ord.mat <- comp.cover[comp.attr$h2o %in% selected.water &
+                     comp.attr$sp.trt %in% selected.trts &
+                     comp.attr$clip %in% selected.clips&
+                     comp.attr$fertilization %in% selected.fert,]
+
+ord.att <- comp.attr[comp.attr$h2o %in% selected.water &
+                     comp.attr$sp.trt %in% selected.trts &
+                     comp.attr$clip %in% selected.clips &
+                     comp.attr$fertilization %in% selected.fert,]
+
+expect_true(nrow(ord.att) == nrow(ord.mat))
+
+# A number of rows have no recorded live plants (not s)
+ord.att <- ord.att[rowSums(ord.mat) != 0, ]
+ord.mat <- ord.mat[rowSums(ord.mat) != 0, ]
+ord.mat <- decostand(ord.mat, method = "total")
+
+distmat <- vegdist(ord.mat, method = "bray")
+WAPS.mds <- metaMDS(distmat, try = 5, trymax = 50, trace = F)
+MDS_xy <- bind_cols(data.frame(ord.att), data.frame(X = WAPS.mds$points[,1], Y = WAPS.mds$points[,2]))
+
+#WAPS.pca <- prcomp(ord.mat)
+#PCA_xy <- cbind(data.frame(ord.att), data.frame(X = WAPS.pca$x[,1], Y = WAPS.pca$x[,2]))
+WAPS.mds$stress
+```
+
+```{r}
+library(ggplot2)
+ggplot(MDS_xy, aes(X1, Y, color = h2o)) + geom_point() + theme_bw() + facet_wrap(~year)
+```
+
+```{r}
+adonis(distmat ~ h2o * as.factor(year), data = ord.att)
+m = betadisper(distmat, paste(ord.att$h2o, ord.att$year))
+plot(m)
+TukeyHSD(m)
+```
+
+```{r}
+m2 = capscale(distmat ~ h2o + as.factor(year), data = ord.att)
+unique(ord.att$plot)
+anova(m2)
+step(m2)
+plot(m2)
+```
+```

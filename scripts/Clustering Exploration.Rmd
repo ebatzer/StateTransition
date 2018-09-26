@@ -1,0 +1,160 @@
+---
+title: "Clustering Analysis"
+output: html_document
+---
+
+# Hierarchical Clustering Analysis:
+
+Following protocol established by 
+
+* Use Hclust() function rather than k-means
+
+```{r}
+library(dplyr)
+library(testthat)
+
+# Cover data (wide format)
+cover <- read.csv("../data/comdata_wideformat.csv", 
+                  header = TRUE, 
+                  stringsAsFactors = FALSE)
+group_percents = cover[,12:23]
+cover = cover[,-(12:23)]
+
+# Treatment labels and group structure
+trtlabels <- read.csv("../data/trtlabels.csv",
+          header = TRUE,
+          stringsAsFactors = FALSE)
+
+# Species treatments
+waps.specs <- read.csv("../data/WAPSspecies.csv",
+                       header = TRUE,
+                       stringsAsFactors = FALSE)
+
+comp.attr <- cover[,1:11]
+comp.cover <- cover[,12:ncol(cover)]
+```
+
+
+```{r}
+selected.trts <-c("annuals", "WAPS", "Natives", "natives+WAPS+annuals", "annuals+natives", "WAPS+annuals", "WAPS+natives")
+selected.clips <- c("none")
+selected.fert <- c("none")
+selected.water <- c("control") 
+
+ord.mat <- comp.cover[comp.attr$water %in% selected.water &
+                     comp.attr$sp.trt %in% selected.trts &
+                     comp.attr$clip %in% selected.clips&
+                     comp.attr$fertilization %in% selected.fert,]
+
+ord.att <- comp.attr[comp.attr$water %in% selected.water &
+                     comp.attr$sp.trt %in% selected.trts &
+                     comp.attr$clip %in% selected.clips &
+                     comp.attr$fertilization %in% selected.fert,]
+
+ord.att %>% group_by(sp.trt, year) %>% summarise("totalobs" = n())
+
+expect_true(nrow(ord.att) == nrow(ord.mat))
+
+# A number of rows have no recorded live plants (not s)
+ord.att <- ord.att[rowSums(ord.mat) != 0, ]
+ord.mat <- ord.mat[rowSums(ord.mat) != 0, ]
+
+library(vegan)
+distmat <- vegdist(decostand(ord.mat, "total"), method = "bray")
+WAPS.mds <- metaMDS(distmat, try = 1, trymax = 5, trace = F, autotransform = TRUE)
+MDS_xy <- bind_cols(data.frame(ord.att), data.frame(X = WAPS.mds$points[,1], Y = WAPS.mds$points[,2]))
+
+#WAPS.pca <- prcomp(ord.mat)
+#PCA_xy <- cbind(data.frame(ord.att), data.frame(X = WAPS.pca$x[,1], Y = WAPS.pca$x[,2]))
+WAPS.mds$stress
+
+library(ggplot2)
+ggplot(MDS_xy, aes(X1, Y, color = as.factor(year))) + geom_point() + theme_bw()
+```
+
+```{r}
+
+distmat <- vegdist(decostand(ord.mat, method = "total"), method = "bray")
+WAPS.mds <- metaMDS(distmat, try = 1, trymax = 5, trace = F)
+MDS_xy <- bind_cols(data.frame(ord.att), data.frame(X = WAPS.mds$points[,1], Y = WAPS.mds$points[,2]))
+
+set.seed(1)
+
+ccas <- cascadeKM(decostand(ord.mat, method = "total"), 2, 10)
+plot(ccas, sortq=TRUE)
+
+library(cluster)
+
+better.K = pam(decostand(ord.mat, method = "total"), k = )
+plot(better.K,which.plot=2)
+
+parts = bind_cols(MDS_xy, cluster = better.K$clustering)
+#parts$cluster[parts$sp.trt == "Natives" & parts$year == 2008] = 2
+
+# parts$cluster[parts$cluster == 3] = "WAPS"
+# parts$cluster[parts$cluster == 2] = "Natives"
+# parts$cluster[parts$cluster == 1] = "Annuals"
+
+ggplot(parts, aes(X1, Y, color = factor(cluster))) + geom_point() + theme_bw()
+ggplot(parts, aes(X1, Y, color = factor(cluster))) + geom_point() + 
+  theme_bw() + facet_wrap(~sp.trt) + geom_line(aes(group = plot))
+ggplot(parts, aes(X1, Y, color = factor(cluster))) + geom_point() + 
+  theme_bw() + facet_wrap(~year)
+
+library(indicspecies)
+IS = multipatt(decostand(ord.mat, method = "total"), parts$cluster, duleg = TRUE, control = how(nperm=999))
+summary(IS, alpha = .05)
+
+cluscounts = parts %>% group_by(year, cluster) %>% summarise(count = n())
+  
+ggplot(cluscounts, aes(x = factor(year), y = count, fill = factor(cluster))) + geom_bar(stat = "identity")
+```
+
+```{r}
+
+distmat <- vegdist(decostand(ord.mat, method = "total"), method = "bray")
+WAPS.mds <- metaMDS(distmat, try = 1, trymax = 5, trace = F)
+MDS_xy <- bind_cols(data.frame(ord.att), data.frame(X = WAPS.mds$points[,1], Y = WAPS.mds$points[,2]))
+
+set.seed(1)
+
+library(cluster)
+
+distmat <- vegdist(decostand(ord.mat, method = "normalize"), method = "bray")
+flexb <- agnes(distmat, method = "flexible", par.method=c(0.625,0.625,-0.25))
+parts = bind_cols(MDS_xy, cluster = cutree(flexb, k=3))
+#parts$cluster[parts$sp.trt == "Natives" & parts$year == 2008] = 2
+ggplot(parts, aes(X1, Y, color = factor(cluster))) + geom_point() + theme_bw()
+
+IS = multipatt(decostand(ord.mat, method = "total"), cutree(flexb, k=3), duleg = TRUE, control = how(nperm=999))
+summary(IS, alpha = .05)
+```
+
+```{r}
+
+agnes(x, diss = inherits(x, "dist"), metric = "euclidean",
+      stand = FALSE, method = "average", par.method,
+      keep.diss = n < 100, keep.data = !diss, trace.lev = 0)
+
+parts = bind_cols(MDS_xy, cluster = ccas$partition[,2])
+parts$cluster[parts$sp.trt == "Natives" & parts$year == 2008] = 2
+
+parts$cluster[parts$cluster == 3] = "WAPS"
+parts$cluster[parts$cluster == 2] = "Natives"
+parts$cluster[parts$cluster == 1] = "Annuals"
+
+ggplot(parts, aes(X1, Y, color = factor(cluster))) + geom_point() + theme_bw()
+ggplot(parts, aes(X1, Y, color = factor(cluster))) + geom_point() + 
+  theme_bw() + facet_wrap(~sp.trt) + geom_line(aes(group = plot))
+ggplot(parts, aes(X1, Y, color = factor(cluster))) + geom_point() + 
+  theme_bw() + facet_wrap(~year)
+
+library(indicspecies)
+IS = multipatt(decostand(ord.mat, method = "total"), ccas$partition[,2], duleg = TRUE, control = how(nperm=999))
+summary(IS, alpha = .05)
+
+cluscounts = parts %>% group_by(year, cluster) %>% summarise(count = n())
+  
+ggplot(cluscounts, aes(x = factor(year), y = count, fill = factor(cluster))) + geom_bar(stat = "identity")
+```
+

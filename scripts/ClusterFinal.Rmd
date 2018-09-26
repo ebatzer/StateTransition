@@ -1,0 +1,347 @@
+---
+title: "Clustering_Final"
+author: "Evan Batzer"
+date: "September 3, 2018"
+output: html_document
+---
+
+```{r, include = FALSE}
+library(tidyverse); library(testthat); library(vegan); library(msm); library(NbClust)
+library(ggplot2); library(cluster); library(mclust); library(indicspecies)
+
+# Cover data (wide format)
+cover <- read.csv("../data/comdata_wideformat.csv", 
+                  header = TRUE, 
+                  stringsAsFactors = FALSE)
+group_percents = cover[,12:23]
+cover = cover[,-(12:23)]
+comp.attr <- cover[,1:11]
+comp.cover <- cover[,12:ncol(cover)]
+
+# Treatment labels and group structure
+trtlabels <- read.csv("../data/trtlabels.csv",
+          header = TRUE,
+          stringsAsFactors = FALSE)
+
+# Species treatments
+waps.specs <- read.csv("../data/WAPSspecies.csv",
+                       header = TRUE,
+                       stringsAsFactors = FALSE)
+
+# Climate data
+climate <- read.csv("../data/cimis_monthly.csv",
+                       header = TRUE,
+                       stringsAsFactors = FALSE)
+
+```
+
+# Clustering Communities - How best to define different states?
+
+There are a number of different algorithms that can be used in cluster analysis, 
+ranging from hierarchical, agglomerative methods that have been (in my
+impression) a mainstay in Ecology, to more computationally intensive or statistically
+nuanced methods, such as K-means (and its variations) or model-based clustering.
+
+Based on my reading, there is no simple way to determine what type of algorithm
+is best suited to your needs, or how many clusters are appropriate. According
+to Legendre and Legendre (2008), all methods are valid, save for TWINSPAN, which
+is cautioned against. If using K-means or hierarchical methods, there are some 
+heuristics that can be used to identify the appropriate amount of clusters 
+needed in the data. Model-based clustering is more complicated, but offers 
+standard metrics to compare model fits -- typically, Bayesian Information 
+Criterion (BIC). 
+
+I think the best way to choose an appropriate classification algorithm is to 
+explore a number of possibilities. Stein et al. (2016) and Bagchi et al. (2013) 
+both employ hierarchical clustering algorithms - flexible beta and Ward's D, 
+respectively - but we may have better luck using a method like K-means or 
+one of the model-based clusters.
+
+Some key considerations:
+
+* __How to transform data prior to analysis?__ I think in most cases, focusing on the
+proportional abundance of species in each sample makes the most sense, but there
+may be some validity to using one of the other recommended transformations, such 
+as Hellinger or Chi-Square.
+
+* __What distance metric to use?__ Most ecological data utilizes Bray-Curtis or 
+Euclidean distances between communities with abundance data. Bray-Curtis has a 
+number of poor mathematical properties, however, that may make its use 
+problematic in some circumstances. Horn and Morisita-Horn indices may be better,
+but are more suited to individual counts an are less often used in circumstances
+with cover data.
+
+* __What species to include in analyses?__ When trying to cluster communities,
+most analyses are conducted on either a relevant subset of species or a modified 
+dataset. Stein et al. (2016) combine all of their weedy species / forbs into a 
+single column called "forbs", while Bagchi et al. (2013) focus on species that 
+occur in at least 2% of all samples taken. There are a lot of weedy species in 
+the WAPS data that could be ignored in clustering as "noise".
+
+
+```{r, echo = FALSE}
+selected.trts <-c("annuals", "WAPS", "Natives", "natives+WAPS+annuals", "annuals+natives", "WAPS+annuals", "WAPS+natives")
+selected.clips <- c("none")
+selected.fert <- c("none")
+selected.water <- c("control", "wet", "latewet", "dry") 
+
+comp.subset = comp.cover[comp.attr$water %in% selected.water &
+             comp.attr$sp.trt %in% selected.trts &
+             comp.attr$clip %in% selected.clips &
+             comp.attr$fertilization %in% selected.fert,]
+
+print("Total Cover in Dataset:")
+specsbycover = sort(round(colSums(comp.subset),2), decreasing = TRUE)
+specsbycover
+
+print("Plot Occupancy in Dataset:")
+specsbyfreq = sort(round(colSums(decostand(comp.subset, method = "pa")) / nrow(comp.subset), 2), decreasing = TRUE)
+specsbyfreq
+```
+* __When to start clustering?__ The seeded communities contain a number of species 
+that are not well-represented in the data after the first year of planting. While
+this is interesting information, it can be problematic for clustering, as it may make
+the first year of data really distinct, almost a separate cluster in itself. My
+guess is that Stein et al. (2016) found that this was the case with their data - 
+they had 5 years of data in their study, but appeared to only run classification
+and NMDS on the last 4 years. 
+
+```{r, echo = FALSE}
+# What treatments and years should be selected?
+selected.trts <-c("annuals", "WAPS", "Natives", "natives+WAPS+annuals", "annuals+natives", "WAPS+annuals", "WAPS+natives")
+selected.clips <- c("none")
+selected.fert <- c("none")
+selected.water <- c("control") 
+selected.years <- c(2008:2018)
+
+# Subsetting cover matrix
+ord.mat <- comp.cover[comp.attr$water %in% selected.water &
+                     comp.attr$sp.trt %in% selected.trts &
+                     comp.attr$clip %in% selected.clips &
+                     comp.attr$fertilization %in% selected.fert &
+                      comp.attr$year %in% selected.years,]
+
+# Subsetting attribute matrix
+ord.att <- comp.attr[comp.attr$water %in% selected.water &
+                     comp.attr$sp.trt %in% selected.trts &
+                     comp.attr$clip %in% selected.clips &
+                     comp.attr$fertilization %in% selected.fert &
+                      comp.attr$year %in% selected.years,]
+
+# Checking that these datasets are the same size
+expect_true(nrow(ord.att) == nrow(ord.mat))
+
+# Filtering species
+totalcov = sum(ord.mat)
+toselect = waps.specs$specname[waps.specs$group %in% c("annual", "natives", "waps")]
+ord.mat = ord.mat %>% select(toselect)
+cat("subsetcov =", sum(ord.mat) / totalcov)
+
+# A number of rows have  no recorded live plants (mostly dry treatments?)
+ord.att <- ord.att[rowSums(ord.mat) != 0, ]
+ord.mat <- ord.mat[rowSums(ord.mat) != 0, ]
+```
+
+# Visualizing Data:
+
+```{r}
+# Constructing distance matrix and running NMDS
+distmat <- vegdist(decostand(ord.mat, "total"), method = "bray")
+WAPS.mds <- metaMDS(distmat, try = 1, trymax = 5, trace = F, autotransform = TRUE)
+MDS_xy <- bind_cols(data.frame(ord.att), data.frame(X = WAPS.mds$points[,1], Y = WAPS.mds$points[,2]))
+
+# Plotting figure
+ggplot(MDS_xy, aes(X1, Y)) + 
+  geom_point(aes(color = as.factor(year))) + 
+  theme_bw() +
+  geom_text(data = data.frame(X1 = Inf, Y = -Inf), 
+            hjust = 1, vjust = -1, 
+            label = paste("Stress =", round(WAPS.mds$stress, 2)))
+```
+
+# K-means Clustering
+
+## Selecting an appropriate number of clusters
+
+```{r, include = FALSE}
+counter = 1
+groupdiss <- c()
+groupsil <- c()
+for(i in 2:10){
+  tempclust = pam(distmat, i)
+  groupdiss[counter] = mean(tempclust$clusinfo[,3])
+  groupsil[counter] = tempclust$silinfo$avg.width
+  counter <- counter + 1
+}
+
+data.frame(k = c(2:10), dis = groupdiss, sil = groupsil) %>% 
+  ggplot(aes(x = k,
+             y = groupsil,
+             fill = groupsil == max(groupsil))) +
+  geom_point(size = 3, pch = 21)
+
+data.frame(k = c(2:10), dis = groupdiss, sil = groupsil) %>% 
+  ggplot(aes(x = k,
+             y = groupdiss,
+             fill = groupsil == max(groupsil))) +
+  geom_point(size = 3, pch = 21)
+```
+
+When comparing a number of different criteria, 4 seems to be the best number of clusters to use
+(see best.nc index) -- the nbclust() package in R suggests using a battery of different 
+metrics and seeing if some cluster number appears as a consistent good performer.
+In this case, 4 clusters is selected as the best number in 4 of the 8 metrics,
+and consistently performs well (usually in the top 2-4 of the 10) for the rest.
+
+Apparently, 7 clusters also seems like a good second choice by these metrics,
+though that number seems too high to be relevant given the number of replicates 
+we have, as well as my intuition for the system as a whole. 
+
+```{r, warning = FALSE}
+NbClust(decostand(ord.mat, method = "total"), min.nc = 2, max.nc = 10, method = "kmeans",
+        index = c("hartigan", "ch", "beale", "kl", "cindex", "db", "silhouette", "duda"))[1:2]
+```
+
+## Visualizing how the clustering algorithm splits up the data
+
+```{r}
+k.cluster = pam(distmat, 4)
+k.cluster$objective
+MDS_xy$clust = k.cluster$clustering
+
+ggplot(MDS_xy, aes(X1, Y, color = as.factor(clust))) + 
+  geom_point() + 
+  theme_bw() +
+  geom_text(data = data.frame(X1 = Inf, Y = -Inf), 
+            aes(color = NULL), hjust = 1, vjust = -1, 
+            label = paste("Stress =", round(WAPS.mds$stress, 2)))
+
+cluscounts = bind_cols(ord.att, data.frame(cluster = k.cluster$clustering)) %>% group_by(year, cluster) %>% summarise(count = n())
+  
+ggplot(cluscounts, aes(x = factor(year), y = count, fill = factor(cluster))) + geom_bar(stat = "identity")
+```
+
+# Describing clusters:
+
+## Indicator species analysis:
+
+```{r}
+IS = multipatt(decostand(ord.mat, method = "total"), k.cluster$clustering, duleg = TRUE, control = how(nperm=999))
+summary(IS, alpha = .05)
+```
+
+Visualizing differences
+
+```{r}
+piecharts = bind_cols(data.frame(cluster = k.cluster$clustering), ord.mat)
+piecharts$cluster[piecharts$cluster == 1] = "Natives"
+piecharts$cluster[piecharts$cluster == 2] = "Wet Annuals"
+piecharts$cluster[piecharts$cluster == 3] = "WAPS"
+piecharts$cluster[piecharts$cluster == 4] = "Dry Annuals"
+
+piecharts %>%
+  gather(key = "species", value = "cover", -cluster) %>%
+  group_by(cluster, species) %>%
+  summarise(cover = mean(cover)) %>%
+  ggplot(aes(x = "", y = cover, fill = species))+
+  geom_bar(stat = "identity", position = position_fill(), color = "black") +
+  # geom_text(aes(label = Cnt), position = position_fill(vjust = 0.5)) +
+  coord_polar(theta = "y") +
+  facet_wrap(~cluster) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(),  axis.ticks = element_blank(),
+        panel.grid  = element_blank(), axis.text = element_blank(), legend.title = element_blank()) +
+  theme(legend.position='bottom') + guides(fill=guide_legend(nrow=2,byrow=TRUE)) +
+  theme(strip.text.x = element_text(size = 20, face = "bold"))
+```
+# Plotting transitions between clusters over time
+
+```{r}
+clustdat <- bind_cols(ord.att, data.frame(cluster = k.cluster$clustering)) %>%
+  dplyr::arrange(sp.trt, plot)
+
+# Assigning states
+clustdat$cluster[clustdat$cluster == 1] = "Natives"
+clustdat$cluster[clustdat$cluster == 2] = "Wet Annuals"
+clustdat$cluster[clustdat$cluster == 3] = "WAPS"
+clustdat$cluster[clustdat$cluster == 4] = "Dry Annuals"
+
+# Plotting change in assignment over time
+clustdat$plot <- factor(clustdat$plot, levels = unique(clustdat$plot))
+clustdat %>% ggplot(aes(x = year,
+           y = as.numeric(plot) - .5)) +
+  theme_bw() + 
+  geom_tile(color = "black", aes(fill = as.factor(cluster))) +
+  geom_hline(yintercept = c(seq(0, 56, by = 8)), size = 2) +
+  geom_text(label = unique(clustdat$sp.trt),
+            data = data.frame(year = rep(2006, 7),
+                              plot = seq(4, 52, by = 8)),
+            fontface = "bold") +
+  xlim(2005, 2019)
+```
+
+# Frequency of transitions
+
+How often do transitions occur?
+
+```{r}
+next_state = clustdat %>% mutate(year = year + 1) %>% rename(paststate = cluster)
+transitions = left_join(clustdat, next_state, by = c("plot", "year")) %>% 
+  mutate(transition = as.numeric(!cluster == paststate))
+
+transto = transitions %>% filter(transition == 1) %>% group_by(cluster, year) %>% 
+  summarise(total = sum(transition))
+
+climate$month = gsub("-.*", "", climate$Month.Year)
+
+climsum = climate %>% group_by(Water.Year) %>% 
+  summarise(total = sum(Total.Precip..mm.), 
+            early = sum(Total.Precip..mm.[month %in% c("Oct", "Nov", "Dec")]),
+            mid = sum(Total.Precip..mm.[month %in% c("Jan", "Feb", "March")]),
+            late = sum(Total.Precip..mm.[month %in% c("April", "May")]))
+
+transitions %>% group_by(year) %>% filter(year != 2008) %>%
+  summarise(trans = sum(na.omit(transition))) %>%
+  ggplot() +
+  geom_bar(aes(x = year,
+             y = trans / 56),
+           stat = "identity",
+           color = "black", 
+           fill = "forestgreen") +
+  geom_line(data = climsum %>% filter(Water.Year > 2007),
+            aes(x = Water.Year ,
+                y = total / max(na.omit(total))))
+
+transto %>%
+  ggplot() +
+  geom_bar(aes(x = year,
+             y = total / 56,
+             fill = cluster),
+           stat = "identity",
+           color = "black")+
+  geom_line(data = climsum %>% filter(Water.Year > 2007),
+            aes(x = Water.Year,
+                y = total / max(na.omit(total)) + 1)) +
+    geom_line(data = climsum %>% filter(Water.Year > 2007),
+            aes(x = Water.Year,
+                y = early / max(na.omit(total)) + 1),
+            color = "blue") +
+    geom_line(data = climsum %>% filter(Water.Year > 2007),
+            aes(x = Water.Year,
+                y = mid / max(na.omit(total)) + 1),
+            color = "orange") +
+    geom_line(data = climsum %>% filter(Water.Year > 2007),
+            aes(x = Water.Year,
+                y = late / max(na.omit(total)) + 1),
+            color = "red") +
+  geom_hline(yintercept = 1)
+```
+
+# Writing new CSV with cluster data:
+
+```{r}
+clustdat <- bind_cols(ord.att, data.frame(cluster = k.cluster$clustering)) %>%
+  dplyr::arrange(sp.trt, plot)
+
+#write.csv("../data/WAPSclusters.csv", x = clustdat)
+```
+

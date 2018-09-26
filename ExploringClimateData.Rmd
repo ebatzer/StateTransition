@@ -1,0 +1,51 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+library(lubridate); library(tidyverse); library(tidyquant)
+library(msm)
+
+clustdat <- read.csv("../data/WAPSclusters.csv", 
+                     header = TRUE, 
+                     stringsAsFactors = FALSE)
+
+climate <- read.csv("../data/cimis_monthly.csv",
+                       header = TRUE,
+                       stringsAsFactors = FALSE)
+
+climate_daily <- read.csv("../data/cimis_daily.csv",
+                       header = TRUE,
+                       stringsAsFactors = FALSE)
+```
+
+```{r, echo = FALSE, warning = FALSE}
+climate_daily$Date = as.POSIXct(climate_daily$Date, format = "%m/%d/%Y")
+
+climate_daily %>% 
+  group_by(month=floor_date(Date, "month")) %>%
+  summarise(precip = sum(na.omit(Precip..mm.)),
+            eto = sum(na.omit(ETo..mm.))) %>%
+  ggplot(aes(x = month, y = precip)) +
+  geom_line() +
+  xlab("Date (Aggregated by Month)") +
+  ylab("Total Precip (mm)") +
+  ggtitle("Precipitation by Month 2006 - 2018")
+
+climate_daily %>% 
+  group_by(month=floor_date(Date, "month")) %>%
+  summarise(precip = sum(na.omit(Precip..mm.)),
+            eto = sum(na.omit(ETo..mm.))) %>%
+  ggplot(aes(x = month, y = precip - eto)) +
+  geom_line()+
+  xlab("Date (Aggregated by Month)") +
+  ylab("Precip - ETo (mm)") +
+  ggtitle("Net Water Deficit by Month 2006 - 2018")
+```
+
+```{r}
+
+```
+

@@ -3,8 +3,9 @@ title: "Data Structure and Characterization"
 output:
   html_document:
     df_print: paged
-  prettydoc::html_pretty:
+  pdf_document: default
   highlight: github
+  prettydoc::html_pretty: null
 ---
 
 <style type="text/css">
@@ -98,7 +99,6 @@ waps.specs <- read.csv("../data/WAPSspecies.csv",
                        stringsAsFactors = FALSE)
 ```
 
-
 # Variables:
 
 * H2O
@@ -118,7 +118,7 @@ waps.specs <- read.csv("../data/WAPSspecies.csv",
     * Fall clipping - ??
     * Spring clipping - 2 clips mid-march through mid-april
 
-#How many observations are there for each unique treatment combination?
+# How many observations are there for each unique treatment combination?
 
 ```{r, size = "tiny"}
 relevant_trts = c("annuals", "WAPS", "Natives", "natives+WAPS+annuals", "annuals+natives", "WAPS+annuals", "WAPS+natives")

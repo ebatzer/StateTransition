@@ -1,0 +1,130 @@
+---
+title: "Individual Species Abundances over Time"
+output: html_notebook
+---
+
+
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(ggplot2)
+library(vegan)
+
+# Cover data (wide format)
+cover <- read.csv("../data/comdata_wideformat.csv", 
+                  header = TRUE, 
+                  stringsAsFactors = FALSE)
+group_percents = cover[,12:23]
+cover = cover[,-(12:23)]
+colnames(cover)
+
+cover.attr = cover %>% select(-X) %>% select(c(1:10))
+cover.counts = cover %>%  select(-X) %>% select(-c(1:10))
+
+# Treatment labels and group structure
+trtlabels <- read.csv("../data/trtlabels.csv",
+          header = TRUE,
+          stringsAsFactors = FALSE)
+
+# Biomass data
+biomass <-  read.csv("../data/biomass_all.csv", 
+                  header = TRUE, 
+                  stringsAsFactors = FALSE)
+
+# Other treatment labels (checking for redundancy)
+checklabels <- read.csv("../data/plot_ids.csv",
+          header = TRUE,
+          stringsAsFactors = FALSE)
+
+checklabels$Sp.comp <- gsub(" ", "", checklabels$Sp.comp)
+
+# Species treatments
+waps.specs <- read.csv("../data/WAPSspecies.csv",
+                       header = TRUE,
+                       stringsAsFactors = FALSE)
+
+# Functional group percent composition
+funcgroups <- read.csv("../data/func_group_percents.csv",
+                       header = TRUE,
+                       stringsAsFactors = FALSE)
+
+funcgroups = funcgroups %>% select(-X)
+
+colnames(cover.attr)
+colnames(cover.counts)
+```
+
+
+```{r}
+annuals = waps.specs %>% filter(group == "annual")
+waps = waps.specs %>% filter(group == "waps")
+natives = waps.specs %>% filter(group == "natives")
+cover_long = bind_cols(cover.attr, cover.counts) %>% filter(fertilization == "none" & clip == "none") %>%
+  gather(key = "species", value = "cover", -c(1:10))
+
+relevant_trts = c("annuals", "WAPS", "Natives", "natives+WAPS+annuals", "annuals+natives", "WAPS+annuals", "WAPS+natives")
+
+```
+
+```{r}
+cover_long %>% filter(species %in% annuals$specname & sp.trt %in% relevant_trts)%>%
+  filter(! species %in% c("oats", "bro.madritensis", "hordeum.sp")) %>%
+  ggplot(aes(x = as.numeric(year),
+             y = cover,
+             color = sp.trt)) +
+  geom_point(alpha = .1) +
+  stat_smooth(se = FALSE) + 
+  geom_smooth(se = FALSE, aes(color = NULL), color = "black") + 
+  facet_grid(species ~ water) +
+  ggtitle("Cover of Annuals over Time") +
+  scale_x_continuous(breaks = seq(2008,2018, by = 2), 
+                   labels = as.character(seq(2008,2018, by = 2))) +
+  xlab("Year") + 
+  theme(strip.text.x = element_text(size = 15),
+        strip.text.y = element_text(size = 15),
+        plot.title = element_text(size=22))
+
+ggsave("../figures/AnnualCover.pdf", height = 10, width = 15)
+```
+```{r}
+cover_long %>% filter(species %in% waps$specname & sp.trt %in% relevant_trts)%>%
+  ggplot(aes(x = as.numeric(year),
+             y = cover,
+             color = sp.trt)) +
+  geom_point(alpha = .1) +
+  stat_smooth(se = FALSE) + 
+  stat_smooth(se = FALSE, aes(color = NULL), color = "black") + 
+  facet_grid(species ~ water) +
+  ggtitle("Cover of WAPS over Time") +
+  scale_x_continuous(breaks = seq(2008,2018, by = 2), 
+                   labels = as.character(seq(2008,2018, by = 2))) +
+  xlab("Year") + 
+  theme(strip.text.x = element_text(size = 15),
+        strip.text.y = element_text(size = 15),
+        plot.title = element_text(size=22))
+
+ggsave("../figures/WAPSCover.pdf", height = 10, width = 15)
+```
+
+```{r}
+cover_long %>% filter(species %in% natives$specname & sp.trt %in% relevant_trts) %>%
+  filter(! species %in% c("poa")) %>%
+  ggplot(aes(x = as.numeric(year),
+             y = cover,
+             color = sp.trt)) +
+  geom_point(alpha = .1) +
+  stat_smooth(se = FALSE) + 
+  stat_smooth(se = FALSE, aes(color = NULL), color = "black") + 
+  facet_grid(species ~ water) +
+  ggtitle("Cover of Natives over Time") +
+  scale_x_continuous(breaks = seq(2008,2018, by = 2), 
+                   labels = as.character(seq(2008,2018, by = 2))) +
+  xlab("Year") + 
+  theme(strip.text.x = element_text(size = 15),
+        strip.text.y = element_text(size = 15),
+        plot.title = element_text(size=22))
+
+ggsave("../figures/NativeCover.pdf", height = 10, width = 15)
+```

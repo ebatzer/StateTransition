@@ -52,11 +52,12 @@ expect_true(nrow(ord.att) == nrow(ord.mat))
 # A number of rows have no recorded live plants (not s)
 ord.att <- ord.att[rowSums(ord.mat) != 0, ]
 ord.mat <- ord.mat[rowSums(ord.mat) != 0, ]
-ord.mat <- sqrt(ord.mat)
+```
 
+```{r}
 library(vegan)
-distmat <- vegdist(ord.mat, method = "bray")
-WAPS.mds <- metaMDS(distmat, try = 5, trymax = 50, trace = F)
+distmat <- vegdist(decostand(ord.mat, "hell"), method = "bray")
+WAPS.mds <- metaMDS(distmat, try = 1, trymax = 50, trace = F)
 MDS_xy <- bind_cols(data.frame(ord.att), data.frame(X = WAPS.mds$points[,1], Y = WAPS.mds$points[,2]))
 
 #WAPS.pca <- prcomp(ord.mat)

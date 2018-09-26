@@ -1,0 +1,194 @@
+---
+title: "Biomass and Resin Data Characterization"
+output: html_notebook
+---
+# Key Questions:
+
+Biomass:
+
+* What is the rationale / timing behind biomass data collection? Does variation in sampling date correspond to interannual differences in precip or phenology?
+
+* Is there a way to chunk up measures of biomass or standardize them to make comparison easier?
+
+Resins:
+
+* Best way to analyze data - net NH4 / NO3 captured per day of incubation in soil.
+
+* What to do about data that is not blank-corrected?
+
+
+Compiled on `r date()`
+
+# Loading packages
+
+```{r}
+library(tidyverse);library(ggplot2);library(lubridate)
+```
+
+
+# Reading in data
+
+```{r}
+# Biomass Data
+bmdat <- read.csv("../data/biomass_all.csv", stringsAsFactors = FALSE)
+head(bmdat)
+
+# Nutrient Data
+resdat <- read.csv("../data/resins_compiled.csv", stringsAsFactors = FALSE)
+head(resdat)
+
+# Changing variable designations
+bmdat$TotalMass <- as.numeric(bmdat$TotalMass)
+bmdat$Rawdate <- bmdat$Date 
+bmdat$Date <- mdy(bmdat$Date)
+
+# Changing variable designations
+resdat$placed <- mdy(resdat$placed)
+resdat$collected <- mdy(resdat$collected)
+resdat$bcnh4 <- as.numeric(resdat$bcnh4)
+resdat$bcno3 <- as.numeric(resdat$bcno3)
+
+```
+# Cleaning Data
+
+There's a large number of NAs in this dataset, and years 2011 and 2012 have fewer datapoints. Why?
+
+* It seems that a number of the dates here have ranges, rather than defined collection periods. For a start, am correcting by selecting the midpoint.
+* Observations 328, 340, 344 have no associated date. They should likely be 2008-12-06, given proximity to other observations.
+
+```{r}
+# Correcting interval cells
+intervals = unique(bmdat$Rawdate[is.na(bmdat$Date)])
+bmdat$Date[bmdat$Rawdate == intervals[2]] = date("2010-5-22")
+bmdat$Date[bmdat$Rawdate == intervals[3]] = date("2010-7-04")  
+
+# Correcting blank cells
+bmdat$Date[c(328,340,344)] <- date("2008-12-06")
+
+# Checking the total number of NA cells
+sum(is.na(bmdat$Date))
+```
+
+# Characterizing biomass data
+
+Table of number of observations per year:
+
+* It seems that there may be a roughly consistent set of plots used in sampling (~350-400 observations per year). It's likely that a number of core plots were targeted for biomass sampling (as with resins), but it's also possible that some years have more temporally distributed sampling schemes - greater temporal coverage?
+* Will have to coordinate with Valerie.
+
+```{r}
+bmdat %>% group_by(year(Date)) %>% summarise("count" = n())
+```
+
+Histograms of biomass distributions:
+
+```{r}
+bmdat %>% 
+  ggplot(aes(x = TotalMass)) + 
+  geom_histogram() +
+  ggtitle("Distribution of Total Mass Values")
+
+bmdat %>% 
+  ggplot(aes(x = as.factor(month(bmdat$Date)))) + 
+  geom_histogram(stat = "count") +
+  ggtitle("Observations by Month")
+
+bmdat %>% 
+  ggplot(aes(x = yday(bmdat$Date),
+             fill = as.factor(month(bmdat$Date)))) + 
+  geom_histogram(bins = 100) +
+  ggtitle("Observations by Month Within Year")
+
+bmdat$year = as.factor(year(bmdat$Date))
+
+bmdat %>% 
+  ggplot(aes(x = month(bmdat$Date),
+             fill = year)) + 
+  geom_histogram(stat = "count", bins = 12) + 
+  facet_wrap(~year) +
+  ggtitle("Distribution of Observations by Year")
+```
+
+# How do biomass values change over time?
+
+Generally see an increasing trend, as expected. Data seems quite right-skewed? May need to just focus on the mid-season range for the most comparable estimates.
+
+```{r}
+
+# Correcting to make sure total mass values are always present
+
+correct_total <- function(x){
+  
+  if(is.na(x$TotalMass) | x$TotalMass == 0){
+    if(!is.na(x$SortedLive) | !is.na(x$SortedLitter)){
+      x$TotalMass = sum(na.omit(x$SortedLive, x$SortedLitter))
+    }
+  }
+  
+  return(x)
+}
+
+bmdat = bmdat %>% do(correct_total(.))
+
+bmdat %>% ggplot(aes(x = yday(Date + 90),
+                     y = TotalMass,
+                     fill = factor(year(Date + 90)),
+                     color = factor(year(Date + 90)))) +
+  geom_point(shape = 21, alpha = .1) +
+  geom_line(method = "lm", stat = "smooth", size = 2, alpha = .5, fullrange = TRUE) +
+  stat_smooth(aes(fill = NULL, color = NULL), se = FALSE, size = 1.5) +
+  ylim(0, 50) +
+  xlab("Day of the Growing Season (Rough Estimate)") +
+  ggtitle("Biomass Over Time")
+
+```
+
+```{r}
+bmdat$year
+  
+bmdat %>% ggplot(aes(x = yday(Date + 90),
+                     y = TotalMass,
+                     fill = factor(year(Date + 90)),
+                     color = factor(year(Date + 90)))) +
+  geom_point(shape = 21, alpha = .1) +
+  geom_line(method = "lm", stat = "smooth", size = 2, alpha = .5, fullrange = TRUE) +
+  ylim(0, 50) +
+  xlab("Day of the Growing Season (Rough Estimate)") +
+  ggtitle("Biomass Over Time") + 
+  facet_wrap(~year)
+```
+
+# Characterizing Resin Data
+
+As Valerie suggested, resin data was collected in a far more replicated fashion early in the experiment. To use resin data in analysis, it will likely be best to either focus on stability of initial plot compositions and their relationship to resource use, or only track resource use among plots that have consistent coverage through time. 
+
+There's also a very large number of observations that don't have a blank correction. What would be the best 
+
+```{r}
+resdat %>% group_by(year(collected)) %>% summarise("count" = n())
+
+paste("Number of rows without balanced-corrected NH4 observations: ", 
+      sum(is.na(resdat$bcnh4)), " (", 
+      round(sum(is.na(resdat$bcnh4))/nrow(resdat),4) * 100, "%)", sep = "")
+
+paste("Number of rows without balanced-corrected NO3 observations:", 
+      sum(is.na(resdat$bcno3)), " (", 
+      round(sum(is.na(resdat$bcno3))/nrow(resdat),4) * 100, "%)", sep = "")
+```
+
+Generally, we see some seasonal variation in nitrogen availability, both as NH4 and NO3. For NO3, in particular, there appears to be an early peak in the first few days on sampling, followed by some variation. NH4 availability seems more consistent, while not taking into account interannual variation.
+
+What to do about data that is not blank-corrected?
+
+```{r}
+min(na.omit(yday(resdat$placed)))
+
+head(resdat)
+resdat %>% ggplot(aes(x = yday(placed + 90))) + 
+  geom_point(aes(y = bcnh4), alpha = .2) +
+  geom_point(aes(y = bcno3), color = "red", alpha = .2) +
+  stat_smooth(aes(y = bcno3), color = "red") +  
+  stat_smooth(aes(y = bcnh4)) +
+  ylim(0,10)
+```
+

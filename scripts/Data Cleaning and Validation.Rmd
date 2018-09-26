@@ -27,7 +27,7 @@ setwd("C:/Users/ebatz/Box Sync/waps/evan-sarah analyses")
 # Reading in datasets
 
 # Species composition
-waps.comp <- read.csv("./data/WAPSthrough2017.csv",
+waps.comp <- read.csv("./data/WAPSthrough2018.csv",
           header = TRUE,
           stringsAsFactors = FALSE)
 
