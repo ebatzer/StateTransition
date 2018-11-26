@@ -275,8 +275,8 @@ colnames(qmat) = c("Natives", "WetA", "WAPS", "DryA")
 rownames(qmat) = c("Natives", "WetA", "WAPS", "DryA")
 
 # With both
-plot.prevalence.msm(msm.env_priority, mintime=2008, maxtime=2018)
-cat("1 - Native, 2 - Priority Annuals, 3 - WAPS, 4 - Dry Annuals")
+# plot.prevalence.msm(msm.l1_priority, mintime=2008, maxtime=2018)
+# cat("1 - Native, 2 - Priority Annuals, 3 - WAPS, 4 - Dry Annuals")
 ```
  
 # Next steps:
@@ -284,18 +284,131 @@ cat("1 - Native, 2 - Priority Annuals, 3 - WAPS, 4 - Dry Annuals")
 Going forward, I think the most important ways to refine this analysis are:
  
 1. Make clustering approaches more concrete - what are the best steps in subsetting
-data and classifying community types?
+data and classifying community types? $\checkmark$
 
-2. Define questions clearly - what exactly is this approach answering?
+2. Define questions clearly - what exactly is this approach answering? $\checkmark$?
 
 3. Determine the best way to analyze climatic data - how to include variables
 in transition models?
 
 4. Follow-up with clearer visualizations of how climate impacts persistence / state change -
 visualize how probabilities of transitions change with priority effects across a 
-gradient of climatic values.
+gradient of climatic values. $\checkmark$
  
  5. Identify other tests and analyses, as needed.
+
+# Best way to analyze climatic data:
+
+I need to double-check how the model functions -- are transition probabilities a 
+function of a water year's precipitation (i.e. are we predicting transitions in
+year t + 1 using data at year t? I think this is likely the case) or as a function
+of the next year's precipitation? The model that best corresponds to our conceptual 
+notion of state change isn't climate at t, but climate at t + 1 (it's between our 
+two sets of observations, but impacts the next year).
+
+The best response, based on other publications is to quantify drought stress using
+SPEI, a simple, standardized metric that is broadly applicable. See "ExploringClimateData"
+for more information on its calculation.
+
+```{r}
+speidata <- read.csv("../data/SPEIfits.csv")
+colnames(speidata)
+clustdat_t1 <- clustdat %>% 
+  left_join((speidata %>% mutate(year = year + 1)), by = c("year" = "year"))
+
+msm.l1_priority <- msm(cluster ~ year, plot, data=clustdat_t1, qmatrix=Q, obstype=2, 
+                    covariates = list("1-2" = ~ annuals + l1fit,
+                                      "1-3" = ~ waps + l1fit,
+                                      "1-4" = ~ annuals + l1fit,
+                                      "2-1" = ~ natives + l1fit,
+                                      "2-3" = ~ waps + l1fit,
+                                      "2-4" = ~ annuals + l1fit,
+                                      "3-1" = ~ natives + l1fit,
+                                      "3-2" = ~ annuals + l1fit,
+                                      "3-4" = ~ annuals + l1fit,
+                                      "4-1" = ~ natives + l1fit,
+                                      "4-2" = ~ annuals + l1fit,
+                                      "4-3" = ~ waps + l1fit))
+
+msm.l2_priority <- msm(cluster ~ year, plot, data=clustdat_t1, qmatrix=Q, obstype=2, 
+                    covariates = list("1-2" = ~ annuals + l2fit,
+                                      "1-3" = ~ waps + l2fit,
+                                      "1-4" = ~ annuals + l2fit,
+                                      "2-1" = ~ natives + l2fit,
+                                      "2-3" = ~ waps + l2fit,
+                                      "2-4" = ~ annuals + l2fit,
+                                      "3-1" = ~ natives + l2fit,
+                                      "3-2" = ~ annuals + l2fit,
+                                      "3-4" = ~ annuals + l2fit,
+                                      "4-1" = ~ natives + l2fit,
+                                      "4-2" = ~ annuals + l2fit,
+                                      "4-3" = ~ waps + l2fit))
+
+msm.l3_priority <- msm(cluster ~ year, plot, data=clustdat_t1, qmatrix=Q, obstype=2, 
+                    covariates = list("1-2" = ~ annuals + l3fit,
+                                      "1-3" = ~ waps + l3fit,
+                                      "1-4" = ~ annuals + l3fit,
+                                      "2-1" = ~ natives + l3fit,
+                                      "2-3" = ~ waps + l3fit,
+                                      "2-4" = ~ annuals + l3fit,
+                                      "3-1" = ~ natives + l3fit,
+                                      "3-2" = ~ annuals + l3fit,
+                                      "3-4" = ~ annuals + l3fit,
+                                      "4-1" = ~ natives + l3fit,
+                                      "4-2" = ~ annuals + l3fit,
+                                      "4-3" = ~ waps + l3fit))
+cat("T1 Model")
+AIC(msm.env_priority, msm.l1_priority, msm.l2_priority, msm.l3_priority)
+
+clustdat_t0 <- clustdat %>% 
+  left_join((speidata %>% mutate(year = year)), by = c("year" = "year"))
+
+msm.l1_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2, 
+                    covariates = list("1-2" = ~ annuals + l1fit,
+                                      "1-3" = ~ waps + l1fit,
+                                      "1-4" = ~ annuals + l1fit,
+                                      "2-1" = ~ natives + l1fit,
+                                      "2-3" = ~ waps + l1fit,
+                                      "2-4" = ~ annuals + l1fit,
+                                      "3-1" = ~ natives + l1fit,
+                                      "3-2" = ~ annuals + l1fit,
+                                      "3-4" = ~ annuals + l1fit,
+                                      "4-1" = ~ natives + l1fit,
+                                      "4-2" = ~ annuals + l1fit,
+                                      "4-3" = ~ waps + l1fit))
+
+msm.l2_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2, 
+                    covariates = list("1-2" = ~ annuals + l2fit,
+                                      "1-3" = ~ waps + l2fit,
+                                      "1-4" = ~ annuals + l2fit,
+                                      "2-1" = ~ natives + l2fit,
+                                      "2-3" = ~ waps + l2fit,
+                                      "2-4" = ~ annuals + l2fit,
+                                      "3-1" = ~ natives + l2fit,
+                                      "3-2" = ~ annuals + l2fit,
+                                      "3-4" = ~ annuals + l2fit,
+                                      "4-1" = ~ natives + l2fit,
+                                      "4-2" = ~ annuals + l2fit,
+                                      "4-3" = ~ waps + l2fit))
+
+msm.l3_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2, 
+                    covariates = list("1-2" = ~ annuals + l3fit,
+                                      "1-3" = ~ waps + l3fit,
+                                      "1-4" = ~ annuals + l3fit,
+                                      "2-1" = ~ natives + l3fit,
+                                      "2-3" = ~ waps + l3fit,
+                                      "2-4" = ~ annuals + l3fit,
+                                      "3-1" = ~ natives + l3fit,
+                                      "3-2" = ~ annuals + l3fit,
+                                      "3-4" = ~ annuals + l3fit,
+                                      "4-1" = ~ natives + l3fit,
+                                      "4-2" = ~ annuals + l3fit,
+                                      "4-3" = ~ waps + l3fit))
+
+cat("T0 Model")
+AIC(msm.l1_priority, msm.l2_priority, msm.l3_priority)
+
+```
 
 # Visualizing response to climate:
 
@@ -317,8 +430,7 @@ $$ P_{13} = 1 - e^{-q_{13}} $$
 $$ P_{14} = 1 - e^{-q_{14}} $$
 
 ```{r}
-
-qmatrix.msm(msm.env_priority, covariates=list(net_cum_3 = 100))
+qmatrix.msm(msm.l1_priority, covariates=list(l1fit = 0))
 p12 = 1 - exp(-.02581)
 p13 = 1 - exp(-.02605)
 p14 = 1 - exp(-.1894)
@@ -326,7 +438,6 @@ tot = sum(p12,p13,p14)
 p12/tot
 p13/tot
 p14/tot
-
 ```
 
 Below is code to pull out transition probabilities for each state. 
@@ -339,17 +450,18 @@ However, there is likely a better way:
 * Assign non-diagonals to the probability of transitioning
 * Repeat for confidence intervals (both low and high)
 
+
 ```{r}
 Nprob = list()
 counter = 1
 
 for(pri in c(0:1)){
-  for(netprecip in seq(-100, 500, by = 100)){
-    qm = as.matrix(qmatrix.msm(msm.env_priority, covariates=list(net_cum_3 = netprecip, 
+  for(netprecip in seq(-1.5, 1.5, by = .1)){
+    qm = as.matrix(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip, 
                                                                natives = pri, annuals = pri, waps = pri))$estimates)
-    ql = as.matrix(qmatrix.msm(msm.env_priority, covariates=list(net_cum_3 = netprecip, 
+    ql = as.matrix(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip, 
                                                                  natives = pri, annuals = pri, waps = pri))$L)
-    qu = as.matrix(qmatrix.msm(msm.env_priority, covariates=list(net_cum_3 = netprecip, 
+    qu = as.matrix(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip, 
                                                                  natives = pri, annuals = pri, waps = pri))$U)
     
     qdf = data.frame(qm) %>% mutate(From = rownames(qm)) %>% 
@@ -387,27 +499,28 @@ bind_rows(Nprob) %>%
              color = From,
              fill = From)) +
   geom_line(aes(y = Trans), size = 1.5) +
-  geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
+  theme_bw() +
+  #geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
   facet_wrap(~priority) +
   ggtitle("Probability of Stability") +
   scale_color_manual(name = 'Initial State', 
          values =c("State 1" = cols[1], "State 2" = cols[2], 
                    "State 3" = cols[3], "State 4" = cols[4]),
-         labels = c('Natives','Priority Annuals', 'WAPS','Dry Annuals')) +
+         labels = c('Natives','High Priority', 'WAPS','Drought Tol.')) +
   scale_fill_manual(name = 'Initial State', 
          values =c("State 1" = cols[1], "State 2" = cols[2], 
                    "State 3" = cols[3], "State 4" = cols[4]),
-         labels = c('Natives','Priority Annuals', 'WAPS','Dry Annuals')) +
-  xlab("Net Precipitation Deficit") +
+         labels = c('Natives','High Priority', 'WAPS','Drought Tol.')) +
+  xlab("Drought Stress") +
   ylab("Probability of Retaining State in Next Year")
 
-# ggsave("../figures/StabilityProbabilities.pdf", height = 6, width = 8)
+ggsave("../figures/StabilityProbabilities_NoErrorBars.pdf", height = 6, width = 8)
 
 ```
 
 ```{r}
 trtnames = c("to Natives", "to Priority Annuals", "to WAPS", "to Dry Annuals")
-priorities = c("No Priority", "Priority")
+priorities = c("No Priority", "Priority"
 bind_rows(Nprob) %>%
   filter(From != To) %>%
   mutate(priority = if_else(priority == 1, "With Priority", "No Priority")) %>%
@@ -415,19 +528,20 @@ bind_rows(Nprob) %>%
              color = From,
              fill = From)) +
   geom_line(aes(y = Trans), size = 1.5) +
-  geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
+  theme_bw() +
+  #geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
   facet_grid(To~priority) +
   ggtitle("Probability of Transition") +
   scale_color_manual(name = 'Initial State', 
          values =c("State 1" = cols[1], "State 2" = cols[2], 
                    "State 3" = cols[3], "State 4" = cols[4]),
-         labels = c('Natives','Priority Annuals', 'WAPS','Dry Annuals')) +
+         labels = c('Natives','High Priority', 'WAPS','Drought Tol.')) +
   scale_fill_manual(name = 'Initial State', 
          values =c("State 1" = cols[1], "State 2" = cols[2], 
                    "State 3" = cols[3], "State 4" = cols[4]),
-         labels = c('Natives','Priority Annuals', 'WAPS','Dry Annuals')) +
-  xlab("Net Precipitation Deficit") +
+         labels = c('Natives','High Priority', 'WAPS','Drought Tol.')) +
+  xlab("Drought Stress") +
   ylab("Probability of Transition in Next Year")
 
-ggsave("../figures/TransitionProbabilities.pdf", height = 14, width = 8)
+ggsave("../figures/TransitionProbabilities_NoErrorBars.pdf", height = 14, width = 8)
 ```

@@ -1,0 +1,291 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+library(viridis)
+```
+
+# Exploring precipitation patterns
+
+What is the best way to explore community responses to variation in precipitation patterns?
+
+Papers on the subject seem to suggest a number of different ways to subset climate
+data to make sense of changes in community composition and productivity from year
+to year. 
+
+Some relevant citations and their approaches to using climate patterns:
+
+* Dudney et al. (2016)
+
+Included both current-year and previous-year rainfall effects divided into Fall
+(October - November), Winter (December - February), and Spring (March - May). Significant
+variables were current winter, current spring, previous fall, and previous spring. Coefficients
+of similar magnitudes suggest that no one season is most responsible for change. 
+
+* Adler and Levine (2007)
+
+Included both current-year and previous-year rainfall effects, cumulatively by year.
+Also included transformations of variables to better account for nonlinearity of effects;
+current and last year richness / productivity was best explained by the inverse 
+transformation of current and last year precipitation.
+
+* Pitt and Heady (1978)
+
+Included 76(!) variables in analysis -- mean, minimum, and maximum temperatures,
+number of days receiving <6.35 mm rain, total precip, days below freezing,
+drough (longest successive number of days receiving <1.27 mm of rain), and
+germination date (number of days after 31 first storm of 19mm).
+
+* Eviner (2015) has a general overview:
+
+Plant production highest in years with high and steady rainfall between November
+and February, especially when temperatures are high in that period. Site-specific.
+
+High precipitation with warm temperatures in the Fall tend to favor annual grasses,
+largely due to rapid germination in warm, moist conditions.
+
+Fall rains followed by a prolonged fall or early-winter drought tend to favor 
+forbs and legumes.
+
+Prolonged mid-winter drouhgt tends to favor forbs, clovers, and perennial grasses.
+
+Some potential variables of interest:
+
+* 19mm (3/4") of an inch needed for grasses to germinate
+
+Framework for how to measure climatic variables:
+
+1. Define the start of each year's germinating season (rainfall in 24hrs > 19mm)
+
+2. Calculate a series of potential variables:
+          * Date of season start and precip
+          * Mean precip for each 30-day period following the season start
+          * Total number of days without precipitation in 30-day intervals
+          * Maximum number of sequential days without precipitation
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+library(lubridate); library(tidyverse); library(tidyquant)
+library(msm)
+
+clustdat <- read.csv("../data/WAPSclusters.csv", 
+                     header = TRUE, 
+                     stringsAsFactors = FALSE)
+
+climate <- read.csv("../data/cimis_monthly.csv",
+                       header = TRUE,
+                       stringsAsFactors = FALSE)
+
+climate_daily <- read.csv("../data/cimis_daily.csv",
+                       header = TRUE,
+                       stringsAsFactors = FALSE)
+
+climate_daily$Date = as.POSIXct(climate_daily$Date, format = "%m/%d/%Y")
+
+```
+
+# First date of sufficient germinating rains
+
+Following figures show the first date when the total amount of precipitation exceeded 19mm in a rolling 7-day period. 
+
+Was it really so late in 2012-2014?
+
+```{r}
+climate_daily %>% mutate(month = month(Date),
+                         year = year(Date)) %>%
+  arrange(Date) %>%
+  mutate(precip_run = c(rep(0, 6), rollapply(Precip..mm., 7, sum))) %>%
+  group_by(Water.Year) %>% 
+  filter(precip_run > 19) %>%
+  summarise(GermRain = min(Date))
+```
+ 
+# Average rain in each month
+
+Following figures show average precipitation (in mm) for each month across the growing season. 
+
+```{r}
+raintotal = climate_daily %>% mutate(month = month(Date),
+                         year = year(Date)) %>%
+  group_by(Water.Year, month) %>%
+  summarise(totalprecip = sum(na.omit(Precip..mm.)),
+            year = unique(year)) %>%
+  filter(month %in% c(11,12,1,2,3,4,5)) %>%
+  mutate(date = as.POSIXct(paste(year, month,1,sep = "/"),
+                           format = "%Y/%m/%d"))
+
+raintotal %>% 
+  filter(Water.Year > 2007) %>%
+  ggplot(aes(x = date,
+             y = totalprecip,
+             fill = as.factor((month + 2) %% 12))) +
+  geom_bar(stat = "identity") +
+  viridis::scale_fill_viridis(discrete = TRUE,
+                              labels = c("Nov", "Dec", "Jan",
+                                         "Feb", "Mar", "Apr", "May")) +
+  labs(fill = "Month", y = "Total Precip (mm)", x = "Year") +
+  ggtitle("Precipitation over Time")
+```
+
+# CV of rainfall in each year
+
+Another way to think about climatic stress would be to quantify how variable precipitation is in a given year -- does consistent precipitation generate a different community than more variable precip? Here, the measure of a coefficient of variation ($CV = \dfrac{stddev}{mean}$) might be the best measure of variability.
+
+```{r}
+precipCV = climate_daily %>% mutate(month = month(Date),
+                         year = year(Date)) %>%
+  filter(month %in% c(11,12,1)) %>%
+  group_by(Water.Year) %>%
+  summarise(pptCV = sd(na.omit(Precip..mm.))/
+                                   mean(na.omit(Precip..mm.)))
+precipCV %>% 
+  filter(Water.Year > 2007) %>%
+  ggplot(aes(x = Water.Year,
+             y = pptCV,
+             fill = pptCV)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis()
+```
+
+# Total number of days in each month with no rain (or less than 1mm?)
+
+Following figures show the total number of days in each year where no rain is observed between November and March
+
+```{r}
+droughttotal = climate_daily %>% mutate(month = month(Date),
+                         year = year(Date)) %>%
+  group_by(Water.Year, month) %>%
+  summarise(droughtdays = sum(na.omit(Precip..mm.) < 1)) %>%
+  filter(month %in% c(11,12,1,2,3))
+droughttotal
+droughttotal %>% 
+  group_by(Water.Year) %>% 
+  summarise(Total = sum(droughtdays))
+```
+
+# Length of droughts in each water year
+
+We can also try to quantify the number and duration of droughts within each year - I've written a function that produces a table of all droughts (consecutive days with less than a mm of rain), and highlighted the maximum drought lenght in each year.
+
+```{r}
+definedrought <- function(df){
+  
+  counter = 1
+  output <- list()  
+  dstart = NA
+  dend = NA
+
+  for(i in 1:nrow(df)){
+    if(df$Precip..mm.[i] < 1 & is.na(dstart)){
+      dstart = df$Date[i]
+    }
+    
+    if(df$Precip..mm.[i] > 1 & !is.na(dstart)){
+      dend = df$Date[i]
+      output[[counter]] = data.frame(dstart, dend, duration = dend - dstart)
+      dstart = NA
+      dend = NA
+      counter <- counter + 1
+    }
+  }
+  
+  return(bind_rows(output))
+  
+}
+
+climate_daily = climate_daily[!is.na(climate_daily$Precip..mm.),]
+
+droughtsummary = climate_daily %>% 
+  mutate(month = month(Date),
+         year = year(Date)) %>% 
+  arrange(Date) %>%
+  group_by(Water.Year) %>%
+  filter(month %in% c(11,12,1,2,3)) %>%
+  do(definedrought(.)) %>%
+  mutate(duration = round(duration))
+
+droughtsummary %>% 
+  ggplot(aes(x = duration)) +
+  geom_histogram()
+
+cat("Longest Observed Winter Droughts:")
+droughtsummary %>%
+  group_by(Water.Year) %>%
+  filter(duration == max(duration))
+```
+
+# SPEI - a standard drought severity metric used in many studies (Prugh et al. 2018, etc.)
+
+From Prugh et al:
+
+"We used the FAO-56 Penman–Monteith equation implemented in the ‘SPEI’ R package 
+to calculate atmospheric evaporative demand (ETo) each month based on average 
+daily minimum and maximum temperatures, average daily relative humidity, dew-point 
+temperature, solar radiation and wind speed. SPEI was then calculated as precipitation 
+minus ETo. SPEI can be calculated over different time intervals to measure short
+- or long-term droughts. To understand aridity in April at the peak of primary 
+production, we calculated 7-, 19- and 31-month SPEI values, which estimated water 
+balance over 1, 2 and 3 growing seasons, respectively, before the current time point. 
+We used the reverse of these SPEI values as a drought index, such that 
+DIx=−1×SPEIx to calculate DI1, DI2 and DI3, respectively from 2000–2015."
+
+So, this drought calculation can be performed across "sliding timescales", allowing 
+us to make drought comparisons between 1, 2, and 3 + year intervals.
+
+This paper makes use of the Penman-Montieth equation, which can be used to estimate
+PET. This is a metric that is supported by the FAO as a standardized metric for comparison.
+
+The SPEI package in R makes the implementation of the Penman-Monteith and SPEI 
+index quite simple.
+
+Relevant data provided in the CIMIS dataset include:
+
+__MONTHLY INTERVALS!__
+
+* Min temp
+* Max temp
+* Wind speed
+* Dew point
+* Solar radiation
+* Vapor pressure deficit
+* Average relative humidity
+
+CIMIS actually uses this Penman-Monteith equation to estimate ETo, so we should be able to 
+
+```{r}
+library(SPEI)
+
+climate$Date = as.POSIXct(climate$Month.Year, format = "%m/%d/%Y")
+climate = climate[year(climate$Date) > 2000,]
+
+lag1_SPEI = spei(data = na.omit(climate$Total.Precip..mm. - climate$Total.ETo..mm.), scale = 8)
+lag2_SPEI = spei(data = na.omit(climate$Total.Precip..mm. - climate$Total.ETo..mm.), scale = 20)
+lag3_SPEI = spei(data = na.omit(climate$Total.Precip..mm. - climate$Total.ETo..mm.), scale = 32)
+
+l1fit = data.frame(matrix(c(lag1_SPEI$fitted), ncol = 12, byrow = TRUE),
+           row.names = c(2001:2018))[,5]
+
+l2fit = data.frame(matrix(c(lag2_SPEI$fitted), ncol = 12, byrow = TRUE),
+           row.names = c(2001:2018))[,5]
+
+l3fit = data.frame(matrix(c(lag3_SPEI$fitted), ncol = 12, byrow = TRUE),
+           row.names = c(2001:2018))[,5]
+
+# write.csv("../data/SPEIfits.csv", x = data.frame(year = c(2001:2018), l1fit, l2fit, l3fit))
+
+data.frame(year = c(2001:2018), l1fit, l2fit, l3fit) %>%
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = l1fit), color = "orange", size = 2) +
+  geom_line(aes(y = l2fit), color = "forestgreen", size = 2)  +
+  geom_line(aes(y = l3fit), color = "blue", size = 2)  +
+  xlim(2008, 2018) +
+  ggtitle("SPEI Fits")
+
+```
+
+
+

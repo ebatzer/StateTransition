@@ -157,6 +157,48 @@ ord.mat <- ord.mat[rowSums(ord.mat) != 0, ]
 
 # Visualizing Data:
 
+Raw functional group abundances:
+
+
+```{r}
+sumtable = left_join(ord.att, bind_cols(comp.attr,group_percents)) %>%
+  group_by(plot, year, sp.trt) %>%
+  select(annuals, natives, waps) %>%
+  mutate(total = sum(annuals, natives, waps)) %>%
+  group_by(year, sp.trt) %>%
+  summarise(annprop = mean(annuals / total),
+            natprop = mean(natives / total),
+            wapsprop = mean(waps / total),
+            annsem = sd(annuals / total) / sqrt(n()),
+            natsem = sd(natives / total) / sqrt(n()),
+            wapssem = sd(waps / total) / sqrt(n()))
+  
+sumtable %>%
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = annprop), color = "red") +
+  geom_line(aes(y = natprop), color = "green") +
+  geom_line(aes(y = wapsprop), color = "blue") +
+  geom_errorbar(aes(ymin = annprop - annsem,
+                    ymax = annprop + annsem),
+                color = "red",
+                width = .1) +
+  geom_errorbar(aes(ymin = natprop - natsem,
+                    ymax = natprop + natsem),
+                color = "green",
+                width = .1) +
+  geom_errorbar(aes(ymin = wapsprop - wapssem,
+                    ymax = wapsprop + wapssem),
+                color = "blue",
+                width = .1) +
+  xlab("Year") +
+  ylab("Proportional Abundance")+
+  facet_wrap(~sp.trt, nrow = 4)
+
+ggsave("../figures/ProportionalAbundances.pdf", width = 10, height = 6)
+```
+
+
+
 The first step in this analysis is to visualize the data using some sort of
 unconstrained ordination method. Because I'll be using Bray-Curtis distance to 
 describe differences between points, NMDS seems to be the best option. 
@@ -189,7 +231,7 @@ p = ggplot(MDS_xy, aes(X1, Y)) +
   transition_time(year) +
   ease_aes('linear')
 
-animate(p, detail = 40, fps = 10)
+# animate(p, detail = 40, fps = 10)
 ```
 
 # K-means Clustering

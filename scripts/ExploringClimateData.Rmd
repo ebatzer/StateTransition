@@ -1,7 +1,13 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+```
 
 # Exploring precipitation patterns
 
@@ -62,14 +68,13 @@ Framework for how to measure climatic variables:
           * Maximum number of sequential days without precipitation
 
 ```{r, echo = FALSE, warning = FALSE, message=FALSE}
-library(lubridate); library(tidyverse); library(tidyquant)
-library(msm)
+library(lubridate); library(tidyverse); library(tidyquant); library(msm)
 
 clustdat <- read.csv("../data/WAPSclusters.csv", 
                      header = TRUE, 
                      stringsAsFactors = FALSE)
 
-climate <- read.csv("../data/cimis_monthly.csv",
+climate <- read.csv("../data/cimis_monthly_1980.csv",
                        header = TRUE,
                        stringsAsFactors = FALSE)
 
@@ -83,28 +88,86 @@ climate_daily$Date = as.POSIXct(climate_daily$Date, format = "%m/%d/%Y")
 
 # First date of sufficient germinating rains
 
-Really so late in 2012-2014?
+Following figures show the first date when the total amount of precipitation exceeded 19mm in a rolling 7-day period. 
+
+Was it really so late in 2012-2014?
 
 ```{r}
 climate_daily %>% mutate(month = month(Date),
                          year = year(Date)) %>%
+  arrange(Date) %>%
   mutate(precip_run = c(rep(0, 6), rollapply(Precip..mm., 7, sum))) %>%
   group_by(Water.Year) %>% 
   filter(precip_run > 19) %>%
   summarise(GermRain = min(Date))
 ```
+ 
+# Average rain in each month
+
+Following figures show average precipitation (in mm) for each month across the growing season. 
+
+```{r}
+raintotal = climate_daily %>% mutate(month = month(Date),
+                         year = year(Date)) %>%
+  group_by(Water.Year, month) %>%
+  summarise(totalprecip = sum(na.omit(Precip..mm.)),
+            year = unique(year)) %>%
+  filter(month %in% c(11,12,1,2,3,4,5)) %>%
+  mutate(date = as.POSIXct(paste(year, month,1,sep = "/"),
+                           format = "%Y/%m/%d"))
+
+raintotal %>% 
+  filter(Water.Year > 2007) %>%
+  ggplot(aes(x = date,
+             y = totalprecip,
+             fill = as.factor((month + 2) %% 12))) +
+  geom_bar(stat = "identity") +
+  viridis::scale_fill_viridis(discrete = TRUE,
+                              labels = c("Nov", "Dec", "Jan",
+                                         "Feb", "Mar", "Apr", "May")) +
+  labs(fill = "Month", y = "Total Precip (mm)", x = "Year") +
+  ggtitle("Precipitation over Time")
+```
+
+# CV of rainfall in each year
+
+Another way to think about climatic stress would be to quantify how variable precipitation is in a given year -- does consistent precipitation generate a different community than more variable precip? Here, the measure of a coefficient of variation ($CV = \dfrac{stddev}{mean}$) might be the best measure of variability.
+
+```{r}
+precipCV = climate_daily %>% mutate(month = month(Date),
+                         year = year(Date)) %>%
+  filter(month %in% c(11,12,1)) %>%
+  group_by(Water.Year) %>%
+  summarise(pptCV = sd(na.omit(Precip..mm.))/
+                                   mean(na.omit(Precip..mm.)))
+precipCV %>% 
+  filter(Water.Year > 2007) %>%
+  ggplot(aes(x = Water.Year,
+             y = pptCV,
+             fill = pptCV)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_c()
+```
 
 # Total number of days in each month with no rain (or less than 1mm?)
 
+Following figures show the total number of days in each year where no rain is observed between November and March
+
 ```{r}
-climate_daily %>% mutate(month = month(Date),
+droughttotal = climate_daily %>% mutate(month = month(Date),
                          year = year(Date)) %>%
   group_by(Water.Year, month) %>%
   summarise(droughtdays = sum(na.omit(Precip..mm.) < 1)) %>%
   filter(month %in% c(11,12,1,2,3))
+
+droughttotal %>% 
+  group_by(Water.Year) %>% 
+  summarise(Total = sum(droughtdays))
 ```
 
 # Length of droughts in each water year
+
+We can also try to quantify the number and duration of droughts within each year - I've written a function that produces a table of all droughts (consecutive days with less than a mm of rain), and highlighted the maximum drought lenght in each year.
 
 ```{r}
 definedrought <- function(df){
@@ -139,7 +202,7 @@ droughtsummary = climate_daily %>%
          year = year(Date)) %>% 
   arrange(Date) %>%
   group_by(Water.Year) %>%
-  filter(month %in% c(11,12,1,2,3,4)) %>%
+  filter(month %in% c(11,12,1,2,3)) %>%
   do(definedrought(.)) %>%
   mutate(duration = round(duration))
 
@@ -152,5 +215,99 @@ droughtsummary %>%
   group_by(Water.Year) %>%
   filter(duration == max(duration))
 ```
+
+# SPEI - a standard drought severity metric used in many studies (Prugh et al. 2018, etc.)
+
+From Prugh et al:
+
+"We used the FAO-56 Penman–Monteith equation implemented in the ‘SPEI’ R package 
+to calculate atmospheric evaporative demand (ETo) each month based on average 
+daily minimum and maximum temperatures, average daily relative humidity, dew-point 
+temperature, solar radiation and wind speed. SPEI was then calculated as precipitation 
+minus ETo. SPEI can be calculated over different time intervals to measure short
+- or long-term droughts. To understand aridity in April at the peak of primary 
+production, we calculated 7-, 19- and 31-month SPEI values, which estimated water 
+balance over 1, 2 and 3 growing seasons, respectively, before the current time point. 
+We used the reverse of these SPEI values as a drought index, such that 
+DIx=−1×SPEIx to calculate DI1, DI2 and DI3, respectively from 2000–2015."
+
+So, this drought calculation can be performed across "sliding timescales", allowing 
+us to make drought comparisons between 1, 2, and 3 + year intervals.
+
+This paper makes use of the Penman-Montieth equation, which can be used to estimate
+PET. This is a metric that is supported by the FAO as a standardized metric for comparison.
+
+The SPEI package in R makes the implementation of the Penman-Monteith and SPEI 
+index quite simple.
+
+Relevant data provided in the CIMIS dataset include:
+
+__MONTHLY INTERVALS!__
+
+* Min temp
+* Max temp
+* Wind speed
+* Dew point
+* Solar radiation
+* Vapor pressure deficit
+* Average relative humidity
+
+CIMIS actually uses this Penman-Monteith equation to estimate ETo, so we should be able to 
+
+```{r}
+climate$Date = as.POSIXct(climate$Month.Year, format = "%m/%d/%Y")
+climate = climate[year(climate$Date) > 1982,]
+```
+
+```{r}
+library(SPEI)
+lag1_SPEI = spei(data = na.omit(climate$Total.Precip..mm. - climate$Total.ETo..mm.), scale = 8)
+lag2_SPEI = spei(data = na.omit(climate$Total.Precip..mm. - climate$Total.ETo..mm.), scale = 20)
+lag3_SPEI = spei(data = na.omit(climate$Total.Precip..mm. - climate$Total.ETo..mm.), scale = 32)
+speifits = data.frame(year = sort(rep(1983:2018, 12)), 
+                      month = rep(c(1:12), 12),
+                      l1fit = c(lag1_SPEI$fitted, NA, NA),
+                      l2fit = c(lag2_SPEI$fitted, NA, NA),
+                      l3fit = c(lag3_SPEI$fitted, NA, NA))
+
+write.csv("../data/SPEIfits.csv", x = speifits %>% filter(month == 5))
+
+p1 = speifits %>% filter(month == 5) %>%
+  gather(key = fit, value = spei, - year, - month) %>%
+  ggplot(aes(x = year, y = spei)) +
+  geom_line(aes(linetype = fit), size = 1.5) +
+  xlim(2008, 2018) +
+  ggtitle("SPEI") +
+  ylab("SPEI Index") +
+  xlab("Year") +
+  scale_linetype_manual(values=c("solid", "twodash", "dotted"),
+                        name = "Temporal Lag",
+                        labels = c("1 Year", "2 Years", "3 Years")) + 
+  theme_bw() +
+  geom_hline(yintercept = 0, linetype = "dashed")
+
+climate$wateryr = year(climate$Date)
+climate$wateryr = if_else(month(climate$Date) > 9, climate$wateryr + 1, climate$wateryr)
+
+climsum = climate %>% group_by(wateryr) %>%
+  summarise(Total.Precip..mm. = sum(Total.Precip..mm.))
+
+p2 = climsum %>%
+  ggplot(aes(x = wateryr,
+             y = Total.Precip..mm.)) +
+  geom_line() +
+  theme_bw() +
+  ylab("Total Precip (mm)") +
+  xlab("Water Year") +
+  ggtitle("Precipitation") +
+  xlim(2008, 2018) +
+  geom_hline(yintercept = mean(na.omit(climsum$Total.Precip..mm.)), 
+             linetype = "dashed")
+
+library(gridExtra)
+grobglob = gridExtra::grid.arrange(p2, p1, nrow = 1, widths = c(1.5,2))
+ggsave(plot = grobglob, "../figures/precip_spei.pdf", width = 10, height = 5)
+```
+
 
 

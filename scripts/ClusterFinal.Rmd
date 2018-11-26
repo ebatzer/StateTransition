@@ -13,10 +13,10 @@ library(ggplot2); library(cluster); library(mclust); library(indicspecies)
 cover <- read.csv("../data/comdata_wideformat.csv", 
                   header = TRUE, 
                   stringsAsFactors = FALSE)
-group_percents = cover[,12:23]
-cover = cover[,-(12:23)]
-comp.attr <- cover[,1:11]
-comp.cover <- cover[,12:ncol(cover)]
+group_percents = cover[,8:19]
+cover = cover[,-(8:19)]
+comp.attr <- cover[,1:15]
+comp.cover <- cover[,15:ncol(cover)]
 
 # Treatment labels and group structure
 trtlabels <- read.csv("../data/trtlabels.csv",
@@ -146,8 +146,7 @@ ord.mat <- ord.mat[rowSums(ord.mat) != 0, ]
 
 ```{r}
 # Constructing distance matrix and running NMDS
-distmat <- vegdist(decostand(ord.mat, "total"), method = "bray")
-WAPS.mds <- metaMDS(distmat, try = 1, trymax = 5, trace = F, autotransform = TRUE)
+WAPS.mds <- metaMDS(decostand(ord.mat, "total"), distance = "bray", try = 1, trymax = 5, trace = F, autotransform = TRUE)
 MDS_xy <- bind_cols(data.frame(ord.att), data.frame(X = WAPS.mds$points[,1], Y = WAPS.mds$points[,2]))
 
 # Plotting figure
@@ -198,7 +197,7 @@ though that number seems too high to be relevant given the number of replicates
 we have, as well as my intuition for the system as a whole. 
 
 ```{r, warning = FALSE}
-NbClust(decostand(ord.mat, method = "total"), min.nc = 2, max.nc = 10, method = "kmeans",
+NbClust(decostand(ord.mat, method = "total"), min.nc = 2, max.nc = 10, method = "kmeans", 
         index = c("hartigan", "ch", "beale", "kl", "cindex", "db", "silhouette", "duda"))[1:2]
 ```
 
@@ -252,7 +251,48 @@ piecharts %>%
         panel.grid  = element_blank(), axis.text = element_blank(), legend.title = element_blank()) +
   theme(legend.position='bottom') + guides(fill=guide_legend(nrow=2,byrow=TRUE)) +
   theme(strip.text.x = element_text(size = 20, face = "bold"))
+
+ggsave("../figures/clustercomps.pdf", height = 10, width = 10)
 ```
+
+# Adding indicator species vectors to NMDS plot
+
+```{r}
+ggplot(MDS_xy, aes(X1, Y)) + 
+  geom_point(aes(color = as.factor(clust),
+                 shape = as.factor(clust))) + 
+  theme_bw() +
+  geom_text(data = data.frame(X1 = Inf, Y = -Inf), 
+            aes(color = NULL), hjust = 1, vjust = -1, 
+            label = paste("Stress =", round(WAPS.mds$stress, 2)), show.legend = FALSE) +
+  geom_segment(data = specvecs,
+               aes(x = 0,
+                   y = 0, 
+                   xend = MDS1/2,
+                   yend = MDS2/2,
+                   color = NULL),
+               arrow = arrow(length = unit(0.01, "npc"), type = "closed"), show.legend = FALSE) + 
+  geom_text(data = specvecs,
+            aes(x = MDS1/2, 
+                y = MDS2/2,
+                color = NULL,
+                label = rowname),
+            nudge_x = 0.05,
+            nudge_y = 0.03,
+            show.legend = FALSE) +
+  guides(color=guide_legend(title="Cluster ID"),
+         shape = guide_legend(title="Cluster ID")) +
+  xlab("NMDS1") +
+  ylab("NMDS2")
+
+specvecs = IS$sign %>% 
+  rownames_to_column() %>% 
+  left_join(data.frame(WAPS.mds$species) %>% rownames_to_column()) %>% 
+  filter(p.value < .05)
+```
+
+
+
 # Plotting transitions between clusters over time
 
 ```{r}
@@ -261,9 +301,9 @@ clustdat <- bind_cols(ord.att, data.frame(cluster = k.cluster$clustering)) %>%
 
 # Assigning states
 clustdat$cluster[clustdat$cluster == 1] = "Natives"
-clustdat$cluster[clustdat$cluster == 2] = "Wet Annuals"
-clustdat$cluster[clustdat$cluster == 3] = "WAPS"
-clustdat$cluster[clustdat$cluster == 4] = "Dry Annuals"
+clustdat$cluster[clustdat$cluster == 2] = "High Priority"
+clustdat$cluster[clustdat$cluster == 3] = "Invasives"
+clustdat$cluster[clustdat$cluster == 4] = "Drought Tol."
 
 # Plotting change in assignment over time
 clustdat$plot <- factor(clustdat$plot, levels = unique(clustdat$plot))
@@ -276,7 +316,13 @@ clustdat %>% ggplot(aes(x = year,
             data = data.frame(year = rep(2006, 7),
                               plot = seq(4, 52, by = 8)),
             fontface = "bold") +
-  xlim(2005, 2019)
+  xlim(2005, 2019) +
+  ylab(NULL) +
+  xlab("Year")+
+  guides(fill=guide_legend(title="Cluster ID"))
+
+ggsave("../figures/TrackingStates.jpeg", height = 6, width = 11)
+
 ```
 
 # Frequency of transitions
