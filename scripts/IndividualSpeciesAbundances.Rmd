@@ -61,15 +61,18 @@ colnames(cover.counts)
 annuals = waps.specs %>% filter(group == "annual")
 waps = waps.specs %>% filter(group == "waps")
 natives = waps.specs %>% filter(group == "natives")
+
 cover_long = bind_cols(cover.attr, cover.counts) %>% filter(fertilization == "none" & clip == "none") %>%
-  gather(key = "species", value = "cover", -c(1:10))
+  gather(key = "species", value = "cover", -c(1:13))
 
 relevant_trts = c("annuals", "WAPS", "Natives", "natives+WAPS+annuals", "annuals+natives", "WAPS+annuals", "WAPS+natives")
 
 ```
 
 ```{r}
-cover_long %>% filter(species %in% annuals$specname & sp.trt %in% relevant_trts)%>%
+ann_spec = annuals$specname
+
+cover_long %>% filter(species %in% ann_spec & sp.trt %in% relevant_trts) %>%
   filter(! species %in% c("oats", "bro.madritensis", "hordeum.sp")) %>%
   ggplot(aes(x = as.numeric(year),
              y = cover,
@@ -87,6 +90,27 @@ cover_long %>% filter(species %in% annuals$specname & sp.trt %in% relevant_trts)
         plot.title = element_text(size=22))
 
 ggsave("../figures/AnnualCover.pdf", height = 10, width = 15)
+
+cover_long %>% filter(species %in% ann_spec & sp.trt %in% relevant_trts) %>%
+  filter(species %in% c("avena", "bro.diandrus")) %>%
+  filter(water == "control") %>%
+  ggplot(aes(x = as.numeric(year),
+             y = cover,
+             color = sp.trt)) +
+  geom_point(alpha = .1) +
+  stat_smooth(se = FALSE) + 
+  geom_smooth(se = FALSE, aes(color = NULL), color = "black") + 
+  facet_grid(species ~ water) +
+  ggtitle("Cover of Annuals over Time") +
+  scale_x_continuous(breaks = seq(2008,2018, by = 2), 
+                   labels = as.character(seq(2008,2018, by = 2))) +
+  xlab("Year") + 
+  theme(strip.text.x = element_text(size = 15),
+        strip.text.y = element_text(size = 15),
+        plot.title = element_text(size=22))
+
+ggsave("../figures/AvenaBroDia.pdf", height = 6, width = 6)
+
 ```
 ```{r}
 cover_long %>% filter(species %in% waps$specname & sp.trt %in% relevant_trts)%>%
@@ -128,3 +152,115 @@ cover_long %>% filter(species %in% natives$specname & sp.trt %in% relevant_trts)
 
 ggsave("../figures/NativeCover.pdf", height = 10, width = 15)
 ```
+
+```{r}
+toplot <- cover_long %>% filter(sp.trt %in% relevant_trts) %>%
+  filter(water == "control") %>%
+  group_by(species, year) %>%
+  summarise(mcov = mean(cover),
+            stddev = sd(cover),
+            obs = n())
+
+toplot$species <- str_replace_all(toplot$species, c("avena" = "A. fatua",
+                                            "bro.hordeaceous" = "B. hordeaceous", 
+                                            "bro.diandrus" = "B. diandrus", 
+                                            "lolium" = "F. perennis", 
+                                            "trifolium" = "T. subterreaneum", 
+                                            "bro.carinatus" = "B. carinatus", 
+                                            "elymus" = "E. glaucus", 
+                                            "leymus" = "E. triticoides", 
+                                            "lotus" = "A. americanus", 
+                                            "nassella" = "S. pulchra", 
+                                            "aegilops" = "A. triuncialis", 
+                                            "taeniatherum" = "E. caput-medusae"))
+```
+
+
+
+```{r}
+g1 = toplot %>%
+  filter(species %in% c("E. glaucus", "S. pulchra")) %>%
+  ggplot(aes(x = as.numeric(year),
+             y = mcov,
+             group = species)) +
+  geom_point(size = 3, pch = 21) +
+  geom_line() + 
+  geom_errorbar(aes(ymin = mcov - (stddev / sqrt(obs)),
+                ymax = mcov + (stddev / sqrt(obs))),
+                width = .2) +
+  facet_grid(~species) +
+  ggtitle("Group 1") +
+  scale_x_continuous(breaks = seq(2008,2018, by = 2), 
+                   labels = as.character(seq(2008,2018, by = 2))) +
+  xlab("Year") +
+  ylab("Mean Cover") +
+  theme(strip.text.x = element_text(size = 15),
+        strip.text.y = element_text(size = 15),
+        plot.title = element_text(size=18))
+
+g2 = toplot %>%
+  filter(species %in% c("F. perennis", "B. hordeaceous")) %>%
+  ggplot(aes(x = as.numeric(year),
+             y = mcov,
+             group = species)) +
+  geom_point(size = 3, pch = 21) +
+  geom_line() + 
+  geom_errorbar(aes(ymin = mcov - (stddev / sqrt(obs)),
+                ymax = mcov + (stddev / sqrt(obs))),
+                width = .2) +
+  facet_grid(~species) +
+  ggtitle("Group 2") +
+  scale_x_continuous(breaks = seq(2008,2018, by = 2), 
+                   labels = as.character(seq(2008,2018, by = 2))) +
+  xlab("Year") +
+  ylab("Mean Cover") +
+  theme(strip.text.x = element_text(size = 15),
+        strip.text.y = element_text(size = 15),
+        plot.title = element_text(size=18))
+
+g3 = toplot %>%
+  filter(species %in% c("E. caput-medusae", "A. triuncialis")) %>%
+  ggplot(aes(x = as.numeric(year),
+             y = mcov,
+             group = species)) +
+  geom_point(size = 3, pch = 21) +
+  geom_line() + 
+  geom_errorbar(aes(ymin = mcov - (stddev / sqrt(obs)),
+                ymax = mcov + (stddev / sqrt(obs))),
+                width = .2) +
+  facet_grid(~species) +
+  ggtitle("Group 3") +
+  scale_x_continuous(breaks = seq(2008,2018, by = 2), 
+                   labels = as.character(seq(2008,2018, by = 2))) +
+  xlab("Year") +
+  ylab("Mean Cover") +
+  theme(strip.text.x = element_text(size = 15),
+        strip.text.y = element_text(size = 15),
+        plot.title = element_text(size=18))
+
+g4 = toplot %>%
+  filter(species %in% c("A. fatua", "B. diandrus")) %>%
+  ggplot(aes(x = as.numeric(year),
+             y = mcov,
+             group = species)) +
+  geom_point(size = 3, pch = 21) +
+  geom_line() + 
+  geom_errorbar(aes(ymin = mcov - (stddev / sqrt(obs)),
+                ymax = mcov + (stddev / sqrt(obs))),
+                width = .2) +
+  facet_grid(~species) +
+  ggtitle("Group 4") +
+  scale_x_continuous(breaks = seq(2008,2018, by = 2), 
+                   labels = as.character(seq(2008,2018, by = 2))) +
+  xlab("Year") +
+  ylab("Mean Cover") +
+  theme(strip.text.x = element_text(size = 15),
+        strip.text.y = element_text(size = 15),
+        plot.title = element_text(size = 18))
+
+
+library(gridExtra)
+newplot = arrangeGrob(g1, g2, g3, g4, nrow = 4)
+ggsave(file = "../figures/GroupCover_v2.pdf", newplot, height = 10, width = 6)
+```
+
