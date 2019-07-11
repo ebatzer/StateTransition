@@ -488,6 +488,7 @@ for(pri in c(0:1)){
     counter = counter + 1
   }
 }
+
 library(viridis)
 
 cols = rainbow(4, v = .5)
@@ -503,15 +504,23 @@ bind_rows(Nprob) %>%
   #geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
   facet_wrap(~priority) +
   ggtitle("Probability of Stability") +
-  scale_color_manual(name = 'Initial State', 
+  scale_color_manual(name = 'State Assignment', 
+         values =c("State 1" = cols[1], 
+                   "State 2" = cols[2], 
+                   "State 3" = cols[3], 
+                   "State 4" = cols[4]),
+         labels = c('E. glaucus - S. pulchra',
+                    'F. perennis - B. hordeaceous', 
+                    'E. caput-medusae - A. triuncialis',
+                    'A. fatua - B. diandrus')) +
+  scale_fill_manual(name = 'State Assignment', 
          values =c("State 1" = cols[1], "State 2" = cols[2], 
                    "State 3" = cols[3], "State 4" = cols[4]),
-         labels = c('Natives','High Priority', 'WAPS','Drought Tol.')) +
-  scale_fill_manual(name = 'Initial State', 
-         values =c("State 1" = cols[1], "State 2" = cols[2], 
-                   "State 3" = cols[3], "State 4" = cols[4]),
-         labels = c('Natives','High Priority', 'WAPS','Drought Tol.')) +
-  xlab("Drought Stress") +
+         labels = c('E. glaucus - S. pulchra',
+                    'F. perennis - B. hordeaceous', 
+                    'E. caput-medusae - A. triuncialis',
+                    'A. fatua - B. diandrus')) +
+  xlab("SPEI") +
   ylab("Probability of Retaining State in Next Year")
 
 ggsave("../figures/StabilityProbabilities_NoErrorBars.pdf", height = 6, width = 8)
@@ -520,28 +529,56 @@ ggsave("../figures/StabilityProbabilities_NoErrorBars.pdf", height = 6, width = 
 
 ```{r}
 trtnames = c("to Natives", "to Priority Annuals", "to WAPS", "to Dry Annuals")
-priorities = c("No Priority", "Priority"
-bind_rows(Nprob) %>%
-  filter(From != To) %>%
-  mutate(priority = if_else(priority == 1, "With Priority", "No Priority")) %>%
+priorities = c("No Priority", "Priority")
+?if
+
+tprob = function(stateval = "State 1", title = "E. glaucus - S. pulchra"){
+  
+  p = bind_rows(Nprob) 
+  
+  p$Trans[p$From == stateval & p$To == stateval] = -1
+  
+  plot = p %>%
+  # filter(From != To) %>%
+  filter(To == stateval) %>%
+  mutate(priority = if_else(priority == 1, "Represented In Seeding", "Not Represented")) %>%
   ggplot(aes(x = precip,
              color = From,
              fill = From)) +
   geom_line(aes(y = Trans), size = 1.5) +
   theme_bw() +
   #geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
-  facet_grid(To~priority) +
-  ggtitle("Probability of Transition") +
-  scale_color_manual(name = 'Initial State', 
+  facet_grid(~priority) +
+  ggtitle(title) +
+  scale_color_manual(name = 'Previous State Assignment', 
          values =c("State 1" = cols[1], "State 2" = cols[2], 
                    "State 3" = cols[3], "State 4" = cols[4]),
-         labels = c('Natives','High Priority', 'WAPS','Drought Tol.')) +
+         labels = c('E. glaucus - S. pulchra',
+                    'F. perennis - B. hordeaceous', 
+                    'E. caput-medusae - A. triuncialis',
+                    'A. fatua - B. diandrus')) +
   scale_fill_manual(name = 'Initial State', 
          values =c("State 1" = cols[1], "State 2" = cols[2], 
                    "State 3" = cols[3], "State 4" = cols[4]),
-         labels = c('Natives','High Priority', 'WAPS','Drought Tol.')) +
-  xlab("Drought Stress") +
-  ylab("Probability of Transition in Next Year")
+         labels = c('E. glaucus - S. pulchra',
+                    'F. perennis - B. hordeaceous', 
+                    'E. caput-medusae - A. triuncialis',
+                    'A. fatua - B. diandrus')) +
+  xlab("SPEI") +
+  ylab("Probability of Assignment in Next Year") +
+  ylim(0, .5)
+  
+  return(plot)
+}
 
-ggsave("../figures/TransitionProbabilities_NoErrorBars.pdf", height = 14, width = 8)
+alltogether = gridExtra::grid.arrange(tprob(),
+                        tprob("State 2", 'F. perennis - B. hordeaceous'),
+                        tprob("State 3", 'E. caput-medusae - A. triuncialis'),
+                        tprob("State 4", 'A. fatua - B. diandrus'),
+                        nrow = 4, 
+                        ncol = 1,
+                        top = "Probability of Transition to States")
+
+ggsave(plot = alltogether,
+       "../figures/TransitionProbabilities_NoErrorBars_v2.pdf", height = 14, width = 8)
 ```
