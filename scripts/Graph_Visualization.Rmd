@@ -1,0 +1,66 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+https://kateto.net/network-visualization
+
+```{r}
+library("tidyverse")
+library("igraph")
+
+ttable <- data.frame(A = c(95, 10, 25, 19),
+                     B = c(8, 50, 11, 21),
+                     C = c(7, 30, 115, 7),
+                     D = c(29, 29, 22, 76),
+                     row.names = c("A", "B", "C", "D")) %>%
+  rownames_to_column("source")
+
+edges = ttable %>% 
+  gather(key = "target", value = "weight", -source) %>%
+  group_by(source) %>%
+  mutate(weight = weight / sum(weight)) %>%
+  select(source, target, weight)
+
+nodes = data.frame(node_id = c("A", "B", "C", "D"),
+                   cluster = c("I", "haven't", "assigned", "yet"),
+                   stability = diag(as.matrix(ttable[,c(2:5)])) / rowSums(as.matrix(ttable[,c(2:5)])))
+
+net = graph_from_data_frame(d = edges, vertices = nodes, directed = TRUE)
+net = simplify(net, remove.loops = T)
+
+colors = rainbow(4, v = .75, s = .3)
+V(net)$color = colors
+E(net)$width <- E(net)$weight * 40
+V(net)$size <- (V(net)$stability * 100)
+V(net)$label <- round(V(net)$stability, 2)
+V(net)$label.font=2
+E(net)$label.font=2
+
+graph_attr(net, "layout") <- layout_with_lgl
+
+pdf("../figures/stm_graph.pdf", height = 7, width = 7)
+
+plot(net, 
+     edge.arrow.size = 1.5,
+     edge.curved = .5,
+     vertex.label.family = "sans",
+     edge.label.family = "sans",
+     edge.label.color = "black",
+     vertex.label.color = "black",
+     edge.label = round(E(net)$weight, 2),
+     margin = c(.5,.1,0,.1),
+     edge.color = "grey70",
+     main = "State Resilience and Transition Probabilities",
+     cex = 1.25)
+
+legend(x=-1.7, y=-1.5, c("State 1: E. glaucus - S.pulchra", 
+                         "State 2: F. perennis - B. hordeaceous", 
+                         "State 3: E. caput-medusae - A. triuncialis", 
+                         "State 4: A. fatua - B. diandrus"), pch=21,
+       col="#777777", 
+       pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1)
+
+dev.off()
+```
+
