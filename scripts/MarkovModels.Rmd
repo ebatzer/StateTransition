@@ -11,7 +11,7 @@ output:
 
 # Fitting Multi-state (Markov) models with MSM
 
-Multi-state Markov models might be a relevant way to analyze this data, where 
+Multi-state Markov models might be a relevant way to analyze this data, where
 repeated observations of a single subject are quantified as a set of discrete
 states with temporal transitions in state assignment described by a matrix
 of transition properties. Also possible with these models is the addition of
@@ -22,8 +22,8 @@ only a fixed probability for each given state change.
 library(lubridate); library(tidyverse); library(tidyquant)
 library(msm)
 
-clustdat <- read.csv("../data/WAPSclusters.csv", 
-                     header = TRUE, 
+clustdat <- read.csv("../data/WAPSclusters.csv",
+                     header = TRUE,
                      stringsAsFactors = FALSE)
 
 climate <- read.csv("../data/cimis_monthly.csv",
@@ -49,7 +49,7 @@ we observed.
 result of the influx of Avena / Bromus diandrus during the peak of the drought)
 
 * "Priority Annuals", which did very well once initially planted, were quick to be lost
-from the dataset. 
+from the dataset.
 
 ```{r, echo = FALSE, warning = FALSE}
 st = as.matrix(statetable.msm(cluster, plot, data = clustdat %>% arrange(plot, year)))
@@ -58,7 +58,7 @@ rownames(st) = c("Natives", "WetA", "WAPS", "DryA")
 st
 ```
 
-# Fitting state-transition models: 
+# Fitting state-transition models:
 
 Fitting these models is relatively simply using the MSM package -- the function
 attempts to find the best values of the transition matrix that predict the observed
@@ -68,7 +68,7 @@ MSMs also allow for the use of likelihood ratio tests -- quantitative measures
 for how additional covariates in the model improve fit. However, one important
 caveat is that each element of the transition matrix is fit by a unique parameter
 (12 total for a 4x4 matrix, as diagonal entries are equal to 1 - sum of all
-transition probabilities), so the addition of a covariate must change a number of 
+transition probabilities), so the addition of a covariate must change a number of
 unique parameters, greatly reducing the residual degrees of freedom.
 
 ```{r, echo = FALSE, warning = FALSE}
@@ -93,18 +93,18 @@ To assess whether priority effects impact transition probabilities, we can inclu
 planting mixture effects on transition probabilities. To reduce the total number
 of degrees of freedom associated with each covariate, I've restricted their
 impact to only those transitions from one state to a group found in the initial
-planting composition. E.g. asking whether the addition of natives to the initial 
+planting composition. E.g. asking whether the addition of natives to the initial
 planting group influences the likelihood that a given community will later
 transition to a native state. This would only affect 3 elements of the transition
 matrix governing the transitions to state 1 (native state) from states
 2, 3, or 4 (wet annual, WAPS, or dry annual states, respectively).
 
 The resulting likelihood ratio test suggests that the addition of these parameters
-significantly improves model fit (p > .001). 
+significantly improves model fit (p > .001).
 
 ```{r, echo = FALSE, warning = FALSE}
 # With priority effects
-msm.priority <- msm(cluster ~ year, plot, data=clustdat, qmatrix=Q, obstype=2, 
+msm.priority <- msm(cluster ~ year, plot, data=clustdat, qmatrix=Q, obstype=2,
                     covariates = list("1-2" = ~ annuals,
                                       "1-3" = ~ waps,
                                       "1-4" = ~ annuals,
@@ -139,7 +139,7 @@ cat("1 - Native, 2 - Priority Annuals, 3 - WAPS, 4 - Dry Annuals")
 
 # Including climate data into analyses:
 
-To improve the model fit above, we could try to incorporate environmental covariates 
+To improve the model fit above, we could try to incorporate environmental covariates
 into our data as well. We know that precipitation patterns can have major effects
 on community assembly, but it is unclear how to best examine the influence of
 this driver on state change rates.  
@@ -147,12 +147,12 @@ this driver on state change rates.
 To start, figures below show data on monthly precipitation and evapotranspiration
 measures taken from the Davis CIMIS (irrigation management) system. These fluctuations
 show a somewhat expected pattern - years 2012 - 2015 show a profound drought,
-while the periods between 2008 - 2011 and 2015-2017 are quite wet. 
+while the periods between 2008 - 2011 and 2015-2017 are quite wet.
 
 ```{r, echo = FALSE, warning = FALSE}
 climate_daily$Date = as.POSIXct(climate_daily$Date, format = "%m/%d/%Y")
 
-climate_daily %>% 
+climate_daily %>%
   group_by(month=floor_date(Date, "month")) %>%
   summarise(precip = sum(na.omit(Precip..mm.)),
             eto = sum(na.omit(ETo..mm.))) %>%
@@ -162,7 +162,7 @@ climate_daily %>%
   ylab("Total Precip (mm)") +
   ggtitle("Precipitation by Month 2006 - 2018")
 
-climate_daily %>% 
+climate_daily %>%
   group_by(month=floor_date(Date, "month")) %>%
   summarise(precip = sum(na.omit(Precip..mm.)),
             eto = sum(na.omit(ETo..mm.))) %>%
@@ -177,9 +177,9 @@ Many studies focusing on climate-driven changes in species abundance have focuse
 early-season precipitation as a main determinant of community composition. As a start,
 I will focus here on precipitation and ETo values between December and February.
 
-There are a number of different ways to use this data to evluate changes in 
-community transition rates -- total precipitation, net water availability 
-(precip - ETo), and lagged precipitation, to name a few. Dudney et al (2017), 
+There are a number of different ways to use this data to evluate changes in
+community transition rates -- total precipitation, net water availability
+(precip - ETo), and lagged precipitation, to name a few. Dudney et al (2017),
 which attempts to evaluate current year and lagged precipitation effects, may
 be of some use.  
 
@@ -189,14 +189,14 @@ intervals, with a three-year moving average indicated by the dashed line.
 ```{r, echo = FALSE, warning = FALSE}
 climate_daily %>% mutate(month = month(Date),
                          year = year(Date)) %>%
-  group_by(Water.Year) %>% 
+  group_by(Water.Year) %>%
   filter(month %in% c(11,12,1,2)) %>%
   summarise(precip = sum(na.omit(Precip..mm.)),
             eto = sum(ETo..mm.)) %>%
-  ggplot() + 
+  ggplot() +
   geom_bar(stat = "identity",
            aes(y = precip,
-               x = Water.Year, 
+               x = Water.Year,
                fill = "blue"),
            width = .3, color = "black") +
     geom_bar(stat = "identity",
@@ -204,14 +204,14 @@ climate_daily %>% mutate(month = month(Date),
                x = Water.Year + .3,
                fill = "tan"),
            width = .3, color = "black") +
-    geom_bar(stat = "identity", 
+    geom_bar(stat = "identity",
            aes(y = precip - eto,
                x = Water.Year + .6,
                fill = "green"),
            width = .3, color = "black") +
   geom_ma(aes(y = precip - eto,
               x = Water.Year + .6),
-              color = "black", n = 3) + 
+              color = "black", n = 3) +
     scale_fill_identity(name = 'Measure', guide = 'legend', labels = c('Precip (mm)', 'ETo (mm)', 'Net (mm)')) +
   xlab("Year") +
   ylab("Water Availability (Nov - Feb") +
@@ -220,7 +220,7 @@ climate_daily %>% mutate(month = month(Date),
 
 Because I don't seem to see a consistent trend here where lower values of net
 precipitation minus ETo produce within year-effects, I think a running average
-approach might be best. Rather than accounting for just a single year of data, 
+approach might be best. Rather than accounting for just a single year of data,
 taking a running average of drought stress can account for successive effects
 of multiple years.
 
@@ -228,7 +228,7 @@ of multiple years.
 climate$month = gsub("-.*", "", climate$Month.Year)
 
 climsum = climate_daily %>% mutate(month = month(Date), year = year(Date)) %>%
-  group_by(Water.Year) %>% 
+  group_by(Water.Year) %>%
   filter(month %in% c(11,12,1,2)) %>%
   summarise(precip = sum(na.omit(Precip..mm.)),
             eto = sum(ETo..mm.),
@@ -243,7 +243,7 @@ clustdat = left_join(clustdat, climsum %>% rename(year = Water.Year))
 # With environmental covariates
 msm.env <- msm(cluster ~ year, plot, data=clustdat, qmatrix=Q, obstype=2, covariates = ~ net_cum_3)
 
-msm.env_priority <- msm(cluster ~ year, plot, data=clustdat, qmatrix=Q, obstype=2, 
+msm.env_priority <- msm(cluster ~ year, plot, data=clustdat, qmatrix=Q, obstype=2,
                     covariates = list("1-2" = ~ annuals + net_cum_3,
                                       "1-3" = ~ waps + net_cum_3,
                                       "1-4" = ~ annuals + net_cum_3,
@@ -266,7 +266,7 @@ data.frame(model = c("Null", "Priority", "Environment", "Env + Priority"),
 ```
 
 The subsequent prevalence plot shows a substantially better fit to the models with
-this environmental data included - though it's not perfect. 
+this environmental data included - though it's not perfect.
 
 ```{r, echo = FALSE, warning = FALSE}
 # Estimated values of Q
@@ -278,11 +278,11 @@ rownames(qmat) = c("Natives", "WetA", "WAPS", "DryA")
 # plot.prevalence.msm(msm.l1_priority, mintime=2008, maxtime=2018)
 # cat("1 - Native, 2 - Priority Annuals, 3 - WAPS, 4 - Dry Annuals")
 ```
- 
+
 # Next steps:
- 
+
 Going forward, I think the most important ways to refine this analysis are:
- 
+
 1. Make clustering approaches more concrete - what are the best steps in subsetting
 data and classifying community types? $\checkmark$
 
@@ -292,18 +292,18 @@ data and classifying community types? $\checkmark$
 in transition models? $\checkmark$
 
 4. Follow-up with clearer visualizations of how climate impacts persistence / state change -
-visualize how probabilities of transitions change with priority effects across a 
+visualize how probabilities of transitions change with priority effects across a
 gradient of climatic values. $\checkmark$
- 
-5. Identify other tests and analyses, as needed. $\checkmark$
+
+ 5. Identify other tests and analyses, as needed.
 
 # Best way to analyze climatic data:
 
-I need to double-check how the model functions -- are transition probabilities a 
+I need to double-check how the model functions -- are transition probabilities a
 function of a water year's precipitation (i.e. are we predicting transitions in
 year t + 1 using data at year t? I think this is likely the case) or as a function
-of the next year's precipitation? The model that best corresponds to our conceptual 
-notion of state change isn't climate at t, but climate at t + 1 (it's between our 
+of the next year's precipitation? The model that best corresponds to our conceptual
+notion of state change isn't climate at t, but climate at t + 1 (it's between our
 two sets of observations, but impacts the next year).
 
 The best response, based on other publications is to quantify drought stress using
@@ -313,10 +313,10 @@ for more information on its calculation.
 ```{r}
 speidata <- read.csv("../data/SPEIfits.csv")
 colnames(speidata)
-clustdat_t1 <- clustdat %>% 
+clustdat_t1 <- clustdat %>%
   left_join((speidata %>% mutate(year = year + 1)), by = c("year" = "year"))
 
-msm.l1_priority <- msm(cluster ~ year, plot, data=clustdat_t1, qmatrix=Q, obstype=2, 
+msm.l1_priority <- msm(cluster ~ year, plot, data=clustdat_t1, qmatrix=Q, obstype=2,
                     covariates = list("1-2" = ~ annuals + l1fit,
                                       "1-3" = ~ waps + l1fit,
                                       "1-4" = ~ annuals + l1fit,
@@ -330,7 +330,7 @@ msm.l1_priority <- msm(cluster ~ year, plot, data=clustdat_t1, qmatrix=Q, obstyp
                                       "4-2" = ~ annuals + l1fit,
                                       "4-3" = ~ waps + l1fit))
 
-msm.l2_priority <- msm(cluster ~ year, plot, data=clustdat_t1, qmatrix=Q, obstype=2, 
+msm.l2_priority <- msm(cluster ~ year, plot, data=clustdat_t1, qmatrix=Q, obstype=2,
                     covariates = list("1-2" = ~ annuals + l2fit,
                                       "1-3" = ~ waps + l2fit,
                                       "1-4" = ~ annuals + l2fit,
@@ -344,7 +344,7 @@ msm.l2_priority <- msm(cluster ~ year, plot, data=clustdat_t1, qmatrix=Q, obstyp
                                       "4-2" = ~ annuals + l2fit,
                                       "4-3" = ~ waps + l2fit))
 
-msm.l3_priority <- msm(cluster ~ year, plot, data=clustdat_t1, qmatrix=Q, obstype=2, 
+msm.l3_priority <- msm(cluster ~ year, plot, data=clustdat_t1, qmatrix=Q, obstype=2,
                     covariates = list("1-2" = ~ annuals + l3fit,
                                       "1-3" = ~ waps + l3fit,
                                       "1-4" = ~ annuals + l3fit,
@@ -362,56 +362,56 @@ AIC(msm.env_priority, msm.l1_priority, msm.l2_priority, msm.l3_priority)
 
 ```
 
-T1 approach seems to be better via AIC, but model doesn't appear to work right in reality. 
+T1 approach seems to be better via AIC, but model doesn't appear to work right in reality.
 
 ```{r}
-clustdat_t0 <- clustdat %>%
-   left_join((speidata %>% mutate(year = year)), by = c("year" = "year"))
-
- msm.l1_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2,
-                     covariates = list("1-2" = ~ annuals + l1fit,
-                                       "1-3" = ~ waps + l1fit,
-                                       "1-4" = ~ annuals + l1fit,
-                                       "2-1" = ~ natives + l1fit,
-                                       "2-3" = ~ waps + l1fit,
-                                       "2-4" = ~ annuals + l1fit,
-                                       "3-1" = ~ natives + l1fit,
-                                       "3-2" = ~ annuals + l1fit,
-                                       "3-4" = ~ annuals + l1fit,
-                                       "4-1" = ~ natives + l1fit,
-                                       "4-2" = ~ annuals + l1fit,
-                                       "4-3" = ~ waps + l1fit))
-
- msm.l2_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2,
-                     covariates = list("1-2" = ~ annuals + l2fit,
-                                       "1-3" = ~ waps + l2fit,
-                                       "1-4" = ~ annuals + l2fit,
-                                       "2-1" = ~ natives + l2fit,
-                                       "2-3" = ~ waps + l2fit,
-                                       "2-4" = ~ annuals + l2fit,
-                                       "3-1" = ~ natives + l2fit,
-                                       "3-2" = ~ annuals + l2fit,
-                                       "3-4" = ~ annuals + l2fit,
-                                       "4-1" = ~ natives + l2fit,
-                                       "4-2" = ~ annuals + l2fit,
-                                       "4-3" = ~ waps + l2fit))
-
- msm.l3_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2,
-                     covariates = list("1-2" = ~ annuals + l3fit,
-                                       "1-3" = ~ waps + l3fit,
-                                       "1-4" = ~ annuals + l3fit,
-                                       "2-1" = ~ natives + l3fit,
-                                       "2-3" = ~ waps + l3fit,
-                                       "2-4" = ~ annuals + l3fit,
-                                       "3-1" = ~ natives + l3fit,
-                                       "3-2" = ~ annuals + l3fit,
-                                       "3-4" = ~ annuals + l3fit,
-                                       "4-1" = ~ natives + l3fit,
-                                       "4-2" = ~ annuals + l3fit,
-                                       "4-3" = ~ waps + l3fit))
-
-cat("T0 Model")
-AIC(msm.l1_priority, msm.l2_priority, msm.l3_priority)
+# clustdat_t0 <- clustdat %>%
+#    left_join((speidata %>% mutate(year = year)), by = c("year" = "year"))
+#
+#  msm.l1_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2,
+#                      covariates = list("1-2" = ~ annuals + l1fit,
+#                                        "1-3" = ~ waps + l1fit,
+#                                        "1-4" = ~ annuals + l1fit,
+#                                        "2-1" = ~ natives + l1fit,
+#                                        "2-3" = ~ waps + l1fit,
+#                                        "2-4" = ~ annuals + l1fit,
+#                                        "3-1" = ~ natives + l1fit,
+#                                        "3-2" = ~ annuals + l1fit,
+#                                        "3-4" = ~ annuals + l1fit,
+#                                        "4-1" = ~ natives + l1fit,
+#                                        "4-2" = ~ annuals + l1fit,
+#                                        "4-3" = ~ waps + l1fit))
+#
+#  msm.l2_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2,
+#                      covariates = list("1-2" = ~ annuals + l2fit,
+#                                        "1-3" = ~ waps + l2fit,
+#                                        "1-4" = ~ annuals + l2fit,
+#                                        "2-1" = ~ natives + l2fit,
+#                                        "2-3" = ~ waps + l2fit,
+#                                        "2-4" = ~ annuals + l2fit,
+#                                        "3-1" = ~ natives + l2fit,
+#                                        "3-2" = ~ annuals + l2fit,
+#                                        "3-4" = ~ annuals + l2fit,
+#                                        "4-1" = ~ natives + l2fit,
+#                                        "4-2" = ~ annuals + l2fit,
+#                                        "4-3" = ~ waps + l2fit))
+#
+#  msm.l3_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2,
+#                      covariates = list("1-2" = ~ annuals + l3fit,
+#                                        "1-3" = ~ waps + l3fit,
+#                                        "1-4" = ~ annuals + l3fit,
+#                                        "2-1" = ~ natives + l3fit,
+#                                        "2-3" = ~ waps + l3fit,
+#                                        "2-4" = ~ annuals + l3fit,
+#                                        "3-1" = ~ natives + l3fit,
+#                                        "3-2" = ~ annuals + l3fit,
+#                                        "3-4" = ~ annuals + l3fit,
+#                                        "4-1" = ~ natives + l3fit,
+#                                        "4-2" = ~ annuals + l3fit,
+#                                        "4-3" = ~ waps + l3fit))
+#
+#  cat("T0 Model")
+#  AIC(msm.l1_priority, msm.l2_priority, msm.l3_priority)
 ```
 
 # Goodness-of-fit test
@@ -427,21 +427,21 @@ chisq.test(outputtable$obs[c(1:4)], outputtable$exp[c(1:4)])
 
 ```{r}
 system.time(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip,
-                                             natives = pri, 
-                                             annuals = pri, 
+                                             natives = pri,
+                                             annuals = pri,
                                              waps = pri),
             ci = "boot", B = 10))
 
 system.time(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip,
-                                             natives = pri, 
-                                             annuals = pri, 
+                                             natives = pri,
+                                             annuals = pri,
                                              waps = pri),
             ci = "boot", B = 100))
 
 
 system.time(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip,
-                                             natives = pri, 
-                                             annuals = pri, 
+                                             natives = pri,
+                                             annuals = pri,
                                              waps = pri),
             ci = "boot", B = 1000))
 ```
@@ -460,18 +460,29 @@ When all transitions are possible, the probability of transitioning to either st
 
 $$ P_{11} = e^{-(q_{12} + q_{13} + q_{14})} $$
 
-and 
+and
 
 $$ P_{12} = 1 - e^{-q_{12}} $$
 $$ P_{13} = 1 - e^{-q_{13}} $$
 $$ P_{14} = 1 - e^{-q_{14}} $$
 
-Below is code to pull out transition probabilities for each state. 
+```{r}
+qmatrix.msm(msm.l1_priority, covariates=list(l1fit = 0))
+p12 = 1 - exp(-.02581)
+p13 = 1 - exp(-.02605)
+p14 = 1 - exp(-.1894)
+tot = sum(p12,p13,p14)
+p12/tot
+p13/tot
+p14/tot
+```
+
+Below is code to pull out transition probabilities for each state.
 However, there is likely a better way:
 
 * Create matrix of Q values
 * Create function that extracts probabilities based on the function exp(q) or
-1 - exp(-q). 
+1 - exp(-q).
 * Assign diagonals to the probability of maintaining a state
 * Assign non-diagonals to the probability of transitioning
 * Repeat for confidence intervals (both low and high)
@@ -483,33 +494,33 @@ counter = 1
 
 for(pri in c(0:1)){
   for(netprecip in seq(-1.5, 1.5, by = .1)){
-    qm = as.matrix(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip, 
+    qm = as.matrix(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip,
                                                                natives = pri, annuals = pri, waps = pri))$estimates)
-    ql = as.matrix(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip, 
+    ql = as.matrix(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip,
                                                                  natives = pri, annuals = pri, waps = pri))$L)
-    qu = as.matrix(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip, 
+    qu = as.matrix(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip,
                                                                  natives = pri, annuals = pri, waps = pri))$U)
-    
-    qdf = data.frame(qm) %>% mutate(From = rownames(qm)) %>% 
+
+    qdf = data.frame(qm) %>% mutate(From = rownames(qm)) %>%
       gather("key" = "To", "value" = "Trans", -From) %>%
       mutate(To = gsub("\\.", " ", To))
-    
-    qlow = data.frame(ql) %>% mutate(From = rownames(ql)) %>% 
+
+    qlow = data.frame(ql) %>% mutate(From = rownames(ql)) %>%
       gather("key" = "To", "value" = "Lower", -From) %>%
       mutate(To = gsub("\\.", " ", To))
-    
-    qupp = data.frame(qu) %>% mutate(From = rownames(qu)) %>% 
+
+    qupp = data.frame(qu) %>% mutate(From = rownames(qu)) %>%
       gather("key" = "To", "value" = "Upper", -From) %>%
       mutate(To = gsub("\\.", " ", To))
-    
+
     qdf$Trans = if_else(qdf$From == qdf$To, exp(qdf$Trans), 1 - exp(-qdf$Trans))
     qlow$Lower = if_else(qlow$From == qlow$To, exp(qlow$Lower), 1 - exp(-qlow$Lower))
     qupp$Upper = if_else(qupp$From == qupp$To, exp(qupp$Upper), 1 - exp(-qupp$Upper))
-    
+
     output <- left_join(qdf, qlow) %>% left_join(qupp)
     output$precip = rep(netprecip, nrow(output))
     output$priority = rep(pri, nrow(output))
-    
+
     Nprob[[counter]] <- output
     counter = counter + 1
   }
@@ -530,20 +541,20 @@ bind_rows(Nprob) %>%
   #geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
   facet_wrap(~priority) +
   ggtitle("Climate and Seeding Composition Effects on State Resilience") +
-  scale_color_manual(name = 'State Assignment', 
-         values =c("State 1" = cols[1], 
-                   "State 2" = cols[2], 
-                   "State 3" = cols[3], 
+  scale_color_manual(name = 'State Assignment',
+         values =c("State 1" = cols[1],
+                   "State 2" = cols[2],
+                   "State 3" = cols[3],
                    "State 4" = cols[4]),
          labels = c('E. glaucus - S. pulchra',
-                    'F. perennis - B. hordeaceous', 
+                    'F. perennis - B. hordeaceous',
                     'E. caput-medusae - A. triuncialis',
                     'A. fatua - B. diandrus')) +
-  scale_fill_manual(name = 'State Assignment', 
-         values =c("State 1" = cols[1], "State 2" = cols[2], 
+  scale_fill_manual(name = 'State Assignment',
+         values =c("State 1" = cols[1], "State 2" = cols[2],
                    "State 3" = cols[3], "State 4" = cols[4]),
          labels = c('E. glaucus - S. pulchra',
-                    'F. perennis - B. hordeaceous', 
+                    'F. perennis - B. hordeaceous',
                     'E. caput-medusae - A. triuncialis',
                     'A. fatua - B. diandrus')) +
   xlab("SPEI") +
@@ -558,11 +569,11 @@ trtnames = c("to Natives", "to Priority Annuals", "to WAPS", "to Dry Annuals")
 priorities = c("No Priority", "Priority")
 
 tprob = function(stateval = "State 1", title = "E. glaucus - S. pulchra"){
-  
-  p = bind_rows(Nprob) 
-  
+
+  p = bind_rows(Nprob)
+
   p$Trans[p$From == stateval & p$To == stateval] = -1
-  
+
   plot = p %>%
   # filter(From != To) %>%
   filter(To == stateval) %>%
@@ -575,24 +586,24 @@ tprob = function(stateval = "State 1", title = "E. glaucus - S. pulchra"){
   #geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
   facet_grid(~priority) +
   ggtitle(title) +
-  scale_color_manual(name = 'Previous State Assignment', 
-         values =c("State 1" = cols[1], "State 2" = cols[2], 
+  scale_color_manual(name = 'Previous State Assignment',
+         values =c("State 1" = cols[1], "State 2" = cols[2],
                    "State 3" = cols[3], "State 4" = cols[4]),
          labels = c('E. glaucus - S. pulchra',
-                    'F. perennis - B. hordeaceous', 
+                    'F. perennis - B. hordeaceous',
                     'E. caput-medusae - A. triuncialis',
                     'A. fatua - B. diandrus')) +
-  scale_fill_manual(name = 'Initial State', 
-         values =c("State 1" = cols[1], "State 2" = cols[2], 
+  scale_fill_manual(name = 'Initial State',
+         values =c("State 1" = cols[1], "State 2" = cols[2],
                    "State 3" = cols[3], "State 4" = cols[4]),
          labels = c('E. glaucus - S. pulchra',
-                    'F. perennis - B. hordeaceous', 
+                    'F. perennis - B. hordeaceous',
                     'E. caput-medusae - A. triuncialis',
                     'A. fatua - B. diandrus')) +
   xlab("SPEI") +
   ylab("Probability of Assignment in Next Year") +
   ylim(0, .5)
-  
+
   return(plot)
 }
 
@@ -600,12 +611,12 @@ alltogether = gridExtra::grid.arrange(tprob(),
                         tprob("State 2", 'F. perennis - B. hordeaceous'),
                         tprob("State 3", 'E. caput-medusae - A. triuncialis'),
                         tprob("State 4", 'A. fatua - B. diandrus'),
-                        nrow = 4, 
+                        nrow = 4,
                         ncol = 1,
                         top = "Probability of Transition to States")
 
-# ggsave(plot = alltogether,
-#        "../figures/TransitionProbabilities_NoErrorBars_v2.pdf", height = 14, width = 8)
+ggsave(plot = alltogether,
+       "../figures/TransitionProbabilities_NoErrorBars_v2.pdf", height = 14, width = 8)
 ```
 
 # Highlighting particular transitions
@@ -620,15 +631,18 @@ textdf = data.frame(
       Trans = c(.5, .5),
       lab = c("+ Priority", "- Priority"),
       priority = c("E. glaucus - S. pulchra ", "E. glaucus - S. pulchra"))
-p = bind_rows(Nprob) 
-  
+p = bind_rows(Nprob)
+
   # p$Trans[p$From == stateval & p$To == stateval] = -1
-  
-plot = p %>%
+
+  plot = p %>%
     filter(From != To) %>%
     filter(To == stateval) %>%
-    mutate(To = plyr::revalue(To, 
-                                c("State 1" = 'E. glaucus - S. pulchra'))) %>%
+    mutate(To = plyr::revalue(To,
+                                c("State 1" = 'E. glaucus - S. pulchra',
+                                  "State 2" = 'F. perennis - B. hordeaceous',
+                                  "State 3" = 'E. caput-medusae - A. triuncialis',
+                                  "State 4" = 'A. fatua - B. diandrus'))) %>%
     mutate(priority = if_else(priority == 1, "E. glaucus - S. pulchra ", "E. glaucus - S. pulchra")) %>%
     ggplot(aes(x = precip,
                color = From,
@@ -638,16 +652,16 @@ plot = p %>%
     #geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
     facet_grid(~priority) +
     ggtitle("Seeding Composition Effects on Transition Probability") +
-      scale_color_manual(name = 'Previous State Assignment', 
-             values =c("State 2" = cols[2], 
+      scale_color_manual(name = 'Previous State Assignment',
+             values =c("State 2" = cols[2],
                        "State 3" = cols[3], "State 4" = cols[4]),
-             labels = c('F. perennis - B. hordeaceous', 
+             labels = c('F. perennis - B. hordeaceous',
                         'E. caput-medusae - A. triuncialis',
                         'A. fatua - B. diandrus')) +
-      scale_fill_manual(name = 'Initial State', 
-             values =c("State 2" = cols[2], 
+      scale_fill_manual(name = 'Initial State',
+             values =c("State 2" = cols[2],
                        "State 3" = cols[3], "State 4" = cols[4]),
-             labels = c('F. perennis - B. hordeaceous', 
+             labels = c('F. perennis - B. hordeaceous',
                         'E. caput-medusae - A. triuncialis',
                         'A. fatua - B. diandrus')) +
     xlab("SPEI") +
@@ -664,19 +678,19 @@ plot = p %>%
 ```{r}
 stateval = c("State 3", "State 4")
 
-p = bind_rows(Nprob) 
-  
+p = bind_rows(Nprob)
+
   # p$Trans[p$From == stateval & p$To == stateval] = -1
-  
+
 plot = p %>%
       group_by(From, To, precip) %>%
       summarise(Trans = mean(Trans)) %>%
       filter(From != To) %>%
       filter(To == stateval) %>%
       ungroup() %>%
-      mutate(To = plyr::revalue(To, 
+      mutate(To = plyr::revalue(To,
                                 c("State 1" = 'E. glaucus - S. pulchra',
-                                  "State 2" = 'F. perennis - B. hordeaceous', 
+                                  "State 2" = 'F. perennis - B. hordeaceous',
                                   "State 3" = 'E. caput-medusae - A. triuncialis',
                                   "State 4" = 'A. fatua - B. diandrus'))) %>%
       # mutate(priority = if_else(priority == 1, "Represented In Seeding", "Not Represented")) %>%
@@ -688,18 +702,18 @@ plot = p %>%
       #geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
       facet_grid(~To) +
       ggtitle("Climate Effects on Transition Probability") +
-       scale_color_manual(name = 'Previous State Assignment', 
-           values =c("State 1" = cols[1], "State 2" = cols[2], 
+       scale_color_manual(name = 'Previous State Assignment',
+           values =c("State 1" = cols[1], "State 2" = cols[2],
                      "State 3" = cols[3], "State 4" = cols[4]),
            labels = c('E. glaucus - S. pulchra',
-                      'F. perennis - B. hordeaceous', 
+                      'F. perennis - B. hordeaceous',
                       'E. caput-medusae - A. triuncialis',
                       'A. fatua - B. diandrus')) +
-    scale_fill_manual(name = 'Initial State', 
-           values =c("State 1" = cols[1], "State 2" = cols[2], 
+    scale_fill_manual(name = 'Initial State',
+           values =c("State 1" = cols[1], "State 2" = cols[2],
                      "State 3" = cols[3], "State 4" = cols[4]),
            labels = c('E. glaucus - S. pulchra',
-                      'F. perennis - B. hordeaceous', 
+                      'F. perennis - B. hordeaceous',
                       'E. caput-medusae - A. triuncialis',
                       'A. fatua - B. diandrus')) +
       xlab("SPEI") +
@@ -708,9 +722,3 @@ plot = p %>%
 
 # ggsave("../figures/climate_transition.pdf", width = 7, height = 4)
 ```
-
-
-
-
-
-
