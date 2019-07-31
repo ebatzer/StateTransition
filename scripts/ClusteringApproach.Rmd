@@ -107,12 +107,12 @@ comp.subset = comp.cover[comp.attr$water %in% selected.water &
              comp.attr$fertilization %in% selected.fert,]
 
 print("Total Cover in Dataset:")
-specsbycover = sort(round(colSums(comp.subset),2), decreasing = TRUE)
-specsbycover
+specsbycover = sort(round(colSums(comp.subset) / sum(comp.subset),2), decreasing = TRUE)
+# specsbycover
 
 print("Plot Occupancy in Dataset:")
 specsbyfreq = sort(round(colSums(decostand(comp.subset, method = "pa")) / nrow(comp.subset), 2), decreasing = TRUE)
-specsbyfreq
+# specsbyfreq
 ```
 
 
@@ -159,7 +159,6 @@ ord.mat <- ord.mat[rowSums(ord.mat) != 0, ]
 
 Raw functional group abundances:
 
-
 ```{r}
 sumtable = left_join(ord.att, bind_cols(comp.attr,group_percents)) %>%
   group_by(plot, year, sp.trt) %>%
@@ -196,7 +195,6 @@ sumtable %>%
 
 ggsave("../figures/ProportionalAbundances.pdf", width = 10, height = 6)
 ```
-
 
 
 The first step in this analysis is to visualize the data using some sort of
@@ -286,8 +284,12 @@ though that number seems too high to be relevant given the number of replicates
 we have, as well as my intuition for the system as a whole. 
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
-NbClust(decostand(ord.mat, method = "total"), min.nc = 2, max.nc = 10, method = "kmeans",
-        index = c("hartigan", "ch", "beale", "kl", "cindex", "db", "silhouette", "duda"))[1:2]
+bestclust = NbClust(decostand(ord.mat, method = "total"), min.nc = 2, max.nc = 10, method = "kmeans",
+        index = c("hartigan", "ch", "beale", "kl", "cindex", "db", "silhouette", "duda", "gap"))[1:2]
+
+
+res = get_clust_tendency(decostand(ord.mat, method = "total"), 100, graph = TRUE)
+# Significant clusterability, H = 0.1
 ```
 
 ## Visualizing how the clustering algorithm splits up the data
@@ -312,14 +314,17 @@ cols = rainbow(4, v = .75)
 ggplot(cluscounts, 
        aes(x = year, 
            y = count / 96, 
-           color = factor(cluster))) + 
-  geom_line(stat = "identity", size = 1.25) +
+           fill = factor(cluster),
+           group = factor(cluster),
+           shape = factor(cluster))) + 
+  geom_point(stat = "identity", size = 3) +
+  geom_line(stat = "identity", color = "black", linetype = 2) +
   ggtitle("State Assignment Frequency") +
   theme_bw() + 
   ylab("Frequency") +
   xlab("Year") +
   scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
-  scale_color_manual(name = 'State Assignment', 
+  scale_fill_manual(name = 'State Assignment', 
          values =c("1" = cols[1], 
                    "2" = cols[2], 
                    "3" = cols[3], 
@@ -327,7 +332,13 @@ ggplot(cluscounts,
          labels = c('E. glaucus - S. pulchra',
                     'F. perennis - B. hordeaceous', 
                     'E. caput-medusae - A. triuncialis',
-                    'A. fatua - B. diandrus')) 
+                    'A. fatua - B. diandrus')) +
+  scale_shape_manual(name = 'State Assignment', 
+         values = c(21,22,23,24),
+         labels = c('E. glaucus - S. pulchra',
+                    'F. perennis - B. hordeaceous', 
+                    'E. caput-medusae - A. triuncialis',
+                    'A. fatua - B. diandrus'))
 
 ggsave("../figures/assignmentfrequency.pdf", width = 7, height = 4)
 ```
@@ -509,7 +520,6 @@ transbray = function(x){
       dis = vegdist(decostand(spmat, "total"),
                     method = "bray",
                     diag = FALSE)[1]
-      print(nrow(spmat))
       year = x$year[i]
       output = bind_rows(output, data.frame(trans, dis, year))    
     }
@@ -526,5 +536,98 @@ bind_cols(clustdat,ord.mat) %>%
   ggplot(aes(x = dis, fill = as.factor(trans))) +
   geom_density(position = position_dodge(), alpha = .2)
   
+braytrans = bind_cols(clustdat,ord.mat) %>%
+  group_by(plot) %>%
+  do(transbray(.)) 
+braytrans = na.omit(braytrans)
+
+quantile(braytrans$dis[braytrans$trans == 1])
+quantile(braytrans$dis[braytrans$trans == 0])
 ``` 
+
+# Net change in desired indicator species per transition assignment
+
+```{r}
+istable = IS$sign
+
+grp1 = rownames(na.omit(istable[istable$s.1 == 1,]))
+grp2 = rownames(na.omit(istable[istable$s.2 == 1,]))
+grp3 = rownames(na.omit(istable[istable$s.3 == 1,]))
+grp4 = rownames(na.omit(istable[istable$s.4 == 1,]))
+
+transbray = function(x){
+  
+  output <- data.frame(trans = NULL, dis = NULL, year = NULL)
+  
+  for(i in 1:nrow(x)){
+    if(i != 1){
+      state = x$cluster[x$year == x$year[i]]
+      prev = x$cluster[x$year == x$year[i - 1]]
+      
+      spmat = x %>% 
+        filter(year %in% c(x$year[i], x$year[i-1])) %>% 
+        arrange(year, .by_group = FALSE) %>%
+        select(colnames(ord.mat))
+      
+      tot = rowSums(spmat)
+      
+      delta_g1 = diff(rowSums(spmat %>% select(grp1)) / tot)
+      delta_g2 = diff(rowSums(spmat %>% select(grp2)) / tot)
+      delta_g3 = diff(rowSums(spmat %>% select(grp3)) / tot)
+      delta_g4 = diff(rowSums(spmat %>% select(grp4)) / tot)
+      
+      g1_tot = c(rowSums(spmat %>% select(grp1)) / tot)[2]
+      g2_tot = c(rowSums(spmat %>% select(grp2)) / tot)[2]
+      g3_tot = c(rowSums(spmat %>% select(grp3)) / tot)[2]
+      g4_tot = c(rowSums(spmat %>% select(grp4)) / tot)[2]
+
+      year = x$year[i]
+      output = bind_rows(output, data.frame(state, prev, year, 
+                                            delta_g1, delta_g2, delta_g3, delta_g4,
+                                            g1_tot, g2_tot, g3_tot, g4_tot))    
+    }
+    
+  }
+  
+  return(output)
+  
+}
+
+grpchange = bind_cols(clustdat,ord.mat) %>%
+  group_by(plot) %>%
+  do(transbray(.))
+
+all = inner_join(clustdat, grpchange, by = c("plot", "year"))
+all = na.omit(all)
+min(all$g4_tot[all$state == 4])
+min(all$g3_tot[all$state == 3])
+min(all$g2_tot[all$state == 2])
+min(all$g1_tot[all$state == 1])
+
+na.omit(grpchange) %>% 
+  mutate(trans = as.numeric(state != prev)) %>%
+  filter(trans == 1) %>%
+  group_by(state) %>%
+  summarise(g1 = mean(delta_g1),
+            g2 = mean(delta_g2),
+            g3 = mean(delta_g3),
+            g4 = mean(delta_g4))
+
+mean(.11, .06, .04, .19)
+```
+
+```{r}
+piecharts = bind_cols(data.frame(cluster = k.cluster$clustering), ord.mat) %>%
+  mutate(g1_cov = nassella + bro.carinatus + elymus + lupinus + vulpia,
+         g2_cov = bro.hordeaceous + lolium + trifolium,
+         g3_cov = aegilops + taeniatherum,
+         g4_cov = avena + bro.diandrus) %>%
+  select(cluster, g1_cov, g2_cov, g3_cov, g4_cov)
+
+piecharts=piecharts %>% 
+  arrange(cluster) %>%
+  mutate(total= g1_cov + g2_cov + g3_cov + g4_cov)
+  
+write.csv(x = piecharts, "covdat.csv")
+```
 
