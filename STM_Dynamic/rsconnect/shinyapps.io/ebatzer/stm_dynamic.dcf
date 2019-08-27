@@ -1,0 +1,12 @@
+name: stm_dynamic
+title:
+username:
+account: ebatzer
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1120227
+bundleId: 2361254
+url: https://ebatzer.shinyapps.io/stm_dynamic/
+when: 1566940134.38769
+asMultiple: FALSE
+asStatic: FALSE
