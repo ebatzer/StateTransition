@@ -208,7 +208,7 @@ is that communities aren't particularly stable.
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 # Constructing distance matrix and running NMDS
 distmat <- vegdist(decostand(ord.mat, "total"), method = "bray")
-WAPS.mds <- metaMDS(distmat, try = 1, trymax = 5, trace = F, autotransform = TRUE)
+WAPS.mds <- metaMDS(distmat, try = 1, trymax = 999, trace = F, autotransform = TRUE)
 MDS_xy <- bind_cols(data.frame(ord.att), data.frame(X = WAPS.mds$points[,1], Y = WAPS.mds$points[,2]))
 
 # Plotting figure

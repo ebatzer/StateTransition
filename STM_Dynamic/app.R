@@ -30,13 +30,17 @@ ui <- fluidPage(
                  
                  sliderInput("spei_val", 
                              label = "Drought Index:",
-                             min = -2, max = 2, value = 0, step = 1),
+                             min = -2, max = 2, value = 0, step = .25),
                  
                  helpText("SPEI (Standardized Precipitation-Evapotranspiration Index) 
                           varies between -2 (extreme drought) and +2 (extreme wet period)"),
                  '',
                  h3("Transition Probability Estimates"),
-                 tableOutput('ttable')),
+                 tableOutput('ttable'),
+                 p(strong("State 1:"), "Native perennial grasses"),
+                 p(strong("State 2:"),  "Naturalized annual grasses (subset)"),
+                 p(strong("State 3:"),  "Invasive annual grasses"),
+                 p(strong("State 4:"),  "Naturalized annual grasses (subset)")),
     
   mainPanel(em("Note: This Shiny app is designed to accompany a presentation by Batzer et al. at SER 2019"),
             br(),br(),
@@ -46,7 +50,6 @@ ui <- fluidPage(
               imageOutput("myImage", height = "100%", width = "100%"))
   )
 )
-
 # Define server logic required to draw a histogram
 server <- function(input, output){
   
@@ -83,7 +86,11 @@ server <- function(input, output){
   output$ttable <- renderTable({  
     edge_df <- msmfits[msmfits$Planting == input$selected_planting & 
                                         msmfits$Precip == input$spei_val,] %>% 
-      select(source, target, weight) %>% spread(target, weight) 
+      select(source, target, weight) %>% 
+      mutate(source = as.integer(as.factor(source)),
+             target = as.integer(as.factor(target))) %>%
+      spread(target, weight) %>%
+      rename("State Assignment" = "source")
     }
     )
 }

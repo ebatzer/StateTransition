@@ -128,10 +128,9 @@ planting_comp = data.frame(Planting = c("Natives","Naturalized","Invasive",
                            Exopri = c(0,1,0,1,0,1,1),
                            Invpri = c(0,0,1,0,1,1,1))
 
-
 edgeoutput <- list()
 counter <- 1
-for(netprecip in seq(-2,2)){
+for(netprecip in seq(-2,2, by = .25)){
   for(selected_planting in unique(planting_comp$Planting)){
     
     ttable <- matrix(pmatrix.msm(msm.l1_priority,
@@ -158,8 +157,26 @@ for(netprecip in seq(-2,2)){
   }
 }
 
-write.csv(x = bind_rows(edgeoutput),
-          "../data/msmfits.csv")
+ttable <- matrix(pmatrix.msm(msm.l1_priority), 
+                 nrow = 4)
+
+    rownames(ttable) = c("A", "B", "C", "D")
+    colnames(ttable) = c("A", "B", "C", "D")
+    
+    edges = data.frame(ttable) %>% 
+      rownames_to_column("source") %>%
+      gather(key = "target", value = "weight", -source)
+    
+    edges = edges %>% mutate(Precip = netprecip,
+                     Planting = selected_planting)
+
+    
+newplot <- plot_stm(edges)
+ggsave(plot = newplot, 
+       filename = "../figures/stm_baseline.pdf",
+       height = 7, width = 8)
+
+?ggsave
 ```
 
 ```{r}

@@ -1,12 +1,12 @@
 plot_stm <- function(edges){
   
   starts <- data.frame(source = as.character(c("A", "B", "C", "D")),
-             xsource = c(1, 1, -1, -1),
-             ysource = c(-1, 1, -1, 1))
+             xsource = c(-1, 1, -1, 1),
+             ysource = c(1, 1, -1, -1))
   
   ends <- data.frame(target = as.character(c("A", "B", "C", "D")),
-                       xtarget = c(1, 1, -1, -1),
-                       ytarget = c(-1, 1, -1, 1))
+                     xtarget = c(-1, 1, -1, 1),
+                     ytarget = c(1, 1, -1, -1))
   
   graphdat <- edges %>% 
     mutate(source = as.character(source), target = as.character(target)) %>%
@@ -22,15 +22,20 @@ plot_stm <- function(edges){
   edgelabels <- graphdat %>% 
     select(source, target, weight) %>% 
     filter(source != target) %>%
-    bind_cols(data.frame(xpos = c(.8, 0, -.5,
-                                  1.2, -.15, 0,
-                                  0, .15, -1.2,
-                                  .5, 0, -.8),
-                         ypos = c(0, -1.2, .15,
-                                  0, -.5, .8,
-                                  -.8, .5, 0,
-                                  -.15, 1.2, 0)))
-    
+    bind_cols(data.frame(
+      xpos = c(0, -.75, .5,
+               0, -.15, 1.25,
+               -1.25, .15, 0,
+               -.5, .75, 0),
+      ypos = c(1.2, 0, -.15,
+               .8, -.5, 0,
+               0, .5, -.8,
+               .15, 0, -1.2)
+      ))
+  
+  namevec <- c(1,2,3,4)
+  names(namevec) <- c("A", "B", "C", "D")
+  
   # Creating figure
   
   corr_fac <- .2
@@ -88,7 +93,7 @@ plot_stm <- function(edges){
               x = xsource,
               y = ysource),
               data = graphdat %>% filter(source == target)) +
-    geom_text(aes(label = paste("State", source),
+    geom_text(aes(label = paste("State", namevec[source]),
                 x = xsource,
                 y = ysource + .5 * sign(ysource)),
             data = graphdat %>% filter(source == target),
