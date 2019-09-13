@@ -33,6 +33,7 @@ climate <- read.csv("../data/cimis_monthly.csv",
 climate_daily <- read.csv("../data/cimis_daily.csv",
                        header = TRUE,
                        stringsAsFactors = FALSE)
+
 ```
 
 # Raw matrix of transition probabilities
@@ -474,7 +475,44 @@ p14 = 1 - exp(-.1894)
 tot = sum(p12,p13,p14)
 p12/tot
 p13/tot
-p14/tot
+
+
+msm.l1_priority <- msm(cluster ~ year, subject = plot, data=clustdat_t0, qmatrix=Q, obstype=2,
+                    covariates = list("1-2" = ~ annuals + l1fit,
+                                      "1-3" = ~ waps + l1fit,
+                                      "1-4" = ~ annuals + l1fit,
+                                      "2-1" = ~ natives + l1fit,
+                                      "2-3" = ~ waps + l1fit,
+                                      "2-4" = ~ annuals + l1fit,
+                                      "3-1" = ~ natives + l1fit,
+                                      "3-2" = ~ annuals + l1fit,
+                                      "3-4" = ~ annuals + l1fit,
+                                      "4-1" = ~ natives + l1fit,
+                                      "4-2" = ~ annuals + l1fit,
+                                      "4-3" = ~ waps + l1fit),
+                    exacttimes = TRUE)
+haz = hazard.msm(msm.l1_priority)
+hazard.msm(msm.l1_priority, cl = .99)
+?hazard.msm
+```
+
+```{r}
+for(i in 1:length(haz)){
+
+  newdf = data.frame(haz[[i]])
+  newdf$coef = names(haz)[i]
+  newdf$trans = rownames(newdf)
+
+  if(i == 1){
+    outputdf = newdf
+  }else{
+    outputdf = bind_rows(list(outputdf, newdf))
+  }
+
+}
+
+hazard_rats = outputdf %>% filter(HR != 1 & U != 1 & L != 1)
+write.csv(x = hazard_rats, "../data/hazardrates.csv")
 ```
 
 Below is code to pull out transition probabilities for each state.
@@ -486,7 +524,6 @@ However, there is likely a better way:
 * Assign diagonals to the probability of maintaining a state
 * Assign non-diagonals to the probability of transitioning
 * Repeat for confidence intervals (both low and high)
-
 
 ```{r}
 Nprob = list()
@@ -635,41 +672,38 @@ p = bind_rows(Nprob)
 
   # p$Trans[p$From == stateval & p$To == stateval] = -1
 
-  plot = p %>%
-    filter(From != To) %>%
-    filter(To == stateval) %>%
-    mutate(To = plyr::revalue(To,
-                                c("State 1" = 'E. glaucus - S. pulchra',
-                                  "State 2" = 'F. perennis - B. hordeaceous',
-                                  "State 3" = 'E. caput-medusae - A. triuncialis',
-                                  "State 4" = 'A. fatua - B. diandrus'))) %>%
-    mutate(priority = if_else(priority == 1, "E. glaucus - S. pulchra ", "E. glaucus - S. pulchra")) %>%
-    ggplot(aes(x = precip,
-               color = From,
-               fill = From)) +
-    geom_line(aes(y = Trans), size = 1.5) +
-    theme_bw() +
-    #geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
-    facet_grid(~priority) +
-    ggtitle("Seeding Composition Effects on Transition Probability") +
-      scale_color_manual(name = 'Previous State Assignment',
-             values =c("State 2" = cols[2],
-                       "State 3" = cols[3], "State 4" = cols[4]),
-             labels = c('F. perennis - B. hordeaceous',
-                        'E. caput-medusae - A. triuncialis',
-                        'A. fatua - B. diandrus')) +
-      scale_fill_manual(name = 'Initial State',
-             values =c("State 2" = cols[2],
-                       "State 3" = cols[3], "State 4" = cols[4]),
-             labels = c('F. perennis - B. hordeaceous',
-                        'E. caput-medusae - A. triuncialis',
-                        'A. fatua - B. diandrus')) +
-    xlab("SPEI") +
-    ylab("Probability of Assignment in Next Year") +
-    ylim(0, .5) +
-    geom_text(data = textdf, aes(fill = NULL, color = NULL, y= Trans), label = textdf$lab, show.legend = FALSE)
+native_trans = p %>%
+  filter(From != To) %>%
+  filter(To == stateval) %>%
+  mutate(To = plyr::revalue(To,
+                            c("State 1" = 'E. glaucus - S. pulchra'))) %>%
+  mutate(priority = if_else(priority == 1, "+ Priority ", "- Priority")) %>%
+  ggplot(aes(x = precip,
+             color = From,
+             fill = From)) +
+  geom_line(aes(y = Trans, linetype = From), size = 1.5) +
+  theme_bw() +
+  #geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
+  facet_grid(~priority) +
+  ggtitle("A) Priority Effects on Transition Probability") +
+  scale_color_manual(name = 'Previous State Assignment',
+                     values =c("State 2" = cols[2],
+                               "State 3" = cols[3], "State 4" = cols[4]),
+                     labels = c('2. F. perennis - B. hordeaceous',
+                                '3. E. caput-medusae - A. triuncialis',
+                                '4. A. fatua - B. diandrus')) +
+  scale_linetype_manual(name = 'Previous State Assignment',
+                        values =c("State 2" = 2,
+                                  "State 3" = 1, "State 4" = 1),
+                        labels = c('2. F. perennis - B. hordeaceous',
+                                   '3. E. caput-medusae - A. triuncialis',
+                                   '4. A. fatua - B. diandrus')) +
+  xlab("SPEI") +
+  ylab("State 1 Transition Probability") +
+  ylim(0, .5)
+  # geom_text(data = textdf, aes(fill = NULL, color = NULL, y= Trans), label = textdf$lab, show.legend = FALSE)
 
-# plot
+native_trans
 # ggsave("../figures/eglaspul_transition.pdf", width = 7, height = 4)
 ```
 
@@ -681,44 +715,40 @@ stateval = c("State 3", "State 4")
 p = bind_rows(Nprob)
 
   # p$Trans[p$From == stateval & p$To == stateval] = -1
+ann_change = p %>%
+  group_by(From, To, precip) %>%
+  filter(priority == 0) %>%
+  filter(From != To) %>%
+  filter(From %in% stateval) %>%
+  mutate(pval = case_when(
+    From == "State 3" & To %in% c("State 1", "State 4") ~ .05,
+    From == "State 4" & To == "State 1" ~ .05,
+    TRUE ~ 1)) %>%
+  ungroup() %>%
+  # mutate(To = plyr::revalue(To,
+  #                           c("State 1" = 'E. glaucus - S. pulchra',
+  #                             "State 2" = 'F. perennis - B. hordeaceous',
+  #                             "State 3" = 'E. caput-medusae - A. triuncialis',
+  #                             "State 4" = 'A. fatua - B. diandrus'))) %>%
+  # mutate(priority = if_else(priority == 1, "Represented In Seeding", "Not Represented")) %>%
+  ggplot(aes(x = precip)) +
+  geom_line(aes(y = Trans, color = To, linetype = as.factor(pval)), size = 1.5) +
+  theme_bw() +
+  #geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
+  facet_grid(~From) +
+  ggtitle("B) Drought Stress Effects on Transition Probability") +
+  scale_color_manual(name = 'Subsequent State Assignment',
+                     values =c("State 1" = cols[1], "State 2" = cols[2],
+                               "State 3" = cols[3], "State 4" = cols[4]),
+                     labels = c('1. E. glaucus - S. pulchra',
+                                '2. F. perennis - B. hordeaceous',
+                                '3. E. caput-medusae - A. triuncialis',
+                                '4. A. fatua - B. diandrus')) +
+  xlab("SPEI") +
+  ylab("Transition Probability") +
+  ylim(0, .2) +
+  guides(linetype = FALSE)
 
-plot = p %>%
-      group_by(From, To, precip) %>%
-      summarise(Trans = mean(Trans)) %>%
-      filter(From != To) %>%
-      filter(To == stateval) %>%
-      ungroup() %>%
-      mutate(To = plyr::revalue(To,
-                                c("State 1" = 'E. glaucus - S. pulchra',
-                                  "State 2" = 'F. perennis - B. hordeaceous',
-                                  "State 3" = 'E. caput-medusae - A. triuncialis',
-                                  "State 4" = 'A. fatua - B. diandrus'))) %>%
-      # mutate(priority = if_else(priority == 1, "Represented In Seeding", "Not Represented")) %>%
-      ggplot(aes(x = precip,
-                 color = From,
-                 fill = From)) +
-      geom_line(aes(y = Trans), size = 1.5) +
-      theme_bw() +
-      #geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
-      facet_grid(~To) +
-      ggtitle("Climate Effects on Transition Probability") +
-       scale_color_manual(name = 'Previous State Assignment',
-           values =c("State 1" = cols[1], "State 2" = cols[2],
-                     "State 3" = cols[3], "State 4" = cols[4]),
-           labels = c('E. glaucus - S. pulchra',
-                      'F. perennis - B. hordeaceous',
-                      'E. caput-medusae - A. triuncialis',
-                      'A. fatua - B. diandrus')) +
-    scale_fill_manual(name = 'Initial State',
-           values =c("State 1" = cols[1], "State 2" = cols[2],
-                     "State 3" = cols[3], "State 4" = cols[4]),
-           labels = c('E. glaucus - S. pulchra',
-                      'F. perennis - B. hordeaceous',
-                      'E. caput-medusae - A. triuncialis',
-                      'A. fatua - B. diandrus')) +
-      xlab("SPEI") +
-      ylab("Probability of Assignment in Next Year") +
-      ylim(0, .5)
-
-# ggsave("../figures/climate_transition.pdf", width = 7, height = 4)
+coef_highlight = gridExtra::grid.arrange(native_trans, ann_change, nrow = 2)
+ggsave(plot = coef_highlight, "../figures/coefficient_highlight.pdf", width = 6, height = 6)
 ```

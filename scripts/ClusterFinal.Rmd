@@ -32,7 +32,6 @@ waps.specs <- read.csv("../data/WAPSspecies.csv",
 climate <- read.csv("../data/cimis_monthly.csv",
                        header = TRUE,
                        stringsAsFactors = FALSE)
-
 ```
 
 # Clustering Communities - How best to define different states?

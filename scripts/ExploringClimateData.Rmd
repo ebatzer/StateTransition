@@ -276,7 +276,7 @@ p1 = speifits %>% filter(month == 5) %>%
   gather(key = fit, value = spei, - year, - month) %>%
   ggplot(aes(x = year, y = spei)) +
   geom_line(aes(linetype = fit), size = 1.5) +
-  ggtitle("SPEI") +
+  ggtitle("B) SPEI") +
   ylab("SPEI Index") +
   xlab("Year") +
   scale_linetype_manual(values=c("solid", "twodash", "dotted"),
@@ -299,7 +299,7 @@ p2 = climsum %>%
   theme_bw() +
   ylab("Total Precip (mm)") +
   xlab("Water Year") +
-  ggtitle("Precipitation")+
+  ggtitle("A) Precipitation")+
   geom_hline(yintercept = mean(na.omit(climsum$Total.Precip..mm.)), 
              linetype = "dashed") + 
   scale_x_continuous(breaks = seq(2008, 2018, by = 2), limits = c(2008, 2018))
@@ -308,6 +308,10 @@ p2 = climsum %>%
 library(gridExtra)
 grobglob = gridExtra::grid.arrange(p2, p1, nrow = 1, widths = c(1.5,2))
 ggsave(plot = grobglob, "../figures/precip_spei.pdf", width = 10, height = 5)
+
+# Run ClusteringApproach.Rmd first
+freq_clim = gridExtra::grid.arrange(p2, assign_freq, nrow = 1, widths = c(1.15,2))
+ggsave(plot = freq_clim, "../figures/statefreq_clim_plot.pdf", width = 10, height = 4)
 ```
 
 

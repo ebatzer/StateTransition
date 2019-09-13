@@ -7,7 +7,7 @@ output:
     df_print: paged
   prettydoc::html_pretty:
   highlight: github
-fig_width: 6 
+fig_width: 6
 fig_height: 4
 ---
 
@@ -16,8 +16,8 @@ library(tidyverse); library(testthat); library(vegan); library(msm); library(NbC
 library(ggplot2); library(cluster); library(mclust); library(indicspecies); library(gganimate)
 
 # Cover data (wide format)
-cover <- read.csv("../data/comdata_wideformat.csv", 
-                  header = TRUE, 
+cover <- read.csv("../data/comdata_wideformat.csv",
+                  header = TRUE,
                   stringsAsFactors = FALSE)
 group_percents = cover[,8:19]
 cover = cover[,-(8:19)]
@@ -43,7 +43,7 @@ climate <- read.csv("../data/cimis_monthly.csv",
 
 # Clustering Communities - How best to define different states?
 
-There are a number of different algorithms that can be used in cluster analysis, 
+There are a number of different algorithms that can be used in cluster analysis,
 ranging from hierarchical, agglomerative methods that have been (in my
 impression) a mainstay in Ecology, to more computationally intensive or statistically
 nuanced methods, such as K-means (and its variations) or model-based clustering.
@@ -51,55 +51,55 @@ nuanced methods, such as K-means (and its variations) or model-based clustering.
 Based on my reading, there is no simple way to determine what type of algorithm
 is best suited to your needs, or how many clusters are appropriate. According
 to Legendre and Legendre (2008), all methods are valid, save for TWINSPAN, which
-is cautioned against. If using K-means or hierarchical methods, there are some 
-heuristics that can be used to identify the appropriate amount of clusters 
-needed in the data. Model-based clustering is more complicated, but offers 
-standard metrics to compare model fits -- typically, Bayesian Information 
-Criterion (BIC). 
+is cautioned against. If using K-means or hierarchical methods, there are some
+heuristics that can be used to identify the appropriate amount of clusters
+needed in the data. Model-based clustering is more complicated, but offers
+standard metrics to compare model fits -- typically, Bayesian Information
+Criterion (BIC).
 
-I think the best way to choose an appropriate classification algorithm is to 
-explore a number of possibilities. Stein et al. (2016) and Bagchi et al. (2013) 
-both employ hierarchical clustering algorithms - flexible beta and Ward's D, 
-respectively - but we may have better luck using a method like K-means or 
+I think the best way to choose an appropriate classification algorithm is to
+explore a number of possibilities. Stein et al. (2016) and Bagchi et al. (2013)
+both employ hierarchical clustering algorithms - flexible beta and Ward's D,
+respectively - but we may have better luck using a method like K-means or
 one of the model-based clusters.
 
 Some key considerations:
 
 * __How to transform data prior to analysis?__ I think in most cases, focusing on the
 proportional abundance of species in each sample makes the most sense, but there
-may be some validity to using one of the other recommended transformations, such 
+may be some validity to using one of the other recommended transformations, such
 as Hellinger or Chi-Square.
 
-* __What distance metric to use?__ Most ecological data utilizes Bray-Curtis or 
-Euclidean distances between communities with abundance data. Bray-Curtis has a 
-number of poor mathematical properties, however, that may make its use 
+* __What distance metric to use?__ Most ecological data utilizes Bray-Curtis or
+Euclidean distances between communities with abundance data. Bray-Curtis has a
+number of poor mathematical properties, however, that may make its use
 problematic in some circumstances. Horn and Morisita-Horn indices may be better,
 but are more suited to individual counts an are less often used in circumstances
 with cover data.
 
-* __When to start clustering?__ The seeded communities contain a number of species 
+* __When to start clustering?__ The seeded communities contain a number of species
 that are not well-represented in the data after the first year of planting. While
 this is interesting information, it can be problematic for clustering, as it may make
 the first year of data really distinct, almost a separate cluster in itself. My
-guess is that Stein et al. (2016) found that this was the case with their data - 
+guess is that Stein et al. (2016) found that this was the case with their data -
 they had 5 years of data in their study, but appeared to only run classification
-and NMDS on the last 4 years. 
+and NMDS on the last 4 years.
 
 * __What species to include in analyses?__ When trying to cluster communities,
-most analyses are conducted on either a relevant subset of species or a modified 
-dataset. Stein et al. (2016) combine all of their weedy species / forbs into a 
-single column called "forbs", while Bagchi et al. (2013) focus on species that 
-occur in at least 2% of all samples taken. There are a lot of weedy species in 
+most analyses are conducted on either a relevant subset of species or a modified
+dataset. Stein et al. (2016) combine all of their weedy species / forbs into a
+single column called "forbs", while Bagchi et al. (2013) focus on species that
+occur in at least 2% of all samples taken. There are a lot of weedy species in
 the WAPS data that could be ignored in clustering as "noise".
 
-    * __Here, I've only included non-agricultural weeds in my analysis, which 
+    * __Here, I've only included non-agricultural weeds in my analysis, which
     represents roughly 93% of the total cover in the dataset__
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 selected.trts <-c("annuals", "WAPS", "Natives", "natives+WAPS+annuals", "annuals+natives", "WAPS+annuals", "WAPS+natives")
 selected.clips <- c("none")
 selected.fert <- c("none")
-selected.water <- c("control", "wet", "latewet", "dry") 
+selected.water <- c("control", "wet", "latewet", "dry")
 
 comp.subset = comp.cover[comp.attr$water %in% selected.water &
              comp.attr$sp.trt %in% selected.trts &
@@ -121,11 +121,11 @@ specsbyfreq = sort(round(colSums(decostand(comp.subset, method = "pa")) / nrow(c
 selected.trts <-c("annuals", "WAPS", "Natives", "natives+WAPS+annuals", "annuals+natives", "WAPS+annuals", "WAPS+natives")
 selected.clips <- c("none")
 selected.fert <- c("none")
-selected.water <- c("control") 
+selected.water <- c("control")
 selected.years <- c(2008:2018)
 
 # To include all treatments:
-# selected.water <- c("control", "wet", "latewet", "dry") 
+# selected.water <- c("control", "wet", "latewet", "dry")
 
 # Subsetting cover matrix
 ord.mat <- comp.cover[comp.attr$water %in% selected.water &
@@ -171,7 +171,7 @@ sumtable = left_join(ord.att, bind_cols(comp.attr,group_percents)) %>%
             annsem = sd(annuals / total) / sqrt(n()),
             natsem = sd(natives / total) / sqrt(n()),
             wapssem = sd(waps / total) / sqrt(n()))
-  
+
 sumtable %>%
   ggplot(aes(x = year)) +
   geom_line(aes(y = annprop), color = "red") +
@@ -198,11 +198,11 @@ ggsave("../figures/ProportionalAbundances.pdf", width = 10, height = 6)
 
 
 The first step in this analysis is to visualize the data using some sort of
-unconstrained ordination method. Because I'll be using Bray-Curtis distance to 
-describe differences between points, NMDS seems to be the best option. 
+unconstrained ordination method. Because I'll be using Bray-Curtis distance to
+describe differences between points, NMDS seems to be the best option.
 
 Below, I show an NMDS plot of all community datapoints, colored by year. I believe
-that I've sent these graphs along before -- the basic gist I get from this figure 
+that I've sent these graphs along before -- the basic gist I get from this figure
 is that communities aren't particularly stable.
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
@@ -212,42 +212,74 @@ WAPS.mds <- metaMDS(distmat, try = 1, trymax = 999, trace = F, autotransform = T
 MDS_xy <- bind_cols(data.frame(ord.att), data.frame(X = WAPS.mds$points[,1], Y = WAPS.mds$points[,2]))
 
 # Plotting figure
-ggplot(MDS_xy, aes(X1, Y)) + 
-  geom_point(aes(color = as.factor(year))) + 
+ggplot(MDS_xy, aes(X1, Y)) +
+  geom_point(aes(color = as.factor(year))) +
   theme_bw() +
-  geom_text(data = data.frame(X1 = Inf, Y = -Inf), 
-            hjust = 1, vjust = -1, 
+  geom_text(data = data.frame(X1 = Inf, Y = -Inf),
+            hjust = 1, vjust = -1,
             label = paste("Stress =", round(WAPS.mds$stress, 2)))
 
-p = ggplot(MDS_xy, aes(X1, Y)) + 
-  geom_point(aes(color = as.factor(sp.trt)), size = 2) + 
+ggplot(MDS_xy %>% filter(year == 2008), aes(X1, Y)) +
+  geom_point(aes(fill = as.factor(sp.trt)), color = "black", pch = 21, size = 4) +
   theme_bw() +
-  geom_text(data = data.frame(X1 = Inf, Y = -Inf), 
-            hjust = 1, vjust = -1, 
+  geom_text(data = data.frame(X1 = Inf, Y = -Inf),
+            hjust = 1, vjust = -1,
             label = paste("Stress =", round(WAPS.mds$stress, 2))) +
-  labs(title = 'Year: {frame_time}') +
-  transition_time(year) +
-  ease_aes('linear')
+  labs(title = 'Year: 2008') +
+  theme_void() +
+  scale_fill_discrete(name = "Planting Combination",
+                       breaks = unique(MDS_xy$sp.trt),
+                       labels = c("N", "N+A+I", "A", "N+I", "N+A", "A+I", "I")) +
+  theme(plot.title = element_text(size = 24, face = "bold"),
+        legend.title = element_text(size = 20, face = "bold"),
+        legend.text = element_text(size = 20, face = "bold"))
 
-# animate(p, detail = 40, fps = 10)
+ggsave("../figures/nmds_viz_v2.png",
+       height = 7.5,
+       width = 11,
+       dpi = 300,
+       units = "in")
+```
+
+
+```{r}
+
+p = ggplot(MDS_xy, aes(X1, Y)) +
+  geom_point(aes(fill = as.factor(sp.trt)), color = "black", pch = 21, size = 4) +
+  theme_bw() +
+  geom_text(data = data.frame(X1 = Inf, Y = -Inf),
+            hjust = 1, vjust = -1,
+            label = paste("Stress =", round(WAPS.mds$stress, 2))) +
+  labs(title = 'Year: {frame_time}', size = 4) +
+  transition_time(year) +
+  ease_aes('cubic-in-out') +
+  theme_void() +
+  scale_fill_discrete(name = "Planting Combination",
+                       breaks = unique(MDS_xy$sp.trt),
+                       labels = c("N", "N+A+I", "A", "N+I", "N+A", "A+I", "I")) +
+  theme(plot.title = element_text(size = 24, face = "bold"),
+        legend.title = element_text(size = 20, face = "bold"),
+        legend.text = element_text(size = 20, face = "bold"))
+
+animate(p, fps = 10, width= 750, height=500, duration = 15)
 ```
 
 # K-means Clustering
 
-To be able to quantitatively assess differences between communities when there 
+To be able to quantitatively assess differences between communities when there
 isn't a clear pattern with simple similarity metrics, clustering methods may ease
 comparison. In this method, rather than looking at distances between communities,
 we can compare changes in community composition as movement between discrete states.
 
 Here, I'm employing K-means clustering, one method that attempts to partition
 datasets into some "K" number of cluster types. One nice feature of this method
-is that the optimal number of clusters can be determined by a number of different 
+is that the optimal number of clusters can be determined by a number of different
 metrics.
 
 ## Selecting an appropriate number of clusters
 
 Here, I utilize a package called NbClust() that can be used to implement a number
-of different metrics -- the nbclust() package in R suggests using a battery of 
+of different metrics -- the nbclust() package in R suggests using a battery of
 tests to see if some cluster number appears as a consistent good performer.
 
 ```{r, include = FALSE}
@@ -261,13 +293,13 @@ for(i in 2:10){
   counter <- counter + 1
 }
 
-data.frame(k = c(2:10), dis = groupdiss, sil = groupsil) %>% 
+data.frame(k = c(2:10), dis = groupdiss, sil = groupsil) %>%
   ggplot(aes(x = k,
              y = groupsil,
              fill = groupsil == max(groupsil))) +
   geom_point(size = 3, pch = 21)
 
-data.frame(k = c(2:10), dis = groupdiss, sil = groupsil) %>% 
+data.frame(k = c(2:10), dis = groupdiss, sil = groupsil) %>%
   ggplot(aes(x = k,
              y = groupdiss,
              fill = groupsil == max(groupsil))) +
@@ -275,13 +307,13 @@ data.frame(k = c(2:10), dis = groupdiss, sil = groupsil) %>%
 ```
 
 When comparing a number of different criteria, 4 seems to be the best number of clusters to use
-(see best.nc table, which highlights the best performer for each type of metric). 
+(see best.nc table, which highlights the best performer for each type of metric).
 4 clusters is selected as the best number in 4 of the 8 metrics,
 and consistently performs well (usually in the top 2-4 of the 10) for the rest.
 
 Apparently, 7 clusters also seems like a good second choice by these metrics,
-though that number seems too high to be relevant given the number of replicates 
-we have, as well as my intuition for the system as a whole. 
+though that number seems too high to be relevant given the number of replicates
+we have, as well as my intuition for the system as a whole.
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 bestclust = NbClust(decostand(ord.mat, method = "total"), min.nc = 2, max.nc = 10, method = "kmeans",
@@ -299,48 +331,83 @@ k.cluster = pam(distmat, 4)
 k.cluster$objective
 MDS_xy$clust = k.cluster$clustering
 
-ggplot(MDS_xy, aes(X1, Y, color = as.factor(clust))) + 
-  geom_point() + 
+ggplot(MDS_xy, aes(X1, Y, color = as.factor(clust))) +
+  geom_point() +
   theme_bw() +
-  geom_text(data = data.frame(X1 = Inf, Y = -Inf), 
-            aes(color = NULL), hjust = 1, vjust = -1, 
+  geom_text(data = data.frame(X1 = Inf, Y = -Inf),
+            aes(color = NULL), hjust = 1, vjust = -1,
             label = paste("Stress =", round(WAPS.mds$stress, 2))) +
   ggtitle("NMDS colored by cluster")
 
 cluscounts = bind_cols(ord.att, data.frame(cluster = k.cluster$clustering)) %>% group_by(year, cluster) %>% summarise(count = n()) %>% bind_rows(data.frame(year = 2008, cluster = 4, count = 0))
-  
+
 cols = rainbow(4, v = .75)
 
-ggplot(cluscounts, 
-       aes(x = year, 
-           y = count / 96, 
+assign_freq = ggplot(cluscounts,
+       aes(x = year,
+           y = count / 96,
            fill = factor(cluster),
            group = factor(cluster),
-           shape = factor(cluster))) + 
+           shape = factor(cluster))) +
   geom_point(stat = "identity", size = 3) +
   geom_line(stat = "identity", color = "black", linetype = 2) +
   ggtitle("State Assignment Frequency") +
-  theme_bw() + 
+  theme_bw() +
   ylab("Frequency") +
   xlab("Year") +
   scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
-  scale_fill_manual(name = 'State Assignment', 
-         values =c("1" = cols[1], 
-                   "2" = cols[2], 
-                   "3" = cols[3], 
+  scale_fill_manual(name = 'State Assignment',
+         values =c("1" = cols[1],
+                   "2" = cols[2],
+                   "3" = cols[3],
                    "4" = cols[4]),
-         labels = c('E. glaucus - S. pulchra',
-                    'F. perennis - B. hordeaceous', 
-                    'E. caput-medusae - A. triuncialis',
-                    'A. fatua - B. diandrus')) +
-  scale_shape_manual(name = 'State Assignment', 
-         values = c(21,22,23,24),
-         labels = c('E. glaucus - S. pulchra',
-                    'F. perennis - B. hordeaceous', 
-                    'E. caput-medusae - A. triuncialis',
-                    'A. fatua - B. diandrus'))
+         labels = c('1. E. glaucus - S. pulchra',
+                    '2. F. perennis - B. hordeaceous',
+                    '3. E. caput-medusae - A. triuncialis',
+                    '4. A. fatua - B. diandrus')) +
+  scale_shape_manual(name = 'State Assignment',
+         values =c("1" = 21,
+                   "2" = 22,
+                   "3" = 23,
+                   "4" = 24),
+         labels = c('1. E. glaucus - S. pulchra',
+                    '2. F. perennis - B. hordeaceous',
+                    '3. E. caput-medusae - A. triuncialis',
+                    '4. A. fatua - B. diandrus'))
+
+assign_freq
 
 ggsave("../figures/assignmentfrequency.pdf", width = 7, height = 4)
+```
+
+```{r}
+
+ggplot(MDS_xy, aes(X1, Y)) +
+  geom_point(aes(fill = as.factor(clust)), color = "black", pch = 21, size = 4) +
+  theme_bw() +
+  geom_text(data = data.frame(X1 = Inf, Y = -Inf),
+            hjust = 1, vjust = -1,
+            label = paste("Stress =", round(WAPS.mds$stress, 2))) +
+  # labs(title = 'Year: 2008') +
+  theme_void() +
+  scale_fill_manual(name = 'State Assignment',
+         values =c("1" = cols[1],
+                   "2" = cols[2],
+                   "3" = cols[3],
+                   "4" = cols[4]),
+         labels = c('State 1',
+                    'State 2',
+                    'State 3',
+                    'State 3')) +
+  theme(plot.title = element_text(size = 24, face = "bold"),
+        legend.title = element_text(size = 20, face = "bold"),
+        legend.text = element_text(size = 20, face = "bold"))
+
+ggsave("../figures/nmds_viz_assignments.png",
+       height = 7.5,
+       width = 11,
+       dpi = 300,
+       units = "in")
 ```
 
 # Describing clusters:
@@ -357,7 +424,7 @@ summary(IS, alpha = .05)
 ```
 
 The four groups defined seem to indicate the presence of a few different
-species groups that I've roughly defined as the following: 
+species groups that I've roughly defined as the following:
 
 1. Native species   
 
@@ -411,7 +478,7 @@ clustdat$cluster[clustdat$cluster == 4] = "Dry Annuals"
 clustdat$plot <- factor(clustdat$plot, levels = unique(clustdat$plot))
 clustdat %>% ggplot(aes(x = year,
            y = as.numeric(plot) - .5)) +
-  theme_bw() + 
+  theme_bw() +
   geom_tile(color = "black", aes(fill = as.factor(cluster))) +
   geom_hline(yintercept = c(seq(0, 56, by = 8)), size = 2) +
   geom_text(label = unique(clustdat$sp.trt),
@@ -424,7 +491,7 @@ clustdat %>% ggplot(aes(x = year,
 # Frequency of transitions
 
 How often do transitions occur? The above figures show that there are some general
-patterns in transition frequency and directionality of change. It seems that 
+patterns in transition frequency and directionality of change. It seems that
 transitions to WAPS are the most frequent early in the experiment, but many
 groups transition to a "dry annuals" state following the drought.  
 
@@ -434,22 +501,22 @@ frequency + direction plotted with precipitation.
 In the first figure, total annual precipitation (relative) is plotted as a black
 line above the plot.
 
-In the second, total precipitation, early (Oct - Dec, blue line), middle (Jan - 
-Mar, orange line), and late (April - May, red line) precip are plotted as 
+In the second, total precipitation, early (Oct - Dec, blue line), middle (Jan -
+Mar, orange line), and late (April - May, red line) precip are plotted as
 separate lines above the bars.
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 next_state = clustdat %>% mutate(year = year + 1) %>% rename(paststate = cluster)
-transitions = left_join(clustdat, next_state, by = c("plot", "year")) %>% 
+transitions = left_join(clustdat, next_state, by = c("plot", "year")) %>%
   mutate(transition = as.numeric(!cluster == paststate))
 
-transto = transitions %>% filter(transition == 1) %>% group_by(cluster, year) %>% 
+transto = transitions %>% filter(transition == 1) %>% group_by(cluster, year) %>%
   summarise(total = sum(transition))
 
 climate$month = gsub("-.*", "", climate$Month.Year)
 
-climsum = climate %>% group_by(Water.Year) %>% 
-  summarise(total = sum(Total.Precip..mm.), 
+climsum = climate %>% group_by(Water.Year) %>%
+  summarise(total = sum(Total.Precip..mm.),
             early = sum(Total.Precip..mm.[month %in% c("Oct", "Nov", "Dec")]),
             mid = sum(Total.Precip..mm.[month %in% c("Jan", "Feb", "March")]),
             late = sum(Total.Precip..mm.[month %in% c("April", "May")]))
@@ -460,7 +527,7 @@ transitions %>% group_by(year) %>% filter(year != 2008) %>%
   geom_bar(aes(x = year,
              y = trans / 56),
            stat = "identity",
-           color = "black", 
+           color = "black",
            fill = "forestgreen") +
   geom_line(data = climsum %>% filter(Water.Year > 2007),
             aes(x = Water.Year ,
@@ -509,13 +576,13 @@ clustdat <- bind_cols(ord.att, data.frame(cluster = k.cluster$clustering)) %>%
 x = bind_cols(clustdat,ord.mat)
 i = 2
 transbray = function(x){
-  
+
   output <- data.frame(trans = NULL, dis = NULL, year = NULL)
-  
+
   for(i in 1:nrow(x)){
     if(i != 1){
       trans = if_else(x$cluster[x$year == x$year[i]] == x$cluster[x$year == x$year[i - 1]], 0, 1)
-      
+
       spmat = x %>% filter(year %in% c(x$year[i], x$year[i-1])) %>% select(colnames(ord.mat))
       dis = vegdist(decostand(spmat, "total"),
                     method = "bray",
@@ -523,9 +590,9 @@ transbray = function(x){
       year = x$year[i]
       output = bind_rows(output, data.frame(trans, dis, year))    
     }
-    
+
   }
-  
+
   return(output)
 }
 
@@ -535,15 +602,15 @@ bind_cols(clustdat,ord.mat) %>%
   do(transbray(.)) %>%
   ggplot(aes(x = dis, fill = as.factor(trans))) +
   geom_density(position = position_dodge(), alpha = .2)
-  
+
 braytrans = bind_cols(clustdat,ord.mat) %>%
   group_by(plot) %>%
-  do(transbray(.)) 
+  do(transbray(.))
 braytrans = na.omit(braytrans)
 
 quantile(braytrans$dis[braytrans$trans == 1])
 quantile(braytrans$dis[braytrans$trans == 0])
-``` 
+```
 
 # Net change in desired indicator species per transition assignment
 
@@ -556,41 +623,41 @@ grp3 = rownames(na.omit(istable[istable$s.3 == 1,]))
 grp4 = rownames(na.omit(istable[istable$s.4 == 1,]))
 
 transbray = function(x){
-  
+
   output <- data.frame(trans = NULL, dis = NULL, year = NULL)
-  
+
   for(i in 1:nrow(x)){
     if(i != 1){
       state = x$cluster[x$year == x$year[i]]
       prev = x$cluster[x$year == x$year[i - 1]]
-      
-      spmat = x %>% 
-        filter(year %in% c(x$year[i], x$year[i-1])) %>% 
+
+      spmat = x %>%
+        filter(year %in% c(x$year[i], x$year[i-1])) %>%
         arrange(year, .by_group = FALSE) %>%
         select(colnames(ord.mat))
-      
+
       tot = rowSums(spmat)
-      
+
       delta_g1 = diff(rowSums(spmat %>% select(grp1)) / tot)
       delta_g2 = diff(rowSums(spmat %>% select(grp2)) / tot)
       delta_g3 = diff(rowSums(spmat %>% select(grp3)) / tot)
       delta_g4 = diff(rowSums(spmat %>% select(grp4)) / tot)
-      
+
       g1_tot = c(rowSums(spmat %>% select(grp1)) / tot)[2]
       g2_tot = c(rowSums(spmat %>% select(grp2)) / tot)[2]
       g3_tot = c(rowSums(spmat %>% select(grp3)) / tot)[2]
       g4_tot = c(rowSums(spmat %>% select(grp4)) / tot)[2]
 
       year = x$year[i]
-      output = bind_rows(output, data.frame(state, prev, year, 
+      output = bind_rows(output, data.frame(state, prev, year,
                                             delta_g1, delta_g2, delta_g3, delta_g4,
                                             g1_tot, g2_tot, g3_tot, g4_tot))    
     }
-    
+
   }
-  
+
   return(output)
-  
+
 }
 
 grpchange = bind_cols(clustdat,ord.mat) %>%
@@ -604,7 +671,7 @@ min(all$g3_tot[all$state == 3])
 min(all$g2_tot[all$state == 2])
 min(all$g1_tot[all$state == 1])
 
-na.omit(grpchange) %>% 
+na.omit(grpchange) %>%
   mutate(trans = as.numeric(state != prev)) %>%
   filter(trans == 1) %>%
   group_by(state) %>%
@@ -624,10 +691,9 @@ piecharts = bind_cols(data.frame(cluster = k.cluster$clustering), ord.mat) %>%
          g4_cov = avena + bro.diandrus) %>%
   select(cluster, g1_cov, g2_cov, g3_cov, g4_cov)
 
-piecharts=piecharts %>% 
+piecharts=piecharts %>%
   arrange(cluster) %>%
   mutate(total= g1_cov + g2_cov + g3_cov + g4_cov)
-  
+
 write.csv(x = piecharts, "covdat.csv")
 ```
-
