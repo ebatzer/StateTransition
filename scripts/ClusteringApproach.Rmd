@@ -221,17 +221,49 @@ ggplot(MDS_xy, aes(X1, Y)) +
             hjust = 1, vjust = -1, 
             label = paste("Stress =", round(WAPS.mds$stress, 2)))
 
-p = ggplot(MDS_xy, aes(X1, Y)) + 
-  geom_point(aes(color = as.factor(sp.trt)), size = 2) + 
+ggplot(MDS_xy %>% filter(year == 2008), aes(X1, Y)) + 
+  geom_point(aes(fill = as.factor(sp.trt)), color = "black", pch = 21, size = 4) + 
   theme_bw() +
   geom_text(data = data.frame(X1 = Inf, Y = -Inf), 
             hjust = 1, vjust = -1, 
             label = paste("Stress =", round(WAPS.mds$stress, 2))) +
-  labs(title = 'Year: {frame_time}') +
-  transition_time(year) +
-  ease_aes('linear')
+  labs(title = 'Year: 2008') +
+  theme_void() +
+  scale_fill_discrete(name = "Planting Combination",
+                       breaks = unique(MDS_xy$sp.trt),
+                       labels = c("N", "N+A+I", "A", "N+I", "N+A", "A+I", "I")) +
+  theme(plot.title = element_text(size = 24, face = "bold"),
+        legend.title = element_text(size = 20, face = "bold"),
+        legend.text = element_text(size = 20, face = "bold"))
 
-# animate(p, detail = 40, fps = 10)
+ggsave("../figures/nmds_viz_v2.png", 
+       height = 7.5,
+       width = 11, 
+       dpi = 300,
+       units = "in")
+```
+
+
+```{r}
+
+p = ggplot(MDS_xy, aes(X1, Y)) + 
+  geom_point(aes(fill = as.factor(sp.trt)), color = "black", pch = 21, size = 4) + 
+  theme_bw() +
+  geom_text(data = data.frame(X1 = Inf, Y = -Inf), 
+            hjust = 1, vjust = -1, 
+            label = paste("Stress =", round(WAPS.mds$stress, 2))) +
+  labs(title = 'Year: {frame_time}', size = 4) +
+  transition_time(year) +
+  ease_aes('cubic-in-out') +
+  theme_void() +
+  scale_fill_discrete(name = "Planting Combination",
+                       breaks = unique(MDS_xy$sp.trt),
+                       labels = c("N", "N+A+I", "A", "N+I", "N+A", "A+I", "I")) +
+  theme(plot.title = element_text(size = 24, face = "bold"),
+        legend.title = element_text(size = 20, face = "bold"),
+        legend.text = element_text(size = 20, face = "bold"))
+
+animate(p, fps = 10, width= 750, height=500, duration = 15)
 ```
 
 # K-means Clustering
@@ -309,27 +341,70 @@ cluscounts = bind_cols(ord.att, data.frame(cluster = k.cluster$clustering)) %>% 
   
 cols = rainbow(4, v = .75)
 
-ggplot(cluscounts, 
+assign_freq = ggplot(cluscounts, 
        aes(x = year, 
            y = count / 96, 
-           color = factor(cluster))) + 
-  geom_line(stat = "identity", size = 1.25) +
-  ggtitle("State Assignment Frequency") +
+           fill = factor(cluster),
+           shape = factor(cluster))) + 
+  geom_line() + 
+  geom_point(stat = "identity", size = 3) +
+  ggtitle("B) State Assignment Frequency") +
   theme_bw() + 
   ylab("Frequency") +
   xlab("Year") +
   scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
-  scale_color_manual(name = 'State Assignment', 
+  scale_fill_manual(name = 'State Assignment', 
          values =c("1" = cols[1], 
                    "2" = cols[2], 
                    "3" = cols[3], 
                    "4" = cols[4]),
-         labels = c('E. glaucus - S. pulchra',
-                    'F. perennis - B. hordeaceous', 
-                    'E. caput-medusae - A. triuncialis',
-                    'A. fatua - B. diandrus')) 
+         labels = c('1. E. glaucus - S. pulchra',
+                    '2. F. perennis - B. hordeaceous', 
+                    '3. E. caput-medusae - A. triuncialis',
+                    '4. A. fatua - B. diandrus')) +
+  scale_shape_manual(name = 'State Assignment', 
+         values =c("1" = 21, 
+                   "2" = 22, 
+                   "3" = 23, 
+                   "4" = 24),
+         labels = c('1. E. glaucus - S. pulchra',
+                    '2. F. perennis - B. hordeaceous', 
+                    '3. E. caput-medusae - A. triuncialis',
+                    '4. A. fatua - B. diandrus')) 
+
+assign_freq
 
 ggsave("../figures/assignmentfrequency.pdf", width = 7, height = 4)
+```
+
+```{r}
+
+ggplot(MDS_xy, aes(X1, Y)) + 
+  geom_point(aes(fill = as.factor(clust)), color = "black", pch = 21, size = 4) + 
+  theme_bw() +
+  geom_text(data = data.frame(X1 = Inf, Y = -Inf), 
+            hjust = 1, vjust = -1, 
+            label = paste("Stress =", round(WAPS.mds$stress, 2))) +
+  # labs(title = 'Year: 2008') +
+  theme_void() +
+  scale_fill_manual(name = 'State Assignment', 
+         values =c("1" = cols[1], 
+                   "2" = cols[2], 
+                   "3" = cols[3], 
+                   "4" = cols[4]),
+         labels = c('State 1',
+                    'State 2', 
+                    'State 3',
+                    'State 3')) +
+  theme(plot.title = element_text(size = 24, face = "bold"),
+        legend.title = element_text(size = 20, face = "bold"),
+        legend.text = element_text(size = 20, face = "bold"))
+
+ggsave("../figures/nmds_viz_assignments.png", 
+       height = 7.5,
+       width = 11, 
+       dpi = 300,
+       units = "in")
 ```
 
 # Describing clusters:
