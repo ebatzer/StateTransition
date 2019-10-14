@@ -101,7 +101,8 @@ plot_stm <- function(edges){
     geom_text(aes(label = round(weight, 2),
                   x = xpos,
                   y = ypos),
-              data = edgelabels)
+              data = edgelabels)+
+    theme(plot.margin = unit(c(0,0,0,0), "cm"))
   
   # nodes = data.frame(node_id = c("A", "B", "C", "D"),
   #                  cluster = c("I", "haven't", "assigned", "yet"),

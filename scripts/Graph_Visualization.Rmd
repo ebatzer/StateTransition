@@ -100,36 +100,37 @@ Q <- rbind ( c(0, 0.333, 0.333, 0.333),
 Q.crude <- crudeinits.msm(cluster ~ year, plot, data=clustdat, qmatrix=Q)
 
 speidata <- read.csv("../data/SPEIfits.csv")
-clustdat_t1 <- clustdat %>%
-  left_join((speidata %>% mutate(year = year + 1)), by = c("year" = "year"))
+clustdat_t0 <- clustdat %>%
+   left_join((speidata %>% mutate(year = year)), by = c("year" = "year"))
 
-msm.l1_priority <- msm(cluster ~ year, plot, data=clustdat_t1, qmatrix=Q, obstype=2,
-                    covariates = list("1-2" = ~ annuals + l1fit,
-                                      "1-3" = ~ waps + l1fit,
-                                      "1-4" = ~ annuals + l1fit,
-                                      "2-1" = ~ natives + l1fit,
-                                      "2-3" = ~ waps + l1fit,
-                                      "2-4" = ~ annuals + l1fit,
-                                      "3-1" = ~ natives + l1fit,
-                                      "3-2" = ~ annuals + l1fit,
-                                      "3-4" = ~ annuals + l1fit,
-                                      "4-1" = ~ natives + l1fit,
-                                      "4-2" = ~ annuals + l1fit,
-                                      "4-3" = ~ waps + l1fit))
+msm.l1_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2,
+                     covariates = list("1-2" = ~ annuals + l1fit,
+                                       "1-3" = ~ waps + l1fit,
+                                       "1-4" = ~ annuals + l1fit,
+                                       "2-1" = ~ natives + l1fit,
+                                       "2-3" = ~ waps + l1fit,
+                                       "2-4" = ~ annuals + l1fit,
+                                       "3-1" = ~ natives + l1fit,
+                                       "3-2" = ~ annuals + l1fit,
+                                       "3-4" = ~ annuals + l1fit,
+                                       "4-1" = ~ natives + l1fit,
+                                       "4-2" = ~ annuals + l1fit,
+                                       "4-3" = ~ waps + l1fit))
 ```
 
 # Assembling the dataframe that can be subsetted to produce
 
 ```{r}
-planting_comp = data.frame(Planting = c("Natives","Naturalized","Invasive",
+planting_comp = data.frame(Planting = c("Baseline", "Natives","Naturalized","Invasive",
                                         "Native + Naturalized", "Native + Invasive", "Naturalized + Invasive",
                                         "Native + Naturalized + Invasive"),
-                           Natpri = c(1,0,0,1,1,0,1),
-                           Exopri = c(0,1,0,1,0,1,1),
-                           Invpri = c(0,0,1,0,1,1,1))
+                           Natpri = c(0,1,0,0,1,1,0,1),
+                           Exopri = c(0,0,1,0,1,0,1,1),
+                           Invpri = c(0,0,0,1,0,1,1,1))
 
 edgeoutput <- list()
 counter <- 1
+
 for(netprecip in seq(-2,2, by = .25)){
   for(selected_planting in unique(planting_comp$Planting)){
     
@@ -157,26 +158,26 @@ for(netprecip in seq(-2,2, by = .25)){
   }
 }
 
-ttable <- matrix(pmatrix.msm(msm.l1_priority), 
-                 nrow = 4)
+write.csv("../STM_Dynamic/msmfits.csv",
+          x = bind_rows(edgeoutput))
 
-    rownames(ttable) = c("A", "B", "C", "D")
-    colnames(ttable) = c("A", "B", "C", "D")
+rownames(ttable) = c("A", "B", "C", "D")
+colnames(ttable) = c("A", "B", "C", "D")
     
-    edges = data.frame(ttable) %>% 
-      rownames_to_column("source") %>%
-      gather(key = "target", value = "weight", -source)
-    
-    edges = edges %>% mutate(Precip = netprecip,
-                     Planting = selected_planting)
+edges = data.frame(ttable) %>% 
+  rownames_to_column("source") %>%
+  gather(key = "target", value = "weight", -source)
+
+edges = edges %>% mutate(Precip = netprecip,
+                         Planting = selected_planting)
 
     
 newplot <- plot_stm(edges)
+
+
 ggsave(plot = newplot, 
        filename = "../figures/stm_baseline.pdf",
        height = 7, width = 8)
-
-?ggsave
 ```
 
 ```{r}
