@@ -19,8 +19,7 @@ covariates that may change transition probabilities, rather than operating with
 only a fixed probability for each given state change.
 
 ```{r, echo = FALSE, warning = FALSE, message=FALSE}
-library(lubridate); library(tidyverse); library(tidyquant)
-library(msm)
+library(lubridate); library(tidyverse); library(msm); library(tidyquant)
 
 clustdat <- read.csv("../data/WAPSclusters.csv",
                      header = TRUE,
@@ -366,53 +365,53 @@ AIC(msm.env_priority, msm.l1_priority, msm.l2_priority, msm.l3_priority)
 T1 approach seems to be better via AIC, but model doesn't appear to work right in reality.
 
 ```{r}
-# clustdat_t0 <- clustdat %>%
-#    left_join((speidata %>% mutate(year = year)), by = c("year" = "year"))
-#
-#  msm.l1_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2,
-#                      covariates = list("1-2" = ~ annuals + l1fit,
-#                                        "1-3" = ~ waps + l1fit,
-#                                        "1-4" = ~ annuals + l1fit,
-#                                        "2-1" = ~ natives + l1fit,
-#                                        "2-3" = ~ waps + l1fit,
-#                                        "2-4" = ~ annuals + l1fit,
-#                                        "3-1" = ~ natives + l1fit,
-#                                        "3-2" = ~ annuals + l1fit,
-#                                        "3-4" = ~ annuals + l1fit,
-#                                        "4-1" = ~ natives + l1fit,
-#                                        "4-2" = ~ annuals + l1fit,
-#                                        "4-3" = ~ waps + l1fit))
-#
-#  msm.l2_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2,
-#                      covariates = list("1-2" = ~ annuals + l2fit,
-#                                        "1-3" = ~ waps + l2fit,
-#                                        "1-4" = ~ annuals + l2fit,
-#                                        "2-1" = ~ natives + l2fit,
-#                                        "2-3" = ~ waps + l2fit,
-#                                        "2-4" = ~ annuals + l2fit,
-#                                        "3-1" = ~ natives + l2fit,
-#                                        "3-2" = ~ annuals + l2fit,
-#                                        "3-4" = ~ annuals + l2fit,
-#                                        "4-1" = ~ natives + l2fit,
-#                                        "4-2" = ~ annuals + l2fit,
-#                                        "4-3" = ~ waps + l2fit))
-#
-#  msm.l3_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2,
-#                      covariates = list("1-2" = ~ annuals + l3fit,
-#                                        "1-3" = ~ waps + l3fit,
-#                                        "1-4" = ~ annuals + l3fit,
-#                                        "2-1" = ~ natives + l3fit,
-#                                        "2-3" = ~ waps + l3fit,
-#                                        "2-4" = ~ annuals + l3fit,
-#                                        "3-1" = ~ natives + l3fit,
-#                                        "3-2" = ~ annuals + l3fit,
-#                                        "3-4" = ~ annuals + l3fit,
-#                                        "4-1" = ~ natives + l3fit,
-#                                        "4-2" = ~ annuals + l3fit,
-#                                        "4-3" = ~ waps + l3fit))
-#
-#  cat("T0 Model")
-#  AIC(msm.l1_priority, msm.l2_priority, msm.l3_priority)
+clustdat_t0 <- clustdat %>%
+   left_join((speidata %>% mutate(year = year)), by = c("year" = "year"))
+
+ msm.l1_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2,
+                     covariates = list("1-2" = ~ annuals + l1fit,
+                                       "1-3" = ~ waps + l1fit,
+                                       "1-4" = ~ annuals + l1fit,
+                                       "2-1" = ~ natives + l1fit,
+                                       "2-3" = ~ waps + l1fit,
+                                       "2-4" = ~ annuals + l1fit,
+                                       "3-1" = ~ natives + l1fit,
+                                       "3-2" = ~ annuals + l1fit,
+                                       "3-4" = ~ annuals + l1fit,
+                                       "4-1" = ~ natives + l1fit,
+                                       "4-2" = ~ annuals + l1fit,
+                                       "4-3" = ~ waps + l1fit))
+
+ msm.l2_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2,
+                     covariates = list("1-2" = ~ annuals + l2fit,
+                                       "1-3" = ~ waps + l2fit,
+                                       "1-4" = ~ annuals + l2fit,
+                                       "2-1" = ~ natives + l2fit,
+                                       "2-3" = ~ waps + l2fit,
+                                       "2-4" = ~ annuals + l2fit,
+                                       "3-1" = ~ natives + l2fit,
+                                       "3-2" = ~ annuals + l2fit,
+                                       "3-4" = ~ annuals + l2fit,
+                                       "4-1" = ~ natives + l2fit,
+                                       "4-2" = ~ annuals + l2fit,
+                                       "4-3" = ~ waps + l2fit))
+
+ msm.l3_priority <- msm(cluster ~ year, plot, data=clustdat_t0, qmatrix=Q, obstype=2,
+                     covariates = list("1-2" = ~ annuals + l3fit,
+                                       "1-3" = ~ waps + l3fit,
+                                       "1-4" = ~ annuals + l3fit,
+                                       "2-1" = ~ natives + l3fit,
+                                       "2-3" = ~ waps + l3fit,
+                                       "2-4" = ~ annuals + l3fit,
+                                       "3-1" = ~ natives + l3fit,
+                                       "3-2" = ~ annuals + l3fit,
+                                       "3-4" = ~ annuals + l3fit,
+                                       "4-1" = ~ natives + l3fit,
+                                       "4-2" = ~ annuals + l3fit,
+                                       "4-3" = ~ waps + l3fit))
+
+ cat("T0 Model")
+ AIC(msm.l1_priority, msm.l2_priority, msm.l3_priority)
 ```
 
 # Goodness-of-fit test
@@ -427,24 +426,24 @@ chisq.test(outputtable$obs[c(1:4)], outputtable$exp[c(1:4)])
 # Bootstrapping confidence intervals (too computationally intensive to be useful)
 
 ```{r}
-system.time(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip,
-                                             natives = pri,
-                                             annuals = pri,
-                                             waps = pri),
-            ci = "boot", B = 10))
-
-system.time(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip,
-                                             natives = pri,
-                                             annuals = pri,
-                                             waps = pri),
-            ci = "boot", B = 100))
-
-
-system.time(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip,
-                                             natives = pri,
-                                             annuals = pri,
-                                             waps = pri),
-            ci = "boot", B = 1000))
+# system.time(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip,
+#                                              natives = pri,
+#                                              annuals = pri,
+#                                              waps = pri),
+#             ci = "boot", B = 10))
+# 
+# system.time(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip,
+#                                              natives = pri,
+#                                              annuals = pri,
+#                                              waps = pri),
+#             ci = "boot", B = 100))
+# 
+# 
+# system.time(qmatrix.msm(msm.l1_priority, covariates=list(l1fit = netprecip,
+#                                              natives = pri,
+#                                              annuals = pri,
+#                                              waps = pri),
+#             ci = "boot", B = 1000))
 ```
 
 
@@ -563,7 +562,6 @@ for(pri in c(0:1)){
   }
 }
 
-library(viridis)
 
 cols = rainbow(4, v = .5)
 
@@ -651,9 +649,9 @@ alltogether = gridExtra::grid.arrange(tprob(),
                         nrow = 4,
                         ncol = 1,
                         top = "Probability of Transition to States")
-
-ggsave(plot = alltogether,
-       "../figures/TransitionProbabilities_NoErrorBars_v2.pdf", height = 14, width = 8)
+ 
+# ggsave(plot = alltogether,
+#        "../figures/TransitionProbabilities_NoErrorBars_v2.pdf", height = 14, width = 8)
 ```
 
 # Highlighting particular transitions
