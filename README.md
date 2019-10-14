@@ -4,15 +4,7 @@ In environmental science, there is increasing emphasis on [resilience](https://w
 
 In rangelands (grazed landscapes), scientists have tried to capture changes in vegetation through "State and Transition Models" (STMs). STMs describe plant dynamics as a series of discrete groups (states) that may flip to other groups over time (transitions) with some probability based on factors such as climate, soil resources, and grazing intensity. STMs offer a great way to evaluate system resilience, as states with a low transition probability can be considered particularly resistant to change. However, STMs are primarily built on the basis of expert opinion and rarely evaluated in a quantitative fashion. 
 
-Here, I aim to complement these expert models by building an STM using a 10-year dataset of continuously observed vegetation plots. Through
-
-__1. Identifying relevant sets of states through unsupervised clustering__
-
-and 
-
-__2. Modelling transitions between states as a Markov process__
-
-I hope to provide a clearer, testable evaluation of resilience in California annual grasslands.
+Here, I aim to complement these expert models by building an STM using a 10-year dataset of continuously observed vegetation plots. Through __identification of relevant sets of states through unsupervised clustering__ and __modelling transitions between states as a Markov process__, I hope to provide a clearer, testable evaluation of resilience in California annual grasslands.
 
 ## Shiny App Companion
 
