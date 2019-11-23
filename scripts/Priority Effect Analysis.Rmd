@@ -145,136 +145,137 @@ cover = cover %>% filter(rs != 0)
 com.mat = cover %>% select_if(is.numeric)
 com.attr = cover %>% select_if(is.factor)
 
-braydisp = betadisper(vegdist(com.mat, method = "bray"), 
-                      paste(com.attr$year, com.attr$block, com.attr$subblock, sep = "_"), sqrt.dist = TRUE)
-
-eucdisp = betadisper(vegdist(com.mat, method = "euclidean"),
-                     paste(com.attr$year, com.attr$block, com.attr$subblock, sep = "_"), sqrt.dist = FALSE)
-
-bd = data.frame(grp = braydisp$group, bray = braydisp$distances, euc = eucdisp$distances)
-
-grpdisp = bind_cols(com.attr, 
-                    data.frame(grp = bd$grp, bray = bd$bray, euc = bd$euc))
+# braydisp = betadisper(vegdist(com.mat, method = "bray"), 
+#                       paste(com.attr$year, com.attr$block, com.attr$subblock, sep = "_"), sqrt.dist = TRUE)
+# 
+# eucdisp = betadisper(vegdist(com.mat, method = "euclidean"),
+#                      paste(com.attr$year, com.attr$block, com.attr$subblock, sep = "_"), sqrt.dist = FALSE)
+# 
+# bd = data.frame(grp = braydisp$group, bray = braydisp$distances, euc = eucdisp$distances)
+# 
+# grpdisp = bind_cols(com.attr, 
+#                     data.frame(grp = bd$grp, bray = bd$bray, euc = bd$euc))
 
 ```
 
 # Plotting dispersion as a function of water treatment:
 
+
 ```{r}
-library(gridExtra)
-
-# Define plotting function
-plot_fgs <- function(water){
-  
-  p = grpdisp %>% 
-    filter(clip == "none" & fertilization == "none") %>%
-    filter(h2o == water) %>% # Filter by h2o treatment (water) name
-    ggplot(aes(x = as.numeric(year),
-               y = bray ^ 2,
-               color = sp.trt)) +
-    geom_point() + 
-    stat_smooth(se = FALSE) + 
-    ylim(0,1) +
-    ggtitle(paste(water, "H2O")) +
-    scale_x_continuous(breaks = seq(0,10, by = 2), 
-                     labels = as.character(seq(2008,2018, by = 2))) +
-    ylab("Distance to Block Centroid (Bray-Curtis)") +
-    xlab("Year") +
-    stat_smooth(aes(color = NULL), color = 'black')
-  
-  return(p)
-}
-
-for(i in unique(grpdisp$h2o)){
-  p = plot_fgs(i)  
-  plot(p)
-}
+# library(gridExtra)
+# 
+# # Define plotting function
+# plot_fgs <- function(water){
+#   
+#   p = grpdisp %>% 
+#     filter(clip == "none" & fertilization == "none") %>%
+#     filter(h2o == water) %>% # Filter by h2o treatment (water) name
+#     ggplot(aes(x = as.numeric(year),
+#                y = bray ^ 2,
+#                color = sp.trt)) +
+#     geom_point() + 
+#     stat_smooth(se = FALSE) + 
+#     ylim(0,1) +
+#     ggtitle(paste(water, "H2O")) +
+#     scale_x_continuous(breaks = seq(0,10, by = 2), 
+#                      labels = as.character(seq(2008,2018, by = 2))) +
+#     ylab("Distance to Block Centroid (Bray-Curtis)") +
+#     xlab("Year") +
+#     stat_smooth(aes(color = NULL), color = 'black')
+#   
+#   return(p)
+# }
+# 
+# for(i in unique(grpdisp$h2o)){
+#   p = plot_fgs(i)  
+#   plot(p)
+# }
 ```
 
 # Plotting dispersion as a function of treatment:
 
 ```{r}
 # Define plotting function
-plot_fgs <- function(sptrt){
-  
-  p = grpdisp %>% 
-    filter(h2o != "control-2nd") %>%
-    filter(clip == "none" & fertilization == "none") %>%
-    filter(sp.trt == sptrt) %>% # Filter by h2o treatment (water) name
-    ggplot(aes(x = as.numeric(year),
-               y = bray ^ 2,
-               color = h2o)) +
-    geom_point() + 
-    stat_smooth(se = FALSE) + 
-    ylim(0,1) +
-    ggtitle(paste(sptrt, "Planting Comp")) +
-    scale_x_continuous(breaks = seq(0, 10, by = 2), 
-                     labels = as.character(seq(2008,2018, by = 2))) +
-    ylab("Distance to Block Centroid (Bray-Curtis)") +
-    xlab("Year")
-  
-  return(p)
-}
-
-for(i in unique(grpdisp$sp.trt)){
-  p = plot_fgs(i)  
-  plot(p)
-}
+# plot_fgs <- function(sptrt){
+#   
+#   p = grpdisp %>% 
+#     filter(h2o != "control-2nd") %>%
+#     filter(clip == "none" & fertilization == "none") %>%
+#     filter(sp.trt == sptrt) %>% # Filter by h2o treatment (water) name
+#     ggplot(aes(x = as.numeric(year),
+#                y = bray ^ 2,
+#                color = h2o)) +
+#     geom_point() + 
+#     stat_smooth(se = FALSE) + 
+#     ylim(0,1) +
+#     ggtitle(paste(sptrt, "Planting Comp")) +
+#     scale_x_continuous(breaks = seq(0, 10, by = 2), 
+#                      labels = as.character(seq(2008,2018, by = 2))) +
+#     ylab("Distance to Block Centroid (Bray-Curtis)") +
+#     xlab("Year")
+#   
+#   return(p)
+# }
+# 
+# for(i in unique(grpdisp$sp.trt)){
+#   p = plot_fgs(i)  
+#   plot(p)
+# }
 
 ```
 
 # How dissimilar are groups of the same planting treatment over time:
 
 ```{r}
-selected.trts <- c("annuals", "WAPS", "Natives", "natives+WAPS+annuals", 
-                   "annuals+natives", "WAPS+annuals", "WAPS+natives")
-
-# cover = cover %>% filter(sp.trt %in% selected.trts)
-# cover[,1:10] =  lapply(cover[, 1:10], as.factor)
-# rs = cover %>% select_if(is.numeric) %>% do(data.frame(rowSums(.)))
-# cover = cover %>% filter(rs != 0)
-
-com.mat = cover %>% select_if(is.numeric)
-com.attr = cover %>% select_if(is.factor)
-
-braydisp = betadisper(vegdist(com.mat, method = "bray"), 
-                      paste(com.attr$year, com.attr$h2o, com.attr$sp.trt, 
-                            com.attr$clip, com.attr$fertilization, sep = "_"), sqrt.dist = TRUE)
-
-eucdisp = betadisper(vegdist(com.mat, method = "euclidean"),
-                      paste(com.attr$year, com.attr$h2o, com.attr$sp.trt, 
-                            com.attr$clip, com.attr$fertilization, sep = "_"), sqrt.dist = FALSE)
-
-bd = data.frame(grp = braydisp$group, bray = braydisp$distances, euc = eucdisp$distances)
-
-grpdisp = bind_cols(com.attr, 
-                    data.frame(grp = bd$grp, bray = bd$bray, euc = bd$euc))
-
-# Define plotting function
-plot_fgs <- function(water){
-  
-  p = grpdisp %>% 
-    filter(h2o == water) %>%
-    filter(clip == "none" & fertilization == "none") %>%
-    ggplot(aes(x = as.numeric(year),
-               y = bray ^ 2,
-               color = sp.trt)) +
-    geom_point() + 
-    stat_smooth(se = FALSE) +
-    ylim(0,1) +
-    ggtitle(paste(water, "H2O")) +
-    scale_x_continuous(breaks = seq(0, 10, by = 2), 
-                     labels = as.character(seq(2008,2018, by = 2))) +
-    ylab("Distance to Block Centroid (Bray-Curtis)") +
-    xlab("Year")
-  
-  return(p)
-}
-
-for(i in unique(grpdisp$h2o)){
-  p = plot_fgs(i)  
-  plot(p)
-}
+# selected.trts <- c("annuals", "WAPS", "Natives", "natives+WAPS+annuals", 
+#                    "annuals+natives", "WAPS+annuals", "WAPS+natives")
+# 
+# # cover = cover %>% filter(sp.trt %in% selected.trts)
+# # cover[,1:10] =  lapply(cover[, 1:10], as.factor)
+# # rs = cover %>% select_if(is.numeric) %>% do(data.frame(rowSums(.)))
+# # cover = cover %>% filter(rs != 0)
+# 
+# com.mat = cover %>% select_if(is.numeric)
+# com.attr = cover %>% select_if(is.factor)
+# 
+# braydisp = betadisper(vegdist(com.mat, method = "bray"), 
+#                       paste(com.attr$year, com.attr$h2o, com.attr$sp.trt, 
+#                             com.attr$clip, com.attr$fertilization, sep = "_"), sqrt.dist = TRUE)
+# 
+# eucdisp = betadisper(vegdist(com.mat, method = "euclidean"),
+#                       paste(com.attr$year, com.attr$h2o, com.attr$sp.trt, 
+#                             com.attr$clip, com.attr$fertilization, sep = "_"), sqrt.dist = FALSE)
+# 
+# bd = data.frame(grp = braydisp$group, bray = braydisp$distances, euc = eucdisp$distances)
+# 
+# grpdisp = bind_cols(com.attr, 
+#                     data.frame(grp = bd$grp, bray = bd$bray, euc = bd$euc))
+# 
+# # Define plotting function
+# plot_fgs <- function(water){
+#   
+#   p = grpdisp %>% 
+#     filter(h2o == water) %>%
+#     filter(clip == "none" & fertilization == "none") %>%
+#     ggplot(aes(x = as.numeric(year),
+#                y = bray ^ 2,
+#                color = sp.trt)) +
+#     geom_point() + 
+#     stat_smooth(se = FALSE) +
+#     ylim(0,1) +
+#     ggtitle(paste(water, "H2O")) +
+#     scale_x_continuous(breaks = seq(0, 10, by = 2), 
+#                      labels = as.character(seq(2008,2018, by = 2))) +
+#     ylab("Distance to Block Centroid (Bray-Curtis)") +
+#     xlab("Year")
+#   
+#   return(p)
+# }
+# 
+# for(i in unique(grpdisp$h2o)){
+#   p = plot_fgs(i)  
+#   plot(p)
+# }
 
 ```
 
@@ -294,14 +295,14 @@ dis_to_control <- function(x){
 }
 
 dis.dat = cover %>% 
-  filter(fertilization == "none" & clip == "none" & h2o != "control-2nd") %>%
-  group_by(block, subblock, sp.trt, h2o) %>% 
+  filter(fertilization == "none" & clip == "none" & water != "control-2nd") %>%
+  group_by(block, subblock, sp.trt, water) %>% 
   do(dis_to_control(.))
 
 # Define plotting function
 plot_fgs <- function(water){
   
-  p = dis.dat %>% filter(h2o == water) %>%
+  p = dis.dat %>% filter(water == water) %>%
     ggplot(aes(x = as.numeric(year),
                y = bray,
                color = sp.trt)) +
@@ -317,11 +318,62 @@ plot_fgs <- function(water){
   return(p)
 }
 
-for(i in unique(dis.dat$h2o)){
+for(i in unique(dis.dat$water)){
   p = plot_fgs(i)  
   plot(p)
 }
 ```
+
+```{r}
+head(cover)
+x = cover %>% filter(block == 1 & sp.trt == "Natives" & subblock == 1)
+
+dis_to_prev <- function(x){
+  commat = x %>% select_if(is.numeric)
+  euc_dis = as.matrix(vegdist(commat, diag = TRUE, method = "euclidean"))[matrix(c(2:(nrow(commat)),(1:(nrow(commat) - 1))), ncol = 2)]
+  
+  
+  bc_dis = as.matrix(vegdist(commat, diag = TRUE, method = "bray"))[matrix(c(2:(nrow(commat)),(1:(nrow(commat) - 1))), ncol = 2)]
+  year = x$year[-1]
+  return(data.frame(year, bray = bc_dis, euc = euc_dis))
+}
+
+dis.dat = cover %>% 
+  filter(fertilization == "none" & clip == "none" & water != "control-2nd") %>%
+  group_by(block, subblock, sp.trt, water) %>% 
+  do(dis_to_prev(.))
+
+dis.dat %>% 
+  ungroup() %>%
+  summarise(n = n(),
+            bray_group = mean(bray),
+            se_group = sd(bray) / sqrt(n))
+
+# Define plotting function
+plot_fgs <- function(water){
+  
+  p = dis.dat %>% filter(water == water) %>%
+    ggplot(aes(x = as.numeric(year),
+               y = bray,
+               color = sp.trt)) +
+    geom_point(alpha = 0.25) + 
+    stat_smooth(se = FALSE) + 
+    ylim(0,1) +
+    ggtitle(paste(water, "H2O")) +
+    scale_x_continuous(breaks = seq(0, 10, by = 2), 
+                     labels = as.character(seq(2008,2018, by = 2))) +
+    ylab("Dissimilarity to State in First Year") +
+    xlab("Year")
+  
+  return(p)
+}
+
+for(i in unique(dis.dat$water)){
+  p = plot_fgs(i)  
+  plot(p)
+}
+```
+
 
 ```{r}
 head(cover)

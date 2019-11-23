@@ -37,10 +37,10 @@ ui <- fluidPage(
                  '',
                  h3("Transition Probability Estimates"),
                  tableOutput('ttable'),
-                 p(strong("State 1:"), "Native perennial grasses"),
-                 p(strong("State 2:"),  "Naturalized annual grasses (subset)"),
-                 p(strong("State 3:"),  "Invasive annual grasses"),
-                 p(strong("State 4:"),  "Naturalized annual grasses (subset)")),
+                 p(strong("State 1:"), "Native perennial grasses, defined primarily by Stipa pulchra and Elymus glaucus"),
+                 p(strong("State 2:"),  "Naturalized annual grasses (subset), defined primarily by Bromus hordeaceous and Festuca perennis"),
+                 p(strong("State 3:"),  "Invasive annual grasses, defined by Elymus caput-medusae and Aegilops triuncialis"),
+                 p(strong("State 4:"),  "Naturalized annual grasses (subset), defined primarily by Avena fatua and Bromus diandrus")),
     
   mainPanel(em("Note: This Shiny app is designed to accompany a presentation by Batzer et al. at SER 2019"),
             br(),br(),
@@ -50,6 +50,7 @@ ui <- fluidPage(
               imageOutput("myImage", height = "100%", width = "100%"))
   )
 )
+
 # Define server logic required to draw a histogram
 server <- function(input, output){
   
@@ -80,8 +81,8 @@ server <- function(input, output){
          contentType = 'image/png',
          width = 800,
          height = 800,
-         alt = "This is alternate text")
-  }, deleteFile = TRUE)
+         alt = "State-Transition Model Output")
+    }, deleteFile = TRUE)
   
   output$ttable <- renderTable({  
     edge_df <- msmfits[msmfits$Planting == input$selected_planting & 

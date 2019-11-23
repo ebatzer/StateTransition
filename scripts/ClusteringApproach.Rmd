@@ -115,7 +115,6 @@ specsbyfreq = sort(round(colSums(decostand(comp.subset, method = "pa")) / nrow(c
 # specsbyfreq
 ```
 
-
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 # What treatments and years should be selected?
 selected.trts <-c("annuals", "WAPS", "Natives", "natives+WAPS+annuals", "annuals+natives", "WAPS+annuals", "WAPS+natives")
@@ -196,6 +195,38 @@ sumtable %>%
 ggsave("../figures/ProportionalAbundances.pdf", width = 10, height = 6)
 ```
 
+Bray-Curtis dissimilarity per year
+
+```{r}
+x <- cbind(year = ord.att[1:4, 7], ord.mat[1:4,])
+
+
+vegdist(ord.mat[1:4,], method = "bray")
+
+dis_to_prev <- function(x){
+  commat = x %>% select(-year, -plot, -sp.trt)
+
+  bc_dis = as.matrix(vegdist(commat, method = "bray"))[
+    matrix(c((1:(nrow(commat) - 1)), 2:(nrow(commat))), ncol = 2)]
+
+  year = x$year[-1]
+
+  return(data.frame(year, bray = bc_dis))
+}
+
+dis.dat = cbind(ord.att %>% select(plot, year, sp.trt), ord.mat) %>%
+  mutate(year = as.character(year)) %>%
+  group_by(plot, sp.trt) %>%
+  do(dis_to_prev(.))
+
+dis.dat %>%
+  ungroup() %>%
+  summarise(n = n(),
+            bray_group = mean(bray),
+            se_group = sd(bray) / sqrt(n))
+```
+
+
 
 The first step in this analysis is to visualize the data using some sort of
 unconstrained ordination method. Because I'll be using Bray-Curtis distance to
@@ -207,9 +238,13 @@ is that communities aren't particularly stable.
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 # Constructing distance matrix and running NMDS
-distmat <- vegdist(decostand(ord.mat, "total"), method = "bray")
-WAPS.mds <- metaMDS(distmat, try = 1, trymax = 9, trace = F, autotransform = TRUE)
+WAPS.mds <- metaMDS(decostand(ord.mat, "total"), try = 1, trymax = 10, trace = F, autotransform = TRUE, distance = "bray")
 MDS_xy <- bind_cols(data.frame(ord.att), data.frame(X = WAPS.mds$points[,1], Y = WAPS.mds$points[,2]))
+
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# Plotting data
+treatments <- c("Natives", "annuals", "WAPS", "annuals+natives", "WAPS+natives", "WAPS+annuals", "natives+WAPS+annuals")
 
 # Plotting figure
 ggplot(MDS_xy, aes(X1, Y)) +
@@ -220,16 +255,24 @@ ggplot(MDS_xy, aes(X1, Y)) +
             label = paste("Stress =", round(WAPS.mds$stress, 2)))
 
 ggplot(MDS_xy %>% filter(year == 2008), aes(X1, Y)) +
-  geom_point(aes(fill = as.factor(sp.trt)), color = "black", pch = 21, size = 4) +
+  geom_point(aes(fill = factor(sp.trt, levels = treatments),
+                 shape = factor(sp.trt, levels = treatments)),
+             color = "black",
+             size = 4) +
   theme_bw() +
   geom_text(data = data.frame(X1 = Inf, Y = -Inf),
             hjust = 1, vjust = -1,
             label = paste("Stress =", round(WAPS.mds$stress, 2))) +
   labs(title = 'Year: 2008') +
   theme_void() +
-  scale_fill_discrete(name = "Planting Combination",
-                       breaks = unique(MDS_xy$sp.trt),
-                       labels = c("N", "N+A+I", "A", "N+I", "N+A", "A+I", "I")) +
+  scale_fill_manual(name = "Planting Combination",
+                       breaks = factor(treatments, levels = treatments),
+                       labels = c("N", "A", "I", "N+A", "N+I", "A+I", "N+A+I"),
+                    values = cbPalette[2:8]) +
+  scale_shape_manual(name = "Planting Combination",
+                       breaks = factor(treatments, levels = treatments),
+                       labels = c("N", "A", "I", "N+A", "N+I", "A+I", "N+A+I"),
+                     values = c(21,21,21,22,22,22,23)) +
   theme(plot.title = element_text(size = 24, face = "bold"),
         legend.title = element_text(size = 20, face = "bold"),
         legend.text = element_text(size = 20, face = "bold"))
@@ -239,13 +282,76 @@ ggsave("../figures/nmds_viz_v2.png",
        width = 11,
        dpi = 300,
        units = "in")
+
+# Plotting just the single-species treatments
+ggplot(MDS_xy %>% filter(year == 2008 & sp.trt %in% treatments[1:3]), aes(X1, Y)) +
+  geom_point(aes(fill = factor(sp.trt, levels = treatments),
+                 shape = factor(sp.trt, levels = treatments)),
+             color = "black",
+             size = 4) +
+  theme_bw() +
+  geom_text(data = data.frame(X1 = Inf, Y = -Inf),
+            hjust = 1, vjust = -1,
+            label = paste("Stress =", round(WAPS.mds$stress, 2))) +
+  labs(title = 'Year: 2008') +
+  theme_void() +
+  scale_fill_manual(name = "Planting Combination",
+                       breaks = factor(treatments, levels = treatments),
+                       labels = c("N", "A", "I", "N+A", "N+I", "A+I", "N+A+I"),
+                    values = cbPalette[2:8]) +
+  scale_shape_manual(name = "Planting Combination",
+                       breaks = factor(treatments, levels = treatments),
+                       labels = c("N", "A", "I", "N+A", "N+I", "A+I", "N+A+I"),
+                     values = c(21,21,21,22,22,22,23)) +
+  theme(plot.title = element_text(size = 24, face = "bold"),
+        legend.title = element_text(size = 20, face = "bold"),
+        legend.text = element_text(size = 20, face = "bold"))
+
+ggsave("../figures/nmds_viz_v2_single.png",
+       height = 7.5,
+       width = 11,
+       dpi = 300,
+       units = "in")
+
+
+# Plotting just the 1+2-species treatments
+ggplot(MDS_xy %>% filter(year == 2008 & sp.trt %in% treatments[1:6]), aes(X1, Y)) +
+  geom_point(aes(fill = factor(sp.trt, levels = treatments),
+                 shape = factor(sp.trt, levels = treatments)),
+             color = "black",
+             size = 4) +
+  theme_bw() +
+  geom_text(data = data.frame(X1 = Inf, Y = -Inf),
+            hjust = 1, vjust = -1,
+            label = paste("Stress =", round(WAPS.mds$stress, 2))) +
+  labs(title = 'Year: 2008') +
+  theme_void() +
+  scale_fill_manual(name = "Planting Combination",
+                       breaks = factor(treatments, levels = treatments),
+                       labels = c("N", "A", "I", "N+A", "N+I", "A+I", "N+A+I"),
+                    values = cbPalette[2:8]) +
+  scale_shape_manual(name = "Planting Combination",
+                       breaks = factor(treatments, levels = treatments),
+                       labels = c("N", "A", "I", "N+A", "N+I", "A+I", "N+A+I"),
+                     values = c(21,21,21,22,22,22,23)) +
+  theme(plot.title = element_text(size = 24, face = "bold"),
+        legend.title = element_text(size = 20, face = "bold"),
+        legend.text = element_text(size = 20, face = "bold"))
+
+ggsave("../figures/nmds_viz_v2_double.png",
+       height = 7.5,
+       width = 11,
+       dpi = 300,
+       units = "in")
+
 ```
 
-
 ```{r}
-
 p = ggplot(MDS_xy, aes(X1, Y)) +
-  geom_point(aes(fill = as.factor(sp.trt)), color = "black", pch = 21, size = 4) +
+  geom_point(aes(fill = as.factor(sp.trt),
+                shape = as.factor(sp.trt)),
+             color = "black",
+             size = 4) +
   theme_bw() +
   geom_text(data = data.frame(X1 = Inf, Y = -Inf),
             hjust = 1, vjust = -1,
@@ -254,14 +360,67 @@ p = ggplot(MDS_xy, aes(X1, Y)) +
   transition_time(year) +
   ease_aes('cubic-in-out') +
   theme_void() +
-  scale_fill_discrete(name = "Planting Combination",
-                       breaks = unique(MDS_xy$sp.trt),
-                       labels = c("N", "N+A+I", "A", "N+I", "N+A", "A+I", "I")) +
+  scale_fill_manual(name = "Planting Combination",
+                       breaks = factor(treatments, levels = treatments),
+                       labels = c("N", "A", "I", "N+A", "N+I", "A+I", "N+A+I"),
+                    values = cbPalette[2:8]) +
+  scale_shape_manual(name = "Planting Combination",
+                       breaks = factor(treatments, levels = treatments),
+                       labels = c("N", "A", "I", "N+A", "N+I", "A+I", "N+A+I"),
+                     values = c(21,21,21,22,22,22,23)) +
   theme(plot.title = element_text(size = 24, face = "bold"),
         legend.title = element_text(size = 20, face = "bold"),
         legend.text = element_text(size = 20, face = "bold"))
 
-animate(p, fps = 10, width= 750, height=500, duration = 15)
+# animate(p, fps = 10, width= 750, height=500, duration = 17)
+```
+
+# Significance of initial assignments
+
+```{r}
+
+pairwise.adonis <- function(x,factors, sim.function = 'vegdist', sim.method = 'bray', p.adjust.m ='bonferroni')
+{
+  library(vegan)
+
+  co = combn(unique(as.character(factors)),2)
+  pairs = c()
+  F.Model =c()
+  R2 = c()
+  p.value = c()
+
+
+  for(elem in 1:ncol(co)){
+    if(sim.function == 'daisy'){
+      x1 = daisy(x[factors %in% c(co[1,elem],co[2,elem]),],metric=sim.method)
+    }else{
+      x1 = vegdist(x[factors %in% c(co[1,elem],co[2,elem]),],method=sim.method)
+    }
+
+    ad = adonis(x1 ~ factors[factors %in% c(co[1,elem],co[2,elem])], permutations = 99999);
+    pairs = c(pairs,paste(co[1,elem],'vs',co[2,elem]));
+    F.Model =c(F.Model,ad$aov.tab[1,4]);
+    R2 = c(R2,ad$aov.tab[1,5]);
+    p.value = c(p.value,ad$aov.tab[1,6])
+  }
+  p.adjusted = p.adjust(p.value,method=p.adjust.m)
+  sig = c(rep('',length(p.adjusted)))
+  sig[p.adjusted <= 0.05] <-'.'
+  sig[p.adjusted <= 0.01] <-'*'
+  sig[p.adjusted <= 0.001] <-'**'
+  sig[p.adjusted <= 0.0001] <-'***'
+
+  pairw.res = data.frame(pairs,F.Model,R2,p.value,p.adjusted,sig)
+  return(pairw.res)
+
+}
+
+adonis(ord.mat[ord.att$year == 2008,] ~ ord.att$sp.trt[ord.att$year == 2008])
+
+pw_adonis_out <- pairwise.adonis(x = ord.mat[ord.att$year == 2008,], factors = ord.att$sp.trt[ord.att$year == 2008])
+
+write.csv(x = pw_adonis_out,
+          "../data/permanova_pairwise.csv")
 ```
 
 # K-means Clustering
@@ -320,7 +479,7 @@ bestclust = NbClust(decostand(ord.mat, method = "total"), min.nc = 2, max.nc = 1
         index = c("hartigan", "ch", "beale", "kl", "cindex", "db", "silhouette", "duda", "gap"))[1:2]
 
 
-res = get_clust_tendency(decostand(ord.mat, method = "total"), 100, graph = TRUE)
+# res = get_clust_tendency(decostand(ord.mat, method = "total"), 100, graph = TRUE)
 # Significant clusterability, H = 0.1
 ```
 
@@ -353,10 +512,10 @@ assign_freq = ggplot(cluscounts,
            y = count / 96,
            fill = factor(cluster),
            group = factor(cluster),
-           shape = factor(cluster))) +
+           shape = factor(cluster))) +  
+  geom_line(stat = "identity", color = "black") +
   geom_point(stat = "identity", size = 3) +
-  geom_line(stat = "identity", color = "black", linetype = 2) +
-  ggtitle("State Assignment Frequency") +
+ ggtitle("B) State Assignment Frequency") +
   theme_bw() +
   ylab("Frequency") +
   xlab("Year") +
@@ -371,24 +530,134 @@ assign_freq = ggplot(cluscounts,
                     '3. E. caput-medusae - A. triuncialis',
                     '4. A. fatua - B. diandrus')) +
   scale_shape_manual(name = 'State Assignment',
-         values =c("1" = 21,
-                   "2" = 22,
-                   "3" = 23,
-                   "4" = 24),
+         values = c(21,22,23,24),
          labels = c('1. E. glaucus - S. pulchra',
                     '2. F. perennis - B. hordeaceous',
                     '3. E. caput-medusae - A. triuncialis',
-                    '4. A. fatua - B. diandrus'))
+                    '4. A. fatua - B. diandrus')) +
+  ylim(0, .4)
 
-assign_freq
+ggsave("../figures/assignmentfrequency.pdf", width = 6.7, height = 4)
 
-ggsave("../figures/assignmentfrequency.pdf", width = 7, height = 4)
+ggplot(cluscounts %>% filter(cluster == 1),
+       aes(x = year,
+           y = count / 96,
+           fill = factor(cluster),
+           group = factor(cluster),
+           shape = factor(cluster))) +   
+  geom_line(stat = "identity", color = "black") +
+  geom_point(stat = "identity", size = 3) +
+  ggtitle("B) State Assignment Frequency") +
+  theme_bw() +
+  ylab("Frequency") +
+  xlab("Year") +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  scale_fill_manual(name = 'State Assignment',
+         values =c("1" = cols[1],
+                   "2" = cols[2],
+                   "3" = cols[3],
+                   "4" = cols[4]),
+         labels = c('1. E. glaucus - S. pulchra',
+                    '2. F. perennis - B. hordeaceous',
+                    '3. E. caput-medusae - A. triuncialis',
+                    '4. A. fatua - B. diandrus')) +
+  scale_shape_manual(name = 'State Assignment',
+         values = c(21,22,23,24),
+         labels = c('1. E. glaucus - S. pulchra',
+                    '2. F. perennis - B. hordeaceous',
+                    '3. E. caput-medusae - A. triuncialis',
+                    '4. A. fatua - B. diandrus')) +
+  ylim(0, .4)
+
+ggsave("../figures/assignmentfrequency_state1.pdf", width = 6.7, height = 4)
+
+
+ggplot(cluscounts %>% filter(cluster %in% c(1,2)),
+       aes(x = year,
+           y = count / 96,
+           fill = factor(cluster),
+           group = factor(cluster),
+           shape = factor(cluster))) +   
+  geom_line(stat = "identity", color = "black") +
+  geom_point(stat = "identity", size = 3) +
+  ggtitle("B) State Assignment Frequency") +
+  theme_bw() +
+  ylab("Frequency") +
+  xlab("Year") +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  scale_fill_manual(name = 'State Assignment',
+         values =c("1" = cols[1],
+                   "2" = cols[2],
+                   "3" = cols[3],
+                   "4" = cols[4]),
+         labels = c('1. E. glaucus - S. pulchra',
+                    '2. F. perennis - B. hordeaceous',
+                    '3. E. caput-medusae - A. triuncialis',
+                    '4. A. fatua - B. diandrus')) +
+  scale_shape_manual(name = 'State Assignment',
+         values = c(21,22,23,24),
+         labels = c('1. E. glaucus - S. pulchra',
+                    '2. F. perennis - B. hordeaceous',
+                    '3. E. caput-medusae - A. triuncialis',
+                    '4. A. fatua - B. diandrus')) +
+  ylim(0, .4)
+
+ggsave("../figures/assignmentfrequency_state12.pdf", width = 6.7, height = 4)
+
+
+ggplot(cluscounts %>% filter(cluster %in% c(1,2,3)),
+       aes(x = year,
+           y = count / 96,
+           fill = factor(cluster),
+           group = factor(cluster),
+           shape = factor(cluster))) +
+  geom_line(stat = "identity", color = "black") +
+  geom_point(stat = "identity", size = 3) +
+  ggtitle("B) State Assignment Frequency") +
+  theme_bw() +
+  ylab("Frequency") +
+  xlab("Year") +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  scale_fill_manual(name = 'State Assignment',
+         values =c("1" = cols[1],
+                   "2" = cols[2],
+                   "3" = cols[3],
+                   "4" = cols[4]),
+         labels = c('1. E. glaucus - S. pulchra',
+                    '2. F. perennis - B. hordeaceous',
+                    '3. E. caput-medusae - A. triuncialis',
+                    '4. A. fatua - B. diandrus')) +
+  scale_shape_manual(name = 'State Assignment',
+         values = c(21,22,23,24),
+         labels = c('1. E. glaucus - S. pulchra',
+                    '2. F. perennis - B. hordeaceous',
+                    '3. E. caput-medusae - A. triuncialis',
+                    '4. A. fatua - B. diandrus')) +
+  ylim(0, .4)
+
+ggsave("../figures/assignmentfrequency_state123.pdf", width = 6.7, height = 4)
+
 ```
 
 ```{r}
+specsdat <- WAPS.mds$species %>%
+  data.frame(.) %>%
+  rownames_to_column() %>%
+  filter(!is.na(MDS1))
+
+specsdat = specsdat[-c(4,14,13,11),]
+
+specsdat$Species = c("A. fatua", "B. hordeacous", "B. diandrus",
+                     "F. perennis", "T. subterraneum", "B. carinatus",
+                     "E. glaucus", "E. triticoides", "A. americanus",
+                     "S. pulchra", "A. triuncialis", "E. caput-medusae")
+
+names(specsdat) = c("Species", "X1", "Y")
+
+cols = rainbow(4, v = .75, s = .3)
 
 ggplot(MDS_xy, aes(X1, Y)) +
-  geom_point(aes(fill = as.factor(clust)), color = "black", pch = 21, size = 4) +
+  geom_point(aes(fill = as.factor(clust), shape = as.factor(clust)), color = "black", size = 4, alpha = .5) +
   theme_bw() +
   geom_text(data = data.frame(X1 = Inf, Y = -Inf),
             hjust = 1, vjust = -1,
@@ -400,17 +669,30 @@ ggplot(MDS_xy, aes(X1, Y)) +
                    "2" = cols[2],
                    "3" = cols[3],
                    "4" = cols[4]),
-         labels = c('State 1',
-                    'State 2',
-                    'State 3',
-                    'State 3')) +
-  theme(plot.title = element_text(size = 24, face = "bold"),
-        legend.title = element_text(size = 20, face = "bold"),
-        legend.text = element_text(size = 20, face = "bold"))
+         labels = c('1. E. glaucus - S. pulchra',
+                    '2. F. perennis - B. hordeaceous',
+                    '3. E. caput-medusae - A. triuncialis',
+                    '4. A. fatua - B. diandrus')) +
+  geom_segment(data = specsdat,
+               aes(group = Species,
+                   x = 0,
+                   y = 0,
+                   xend = X1,
+                   yend = Y)) +
+  geom_text(aes(label = Species), data = specsdat, fontface = "bold") +
+  scale_shape_manual(name = 'State Assignment',
+                     values = c(21,22,23,24),
+                     labels = c('1. E. glaucus - S. pulchra',
+                    '2. F. perennis - B. hordeaceous',
+                    '3. E. caput-medusae - A. triuncialis',
+                    '4. A. fatua - B. diandrus')) +
+  theme(plot.title = element_text(size = 10),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10))
 
 ggsave("../figures/nmds_viz_assignments.png",
-       height = 7.5,
-       width = 11,
+       height = 6,
+       width = 9,
        dpi = 300,
        units = "in")
 ```
@@ -467,7 +749,7 @@ piecharts %>%
   theme(strip.text.x = element_text(size = 20, face = "bold"),
         axis.text.x = element_text(angle = 90)) +
   guides(fill = FALSE) +
-  ggtitle("Mean Relative Species Cover of Vegetation Groups") + 
+  ggtitle("Mean Relative Species Cover of Vegetation Groups") +
   ylab("Mean Relative Cover")
 
 ```
