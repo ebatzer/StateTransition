@@ -208,7 +208,7 @@ is that communities aren't particularly stable.
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 # Constructing distance matrix and running NMDS
 distmat <- vegdist(decostand(ord.mat, "total"), method = "bray")
-WAPS.mds <- metaMDS(distmat, try = 1, trymax = 999, trace = F, autotransform = TRUE)
+WAPS.mds <- metaMDS(distmat, try = 1, trymax = 9, trace = F, autotransform = TRUE)
 MDS_xy <- bind_cols(data.frame(ord.att), data.frame(X = WAPS.mds$points[,1], Y = WAPS.mds$points[,2]))
 
 # Plotting figure
@@ -341,6 +341,11 @@ ggplot(MDS_xy, aes(X1, Y, color = as.factor(clust))) +
 
 cluscounts = bind_cols(ord.att, data.frame(cluster = k.cluster$clustering)) %>% group_by(year, cluster) %>% summarise(count = n()) %>% bind_rows(data.frame(year = 2008, cluster = 4, count = 0))
 
+adonis(ord.mat ~ as.factor(k.cluster$clustering))
+```
+
+
+```{r}
 cols = rainbow(4, v = .75)
 
 assign_freq = ggplot(cluscounts,
@@ -441,25 +446,30 @@ perhaps driven by drier weather.
 What constitutes each group? The easiest way to do so might be a simple pie chart:
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE, fig.height = 10, fig.width = 10}
-piecharts = bind_cols(data.frame(cluster = k.cluster$clustering), ord.mat)
-piecharts$cluster[piecharts$cluster == 1] = "Natives"
-piecharts$cluster[piecharts$cluster == 2] = "Wet Annuals"
-piecharts$cluster[piecharts$cluster == 3] = "WAPS"
-piecharts$cluster[piecharts$cluster == 4] = "Dry Annuals"
+piecharts = bind_cols(data.frame(cluster = k.cluster$clustering), decostand(ord.mat, method = "total"))
+piecharts$cluster[piecharts$cluster == 1] = "Native Perennials"
+piecharts$cluster[piecharts$cluster == 2] = "Transient Annuals"
+piecharts$cluster[piecharts$cluster == 3] = "Invasive Annuals"
+piecharts$cluster[piecharts$cluster == 4] = "Resilient Annuals"
+
 
 piecharts %>%
   gather(key = "species", value = "cover", -cluster) %>%
   group_by(cluster, species) %>%
-  summarise(cover = mean(cover)) %>%
-  ggplot(aes(x = "", y = cover, fill = species))+
-  geom_bar(stat = "identity", position = position_fill(), color = "black") +
+  summarise(meancover = mean(cover),
+            se_cover = sd(cover) / sqrt(dplyr::n())) %>%
+  ggplot(aes(x = species, y = meancover, fill = species))+
+  geom_bar(stat = "identity", color = "black") +
+  geom_errorbar(aes(ymin = meancover - se_cover, ymax = meancover + se_cover), width = .5) +
   # geom_text(aes(label = Cnt), position = position_fill(vjust = 0.5)) +
-  coord_polar(theta = "y") +
   facet_wrap(~cluster) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank(),  axis.ticks = element_blank(),
-        panel.grid  = element_blank(), axis.text = element_blank(), legend.title = element_blank()) +
   theme(legend.position='bottom') + guides(fill=guide_legend(nrow=2,byrow=TRUE)) +
-  theme(strip.text.x = element_text(size = 20, face = "bold"))
+  theme(strip.text.x = element_text(size = 20, face = "bold"),
+        axis.text.x = element_text(angle = 90)) +
+  guides(fill = FALSE) +
+  ggtitle("Mean Relative Species Cover of Vegetation Groups") + 
+  ylab("Mean Relative Cover")
+
 ```
 
 # Plotting transitions between clusters over time
