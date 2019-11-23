@@ -683,7 +683,7 @@ native_trans = p %>%
   theme_bw() +
   #geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
   facet_grid(~priority) +
-  ggtitle("A) Priority Effects on Transition Probability") +
+  ggtitle("Priority Affects State 1 Transition Probability") +
   scale_color_manual(name = 'Previous State Assignment',
                      values =c("State 2" = cols[2],
                                "State 3" = cols[3], "State 4" = cols[4]),
@@ -702,7 +702,7 @@ native_trans = p %>%
   # geom_text(data = textdf, aes(fill = NULL, color = NULL, y= Trans), label = textdf$lab, show.legend = FALSE)
 
 native_trans
-# ggsave("../figures/eglaspul_transition.pdf", width = 7, height = 4)
+ggsave("../figures/eglaspul_transition.pdf", width = 7, height = 4)
 ```
 
 ## Transitions between invasive and drought tolerant states

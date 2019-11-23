@@ -64,7 +64,7 @@ NWA[,4:ncol(NWA)] = vegan::decostand(NWA[,4:ncol(NWA)],
 
 Question of whether or not to normalize cover before conducting this analysis
 
-Proportionally, we see that natives are a muc hbigger fraction ofoverall cover in the "dry" treatment - persistence of perennials under dry conditions where everything else suffers. Curiously, they seem to do worst in "wet" conditions. I'd be curious to see what happens when they are given temporal priority - e.g. a more standard restoration setting.
+Proportionally, we see that natives are a much bigger fraction ofoverall cover in the "dry" treatment - persistence of perennials under dry conditions where everything else suffers. Curiously, they seem to do worst in "wet" conditions. I'd be curious to see what happens when they are given temporal priority - e.g. a more standard restoration setting.
 
 ```{r}
 NWA_long = gather(NWA, key = "class", value = "cover", -c(plot, year, sp.trt))
