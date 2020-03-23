@@ -270,19 +270,19 @@ speifits = data.frame(year = sort(rep(1983:2018, 12)),
                       l2fit = c(lag2_SPEI$fitted, NA, NA),
                       l3fit = c(lag3_SPEI$fitted, NA, NA))
 
-write.csv("../data/SPEIfits.csv", x = speifits %>% filter(month == 5))
+# write.csv("../data/SPEIfits.csv", x = speifits %>% filter(month == 5))
 
 p1 = speifits %>% filter(month == 5) %>%
   gather(key = fit, value = spei, - year, - month) %>%
+  filter(fit == "l1fit") %>%
   ggplot(aes(x = year, y = spei)) +
-  geom_line(aes(linetype = fit), size = 1.5) +
-  ggtitle("B) SPEI") +
+  geom_line(size = .5) +
+  geom_point(size = 3, color = "black") +
+  ggtitle("A) Drought Severity") +
   ylab("SPEI Index") +
   xlab("Year") +
-  scale_linetype_manual(values=c("solid", "twodash", "dotted"),
-                        name = "Temporal Lag",
-                        labels = c("1 Year", "2 Years", "3 Years")) + 
   theme_bw() +
+  ylim(-2.25, 2.25) +
   geom_hline(yintercept = 0, linetype = "dashed") + 
   scale_x_continuous(breaks = seq(2008, 2018, by = 2), limits = c(2008, 2018))
 
@@ -310,7 +310,7 @@ grobglob = gridExtra::grid.arrange(p2, p1, nrow = 1, widths = c(1.5,2))
 ggsave(plot = grobglob, "../figures/precip_spei.pdf", width = 10, height = 5)
 
 # Run ClusteringApproach.Rmd first
-freq_clim = gridExtra::grid.arrange(p2, assign_freq, nrow = 1, widths = c(1.15,2))
+freq_clim = gridExtra::grid.arrange(p1, assign_freq, nrow = 1, widths = c(1.1,2))
 ggsave(plot = freq_clim, "../figures/statefreq_clim_plot.pdf", width = 10, height = 4)
 ```
 

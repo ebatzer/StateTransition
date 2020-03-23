@@ -33,6 +33,11 @@ climate_daily <- read.csv("../data/cimis_daily.csv",
                        header = TRUE,
                        stringsAsFactors = FALSE)
 
+
+labellist <- c('1. Native Perennials',
+                    '2. Festuca - B. hordeaceous Annuals',
+                    '3. Invasive Annuals',
+                    '4. Avena - B. diandrus Annuals')
 ```
 
 # Raw matrix of transition probabilities
@@ -581,17 +586,13 @@ bind_rows(Nprob) %>%
                    "State 2" = cols[2],
                    "State 3" = cols[3],
                    "State 4" = cols[4]),
-         labels = c('E. glaucus - S. pulchra',
-                    'F. perennis - B. hordeaceous',
-                    'E. caput-medusae - A. triuncialis',
-                    'A. fatua - B. diandrus')) +
+         labels = labellist) +
+
   scale_fill_manual(name = 'State Assignment',
          values =c("State 1" = cols[1], "State 2" = cols[2],
                    "State 3" = cols[3], "State 4" = cols[4]),
-         labels = c('E. glaucus - S. pulchra',
-                    'F. perennis - B. hordeaceous',
-                    'E. caput-medusae - A. triuncialis',
-                    'A. fatua - B. diandrus')) +
+         labels = labellist) +
+
   xlab("SPEI") +
   ylab("Probability of Retaining State in Next Year")
 
@@ -624,17 +625,13 @@ tprob = function(stateval = "State 1", title = "E. glaucus - S. pulchra"){
   scale_color_manual(name = 'Previous State Assignment',
          values =c("State 1" = cols[1], "State 2" = cols[2],
                    "State 3" = cols[3], "State 4" = cols[4]),
-         labels = c('E. glaucus - S. pulchra',
-                    'F. perennis - B. hordeaceous',
-                    'E. caput-medusae - A. triuncialis',
-                    'A. fatua - B. diandrus')) +
+         labels = labellist) +
+
   scale_fill_manual(name = 'Initial State',
          values =c("State 1" = cols[1], "State 2" = cols[2],
                    "State 3" = cols[3], "State 4" = cols[4]),
-         labels = c('E. glaucus - S. pulchra',
-                    'F. perennis - B. hordeaceous',
-                    'E. caput-medusae - A. triuncialis',
-                    'A. fatua - B. diandrus')) +
+         labels = labellist) +
+
   xlab("SPEI") +
   ylab("Probability of Assignment in Next Year") +
   ylim(0, .5)
@@ -643,9 +640,9 @@ tprob = function(stateval = "State 1", title = "E. glaucus - S. pulchra"){
 }
 
 alltogether = gridExtra::grid.arrange(tprob(),
-                        tprob("State 2", 'F. perennis - B. hordeaceous'),
-                        tprob("State 3", 'E. caput-medusae - A. triuncialis'),
-                        tprob("State 4", 'A. fatua - B. diandrus'),
+                        tprob("State 2", labellist[2]),
+                        tprob("State 3", labellist[3]),
+                        tprob("State 4", labellist[4]),
                         nrow = 4,
                         ncol = 1,
                         top = "Probability of Transition to States")
@@ -683,21 +680,19 @@ native_trans = p %>%
   theme_bw() +
   #geom_ribbon(aes(ymax = Upper, ymin = Lower), alpha = .2) +
   facet_grid(~priority) +
-  ggtitle("Priority Affects State 1 Transition Probability") +
+  ggtitle("Priority Affects Native Perennial Transition Probability") +
   scale_color_manual(name = 'Previous State Assignment',
                      values =c("State 2" = cols[2],
                                "State 3" = cols[3], "State 4" = cols[4]),
-                     labels = c('2. F. perennis - B. hordeaceous',
-                                '3. E. caput-medusae - A. triuncialis',
-                                '4. A. fatua - B. diandrus')) +
+                     labels = labellist[2:4]) +
+
   scale_linetype_manual(name = 'Previous State Assignment',
                         values =c("State 2" = 2,
                                   "State 3" = 1, "State 4" = 1),
-                        labels = c('2. F. perennis - B. hordeaceous',
-                                   '3. E. caput-medusae - A. triuncialis',
-                                   '4. A. fatua - B. diandrus')) +
+                     labels = labellist[2:4]) +
+
   xlab("SPEI") +
-  ylab("State 1 Transition Probability") +
+  ylab("Native Perennial Transition Probability") +
   ylim(0, .5)
   # geom_text(data = textdf, aes(fill = NULL, color = NULL, y= Trans), label = textdf$lab, show.legend = FALSE)
 
@@ -738,10 +733,8 @@ ann_change = p %>%
   scale_color_manual(name = 'Subsequent State Assignment',
                      values =c("State 1" = cols[1], "State 2" = cols[2],
                                "State 3" = cols[3], "State 4" = cols[4]),
-                     labels = c('1. E. glaucus - S. pulchra',
-                                '2. F. perennis - B. hordeaceous',
-                                '3. E. caput-medusae - A. triuncialis',
-                                '4. A. fatua - B. diandrus')) +
+                     labels = labellist) +
+
   xlab("SPEI") +
   ylab("Transition Probability") +
   ylim(0, .2) +

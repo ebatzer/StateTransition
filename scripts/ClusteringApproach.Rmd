@@ -113,6 +113,12 @@ specsbycover = sort(round(colSums(comp.subset) / sum(comp.subset),2), decreasing
 print("Plot Occupancy in Dataset:")
 specsbyfreq = sort(round(colSums(decostand(comp.subset, method = "pa")) / nrow(comp.subset), 2), decreasing = TRUE)
 # specsbyfreq
+
+
+labellist <- c('1. Native Perennials',
+                    '2. Festuca - B. hordeaceous Annuals',
+                    '3. Invasive Annuals',
+                    '4. Avena - B. diandrus Annuals')
 ```
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
@@ -506,6 +512,8 @@ adonis(ord.mat ~ as.factor(k.cluster$clustering))
 
 ```{r}
 cols = rainbow(4, v = .75)
+cols[3] = rainbow(4, v = .9)[3]
+
 
 assign_freq = ggplot(cluscounts,
        aes(x = year,
@@ -525,19 +533,14 @@ assign_freq = ggplot(cluscounts,
                    "2" = cols[2],
                    "3" = cols[3],
                    "4" = cols[4]),
-         labels = c('1. E. glaucus - S. pulchra',
-                    '2. F. perennis - B. hordeaceous',
-                    '3. E. caput-medusae - A. triuncialis',
-                    '4. A. fatua - B. diandrus')) +
+         labels = labellist) +
   scale_shape_manual(name = 'State Assignment',
          values = c(21,22,23,24),
-         labels = c('1. E. glaucus - S. pulchra',
-                    '2. F. perennis - B. hordeaceous',
-                    '3. E. caput-medusae - A. triuncialis',
-                    '4. A. fatua - B. diandrus')) +
+         labels = labellist) +
   ylim(0, .4)
 
-#ggsave("../figures/assignmentfrequency.pdf", width = 6.7, height = 4)
+
+ggsave("../figures/assignmentfrequency.pdf", width = 6.7, height = 4)
 
 ggplot(cluscounts %>% filter(cluster == 1),
        aes(x = year,
@@ -557,16 +560,12 @@ ggplot(cluscounts %>% filter(cluster == 1),
                    "2" = cols[2],
                    "3" = cols[3],
                    "4" = cols[4]),
-         labels = c('1. E. glaucus - S. pulchra',
-                    '2. F. perennis - B. hordeaceous',
-                    '3. E. caput-medusae - A. triuncialis',
-                    '4. A. fatua - B. diandrus')) +
+         labels = labellist) +
+
   scale_shape_manual(name = 'State Assignment',
          values = c(21,22,23,24),
-         labels = c('1. E. glaucus - S. pulchra',
-                    '2. F. perennis - B. hordeaceous',
-                    '3. E. caput-medusae - A. triuncialis',
-                    '4. A. fatua - B. diandrus')) +
+         labels = labellist) +
+
   ylim(0, .4)
 
 #ggsave("../figures/assignmentfrequency_state1.pdf", width = 6.7, height = 4)
@@ -590,16 +589,12 @@ ggplot(cluscounts %>% filter(cluster %in% c(1,2)),
                    "2" = cols[2],
                    "3" = cols[3],
                    "4" = cols[4]),
-         labels = c('1. E. glaucus - S. pulchra',
-                    '2. F. perennis - B. hordeaceous',
-                    '3. E. caput-medusae - A. triuncialis',
-                    '4. A. fatua - B. diandrus')) +
+         labels = labellist) +
+
   scale_shape_manual(name = 'State Assignment',
          values = c(21,22,23,24),
-         labels = c('1. E. glaucus - S. pulchra',
-                    '2. F. perennis - B. hordeaceous',
-                    '3. E. caput-medusae - A. triuncialis',
-                    '4. A. fatua - B. diandrus')) +
+         labels = labellist) +
+
   ylim(0, .4)
 
 #ggsave("../figures/assignmentfrequency_state12.pdf", width = 6.7, height = 4)
@@ -623,16 +618,12 @@ ggplot(cluscounts %>% filter(cluster %in% c(1,2,3)),
                    "2" = cols[2],
                    "3" = cols[3],
                    "4" = cols[4]),
-         labels = c('1. E. glaucus - S. pulchra',
-                    '2. F. perennis - B. hordeaceous',
-                    '3. E. caput-medusae - A. triuncialis',
-                    '4. A. fatua - B. diandrus')) +
+         labels = labellist) +
+
   scale_shape_manual(name = 'State Assignment',
          values = c(21,22,23,24),
-         labels = c('1. E. glaucus - S. pulchra',
-                    '2. F. perennis - B. hordeaceous',
-                    '3. E. caput-medusae - A. triuncialis',
-                    '4. A. fatua - B. diandrus')) +
+         labels = labellist) +
+
   ylim(0, .4)
 
 #ggsave("../figures/assignmentfrequency_state123.pdf", width = 6.7, height = 4)
@@ -669,10 +660,8 @@ ggplot(MDS_xy, aes(X1, Y)) +
                    "2" = cols[2],
                    "3" = cols[3],
                    "4" = cols[4]),
-         labels = c('1. E. glaucus - S. pulchra',
-                    '2. F. perennis - B. hordeaceous',
-                    '3. E. caput-medusae - A. triuncialis',
-                    '4. A. fatua - B. diandrus')) +
+         labels = labellist) +
+
   geom_segment(data = specsdat,
                aes(group = Species,
                    x = 0,
@@ -682,19 +671,17 @@ ggplot(MDS_xy, aes(X1, Y)) +
   geom_text(aes(label = Species), data = specsdat, fontface = "bold") +
   scale_shape_manual(name = 'State Assignment',
                      values = c(21,22,23,24),
-                     labels = c('1. E. glaucus - S. pulchra',
-                    '2. F. perennis - B. hordeaceous',
-                    '3. E. caput-medusae - A. triuncialis',
-                    '4. A. fatua - B. diandrus')) +
+         labels = labellist) +
+
   theme(plot.title = element_text(size = 10),
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 10))
 
-#ggsave("../figures/nmds_viz_assignments.png",
-       # height = 6,
-       # width = 9,
-       # dpi = 300,
-       # units = "in")
+ggsave("../figures/nmds_viz_assignments.png",
+height = 6,
+width = 9,
+dpi = 300,
+units = "in")
 ```
 
 # Describing clusters:
@@ -775,10 +762,15 @@ reds <- colorRampPalette(c(cols[1], "red4"))(4)
 purples <- colorRampPalette(c(cols[4], "purple4"))(4)
 
 speccols <- c(reds, greens, blues, purples)
+?recode_factor
+
+groupsummary$cluster <- recode(as.factor(groupsummary$cluster), 
+                               "Resilient Annuals" = "Avena - B. diandrus Annuals",
+       "Transient Annuals" = "Festuca - B. hordeaceous Annuals")
 
 groupsummary %>%
   filter(! species %in% levels(groupsummary$species)[14:16]) %>%
-  ggplot(aes(x = species, y = meancover, fill = species))+
+  ggplot(aes(x = species, y = meancover, fill = species)) +
   geom_bar(stat = "identity", color = "black") +
   geom_errorbar(aes(ymin = meancover - se_cover, ymax = meancover + se_cover), width = .5) +
   # geom_text(aes(label = Cnt), position = position_fill(vjust = 0.5)) +
