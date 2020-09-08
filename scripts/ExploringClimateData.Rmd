@@ -278,7 +278,7 @@ p1 = speifits %>% filter(month == 5) %>%
   ggplot(aes(x = year, y = spei)) +
   geom_line(size = .5) +
   geom_point(size = 3, color = "black") +
-  ggtitle("A) Drought Severity") +
+  ggtitle("A) Climatic Variation") +
   ylab("SPEI Index") +
   xlab("Year") +
   theme_bw() +
